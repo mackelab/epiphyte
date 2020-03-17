@@ -1,0 +1,227 @@
+data_preprocessing/__pycache__/
+data_preprocessing/data_processing.pyc
+data_preprocessing/data_utils.pyc
+data_preprocessing/data_utils_keyparse.pyc
+data_preprocessing/produce_binaries_scratch.ipynb
+
+affect_annotation/keyparse_class.pyc
+affect_annotation/.ipynb_checkpoints/
+
+.gitignore
+
+data_preprocessing/.ipynb_checkpoints/
+data_preprocessing/Untitled.ipynb
+
+affect_annotation/keyboard_sync_test.txt
+analysis/.ipynb_checkpoints/
+analysis/correlate.pyc
+analysis/correlate_v2.pyc
+analysis/raster.pyc
+data_preprocessing/__init__.py
+data_preprocessing/binaries/46/rectimes_indicator_tom_46.npy
+data_preprocessing/test_binning.py
+
+.idea/
+analysis/binary_analysis/.ipynb_checkpoints/
+
+analysis/binary_analysis/avgfr.pyc
+analysis/binary_analysis/onoffratio.pyc
+analysis/examples/.ipynb_checkpoints/
+
+analysis/plotting/raster.pyc
+
+/movie_annotation/examples/.ipynb_checkpoints/gantt_testing-checkpoint.ipynb
+/data_preprocessing/archive/.ipynb_checkpoints/timestamp_process-checkpoint.ipynb
+/movie_annotation/archive/.ipynb_checkpoints/keyparse_emo-checkpoint.ipynb
+/data_preprocessing/archive/.ipynb_checkpoints/prepro_pipeline-checkpoint.ipynb
+/movie_annotation/archive/.ipynb_checkpoints/keyparse_actors-checkpoint.ipynb
+/movie_annotation/archive/.ipynb_checkpoints/keyparse_class-checkpoint.py
+/analysis/examples/scratchpad.ipynb
+
+movie_annotation/__pycache__/
+analysis/__pycache__/
+analysis/binary_analysis/__pycache__/
+
+
+
+.gitignore
+analysis/plotting/.ipynb_checkpoints/
+analysis/plotting/__pycache__/
+test_dir/
+
+analysis/binary_analysis/perm_results/46/label_tom/MUA/two_perm_scores.npy
+
+analysis/binary_analysis/perm_results/46/label_tom/SUA/two_perm_scores.npy
+
+analysis/plotting/plots/perm/*
+data_preprocessing/archive/.ipynb_checkpoints/
+movie_annotation/examples/.ipynb_checkpoints/
+movie_annotation/.ipynb_checkpoints/
+data_preprocessing/examples/.ipynb_checkpoints/
+analysis/plotting/plots/rasters/
+movie_annotation/archive/__pycache__/
+
+
+
+
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+# *.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+.idea
+
+keylogger/Untitled.ipynb
+Untitled.ipynb
+*/Untitled*
+
+*.swp
+
+*/can_be_deleted.*
+
+data_preprocessing/binaries
+
+movie_annotation/labels/raw_files/
+!movie_annotation/labels/raw_files/Friends_sad_Carlo_Jan.txt
+!movie_annotation/labels/raw_files/happy_angry_svea_mike.txt
+!movie_annotation/labels/raw_files/Summer_Rachel_happy_Poornima_Tamara.txt
+!movie_annotation/labels/raw_files/sad_tom_alana_artur.txt
+!movie_annotation/labels/watchlogs/
+
+
+*.svg
+*/*.png
+movie_annotation/plots/
+*.html
+
+ign/
+
+movie_annotation/indicators/old/
+movie_annotation/indicators/old2/
+movie_annotation/indicators/old3/
+
+data_base/mysql-docker/data
+
+
+
+movie_annotation/examples/.~lock.xray1_notrivia.csv#
+analysis/binary_analysis/perm_results/46/label_summer/
+analysis/binary_analysis/perm_results/46/label_mckenzie/
+analysis/binary_analysis/perm_results/46/label_paul/
+
+analysis/binary_analysis/perm_results/46/label_tom/MUA/segmented/
+
+analysis/binary_analysis/perm_results/46/label_tom/SUA/segmented/
+
+*.png
+*.pdf
+*.npy
+*can_be_deleted*
+/movie_annotation/annotation_reader.df_events_processed.csv
+/movie_annotation/.~lock.data_labels_test.csv#
+/analysis/regression/binning100/
+/analysis/regression/binning1000/
+
+
+src/
