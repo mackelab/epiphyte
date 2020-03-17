@@ -52,3 +52,8 @@ SET FOREIGN_KEY_CHECKS=1;
 ```
 SHOW GRANTS FOR <user_name>;
 ```
+
+## Show all users
+```
+select User from mysql.user;
+```
