@@ -1,13 +1,10 @@
 import datajoint as dj
 import numpy as np
 import os
-import sys
 
-sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
 import data_base.config as config
 import data_base.helpers as helpers
 import data_preprocessing.data_utils as data_utils
-#import data_preprocessing.binning as binning
 
 dhv_schema = dj.schema('dhv', locals())
 
@@ -88,7 +85,6 @@ class MovieSession(dj.Imported):
         for folder_name in os.listdir(config.PATH_TO_DATA + "/session_data/"):
             if folder_name.startswith("session"):
                 patient_id, session_nr, date, time = helpers.extract_session_information(folder_name)
-                watchlog_name = config.watchlog_names[int(patient_id)]
 
                 path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
                                                                  config.watchlog_names[int(patient_id)])
@@ -102,7 +98,6 @@ class MovieSession(dj.Imported):
                 pts, rectime, cpu_time = time_conversion.convert()
 
                 cpu_time = cpu_time
-                neural_recording_time = rectime
                 path_order_movie_frames = "{}/patient_data/{}/session_{}/order_of_movie_frames/pts.npy".format(
                     config.PATH_TO_DATA, patient_id, session_nr)
                 np.save(path_order_movie_frames, pts)
