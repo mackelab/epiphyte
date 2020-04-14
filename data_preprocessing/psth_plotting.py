@@ -288,4 +288,4 @@ if __name__ == "__main__":
     psth = PSTH(pat_id, bin_size)
 
     psth.load_and_check_cuts()
-psth.plot_psth(2,3,plot_sum=True)
+    psth.plot_psth(2,3,plot_sum=True)
