@@ -7,7 +7,7 @@ from scipy import stats
 
 import sys
 import os.path
-sys.path.append('../analysis/nonbinary_analysis')
+#sys.path.append('../analysis/nonbinary_analysis')
 from psth_plotting import PSTH
 
 def find_changepoint_tt(data, save=None, filename=None, comparison_tau=None):
