@@ -81,8 +81,21 @@ def extract_name_unit_id_from_unit_level_data_cleaning(filename):
 
 
 def extract_information_from_label_name(filename):
-    id, name, annotator, date, category = filename.split("_")
-    return id, name, annotator, date, category
+    id_, name, annotator, date, category = filename.split("_")
+    return id_, name, annotator, date, category
+
+
+def extract_information_from_continuous_watch_folder(folder):
+    for filename in os.listdir(folder):
+        if filename.endswith(".npy"):
+            if filename.startswith("values"):
+                values = np.load(folder + filename)
+                _, _, _, annotator_id, annotation_date_ending = filename.split("_")
+                annotation_date = annotation_date_ending[:-4]
+            if filename.startswith("start_values"):
+                start_values = np.load(folder + filename)
+            if filename.startswith("stop_values"):
+                stop_values = np.load(folder + filename)
 
 
 def fill_labels(table_name):
@@ -202,18 +215,6 @@ def fill_binned_spikes(table_name, table_electrode_units):
                                             'session_nr': session_nr, 'spike_vector': spikes_file}, skip_duplicates=True)
                         print("Added {} for binning {} of patient {} to data base".format(csc_nr + " " + unit,
                                                                                           bin_size, patient_id))
-
-
-# def fill_movie_related_patient_data(table_name):
-#     """
-#     This function fills the table "pts_labels" from scratch, using the indicator functions from the table
-#     'IndicatorFunctions' and the movie frames from the table 'Patients'
-#     :param table_name: name of table that shall be filled (usually: movie_related_patient_data
-#     :return: None
-#     """
-#     pts_perfect_patient = [round((x * 0.04), 2) for x in range(1, 119695)]
-#
-#     table_name.insert1(['-1', pts_perfect_patient, "1999-01-01"], skip_duplicates=True)
 
 
 def fill_movie_sessions(table_name):
