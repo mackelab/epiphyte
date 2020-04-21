@@ -1,11 +1,12 @@
-#PATH_TO_DATA = "/media/tamara/INTENSO1/data_dhv"
 PATH_TO_DATA = "/media/hard_drive_dhv/data_dhv"
 PATH_TO_LABELS = PATH_TO_DATA + "/movie_labels"
 PATH_PATIENT_ALIGNED_LABELS = PATH_TO_DATA + "/patient_aligned_labels"
 PATH_TO_PATIENT_DATA = PATH_TO_DATA + "/patient_data"
 PATH_TO_SESSION_DATA = PATH_TO_DATA + "/session_data"
 
-PTS_MOVIE = [round((x * 0.04), 2) for x in range(1, 119695)]
+#ROOT_FOLDER_REPOSITORY = "/home/tamara/Documents/PhD/DeepHumanVision_pilot/"
+
+#PTS_MOVIE = [round((x * 0.04), 2) for x in range(1, 119695)]
 PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125725)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
 
 
