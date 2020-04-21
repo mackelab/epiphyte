@@ -15,7 +15,7 @@ def get_index_nearest_timestamp_in_vector(vector, timestamp):
         timestamp, which shall be searched
     :return int index
     """
-    return (np.abs(vector - int(timestamp))).argmin()  # row number with matching pts
+    return (np.abs(vector - int(timestamp))).argmin()
 
 
 def get_nearest_value_from_vector(vector, timestamp):
@@ -27,7 +27,7 @@ def get_nearest_value_from_vector(vector, timestamp):
         value for which to search
     :return float
     """
-    return vector[(np.abs(vector - (timestamp))).argmin()]  # row number with matching pts
+    return vector[(np.abs(vector - (timestamp))).argmin()]
 
 
 def create_vector_from_start_stop_times_reference_cont_watch(reference_vector, values, starts, stops):
