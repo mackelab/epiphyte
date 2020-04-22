@@ -1,10 +1,15 @@
 import datajoint as dj
 import numpy as np
 import os
+import sys
 
+sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
 import data_base.config as config
 import data_base.helpers as helpers
 import data_preprocessing.data_utils as data_utils
+import movie_annotation.processing_labels as processing_labels
+import data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+
 
 dhv_schema = dj.schema('dhv', locals())
 
@@ -85,6 +90,7 @@ class MovieSession(dj.Imported):
         for folder_name in os.listdir(config.PATH_TO_DATA + "/session_data/"):
             if folder_name.startswith("session"):
                 patient_id, session_nr, date, time = helpers.extract_session_information(folder_name)
+                watchlog_name = config.watchlog_names[int(patient_id)]
 
                 path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
                                                                  config.watchlog_names[int(patient_id)])
@@ -98,6 +104,7 @@ class MovieSession(dj.Imported):
                 pts, rectime, cpu_time = time_conversion.convert()
 
                 cpu_time = cpu_time
+                neural_recording_time = rectime
                 path_order_movie_frames = "{}/patient_data/{}/session_{}/order_of_movie_frames/pts.npy".format(
                     config.PATH_TO_DATA, patient_id, session_nr)
                 np.save(path_order_movie_frames, pts)
@@ -156,6 +163,47 @@ class VideoAnnotation(dj.Imported):
                               }, skip_duplicates=True)
 
 
+@dhv_schema
+class MovieAnnotation(dj.Imported):
+    definition = """
+    -> Annotator   # creator of movie annotation
+    -> LabelName   # name of annotation
+    annotation_date: date    # date of annotation
+    ---
+    values: longblob       # list of values that represent label
+    start_times: longblob  # list of start times of label segments in movie play time (PTS)
+    stop_times: longblob   # list of stop times of label segments in movie play time (PTS)
+    category: varchar(32)  # categoy of label; e.g. 'character', 'emotion', 'location'
+    indicator_function: longblob # full indicator function, one value for each movie frame
+    additional_information="":varchar(30) # space for additional information
+    """
+    def _make_tuples(self, key):
+        directory = "{}/movie_annotation/".format(config.PATH_TO_DATA)
+        for filename in os.listdir(directory):
+            if os.path.isfile(directory + filename) and filename.endswith(".npy"):
+                label_id, name, annotator, date, category = filename[:-4].split("_")
+
+                content = np.load("{}{}".format(directory, filename))
+                
+                values = np.array(content[0])
+                start_times = np.array(content[1])
+                stop_times = np.array(content[2])
+                
+                ind_func = processing_labels.make_label_from_start_stop_times(values, start_times, stop_times, config.PTS_MOVIE_new)
+                
+                self.insert1({'label_name': name,
+                      'annotator_id': annotator,
+                      'annotation_date': date[0:4] + "-" + date[4:6] + "-" + date[6:8],
+                      'category': category,
+                      'values': values,
+                      'start_times': start_times,
+                      'stop_times': stop_times,
+                      'indicator_function': np.array(ind_func)
+                      }, skip_duplicates=True)
+                print("Added label {} to database.".format(name))
+    
+    
+            
 @dhv_schema
 class ElectrodeUnit(dj.Imported):
     definition = """
@@ -276,7 +324,7 @@ class BinnedSpikesDuringMovie(dj.Imported):
 
 
 @dhv_schema
-class ProcessedVideoAnnotation(dj.Computed):
+class ProcessedMovieAnnotation(dj.Computed):
     definition = """
     -> LabelName
     -> LabelProcessingMethod
@@ -288,19 +336,19 @@ class ProcessedVideoAnnotation(dj.Computed):
     class Entry(dj.Part):
         definition = """
         -> master
-        -> VideoAnnotation
+        -> MovieAnnotation
         """
 
     @property
     def key_source(self):
         # dj.U() is used to promote a non primary-key column into a primary key column
         return dj.U('last_entry_date') * (
-                    LabelName.aggr(VideoAnnotation, last_entry_date='MAX(annotation_date)') * LabelProcessingMethod)
+                    LabelName.aggr(MovieAnnotation, last_entry_date='MAX(annotation_date)') * LabelProcessingMethod)
 
     def make(self, key):
         base_key = dict(key)  # make a copy for Part table entries
         if key['proc_method'] == 'method1':
-            entry_keys, labeled_frames = (VideoAnnotation & key).fetch('KEY', 'labeled_frames')
+            entry_keys, labeled_frames = (MovieAnnotation & key).fetch('KEY', 'labeled_frames')
             key['processed_frames'] = np.stack(labeled_frames).mean(axis=0)
             self.insert1(key)
             entry_keys = [dict(k, **base_key) for k in entry_keys]  # add master's columns into entry_keys
@@ -329,7 +377,71 @@ class PatientAlignedLabel(dj.Computed):
                       'patient_id': entry_key_movie_session[0]['patient_id'],
                       'session_nr': entry_key_movie_session[0]['session_nr'],
                       'label_in_patient_time': np.array(patient_aligned_label)}, skip_duplicates=True)
+        
 
+@dhv_schema
+class PatientAlignedLabelTimeFrames(dj.Computed):
+    definition = """
+    -> MovieAnnotation     # label
+    -> MovieSession        # movie watching session ID
+    ---
+    values: longblob       # list of values that represent label
+    start_times: longblob  # list of start times of label segments in neural recoring time
+    stop_times: longblob   # list of stop times of label segments in neural recording time
+    additionl_information="":varchar(30)
+    """
+    def make(self, key):
+        for row in PatientAlignedLabel():
+            annotator_id = row.get("annotator_id")
+            label_name = row.get("label_name")
+            annotation_date = row.get("annotation_date")
+            session_nr = row.get("session_nr")
+            patient_id = row.get("patient_id")
+
+            label_in_patient_time = row.get("label_in_patient_time")
+            # only insert binary labels into the table
+            if len(set(label_in_patient_time)) <= 2:
+                neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
+                values_label, start_times_label, stop_times_label = processing_labels.get_start_stop_times_from_label(neural_rec_time, label_in_patient_time)
+
+                self.insert1({"annotator_id": annotator_id, "label_name": label_name, "annotation_date": annotation_date, "session_nr": session_nr, "patient_id": patient_id, "values": np.array(values_label), "start_times": np.array(start_times_label), "stop_times": np.array(stop_times_label)}, skip_duplicates=True)
+    
+    
+@dhv_schema
+class PatientAlignedMovieAnnotation(dj.Computed):
+    definition = """
+    # Movie Annotations aligned to patient time / time points are in neural recording time
+    -> MovieAnnotation     # label
+    -> MovieSession        # movie watching session ID
+    ---
+    label_in_patient_time: longblob    # label matched to patient time (pts)
+    values: longblob       # list of values that represent label
+    start_times: longblob  # list of start times of label segments in neural recoring time
+    stop_times: longblob   # list of stop times of label segments in neural recording time
+    additionl_information="":varchar(30)
+    """
+
+    def make(self, key):
+        entry_key_video_annot, original_label = (MovieAnnotation & key).fetch('KEY', 'indicator_function')
+        entry_key_movie_session, pts_vec = (MovieSession & key).fetch("KEY", 'order_movie_frames')
+        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0],
+                                                                        patient_pts=np.load(pts_vec[0]))
+        neural_rec_time = get_neural_rectime_of_patient(entry_key_movie_session[0]['patient_id'], entry_key_movie_session[0]['session_nr'])
+        print(neural_rec_time)
+        values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rec_time, patient_aligned_label)
+        
+        self.insert1({'annotator_id': entry_key_video_annot[0]['annotator_id'],
+                      'label_name': entry_key_video_annot[0]['label_name'],
+                      'annotation_date': entry_key_video_annot[0]['annotation_date'],
+                      'patient_id': entry_key_movie_session[0]['patient_id'],
+                      'session_nr': entry_key_movie_session[0]['session_nr'],
+                      'label_in_patient_time': np.array(patient_aligned_label),
+                      'values': np.array(values),
+                      'start_times': np.array(starts),
+                      'stop_times': np.array(stops),
+                     }, skip_duplicates=True)
+            
+        print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
 
 @dhv_schema
 class BinnedPatientAlignedLabel(dj.Imported):
@@ -422,32 +534,36 @@ class ContinuousWatchSegments(dj.Imported):
     -> Annotator                       # who created the cleaning?
     label_entry_date: date             # date of creation of label
     ---
-    data: attach                       # actual data
-    description = "" : varchar(128)    # description of data cleaning
+    values: longblob                   # values of continuous watch segments
+    start_times: longblob              # start time points of segments
+    stop_times: longblob               # end time points of segments
+    notes = "" : varchar(128)          # further notes
     """
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
         for index_session in range(0, len(patient_ids)):
-            path_binaries = '{}/unit_level_data_cleaning/'.format(config.PATH_TO_DATA)
+            path_binaries = '{}/continuous_watch/'.format(config.PATH_TO_DATA)
             folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
                 session_nrs[index_session]) + "/"
             if not os.path.exists(folder):
                 os.makedirs(folder)
             for filename in os.listdir(folder):
                 if filename.endswith(".npy"):
-                    name, unit_id, annotator = helpers.extract_name_unit_id_from_unit_level_data_cleaning(filename)
-                    if name == '4stddev':
-                        description = "removing all bins where the firing rate is greater than 4 std dev from mean"
-                    elif name == "smoothed4stddev":
-                        description = "removing all bins where smoothed firing rate is greater than 4 std dev from mean"
-                    else:
-                        description = ""
-                    self.insert1(
-                        {'patient_id': patient_ids[index_session], "annotator_id": annotator,
-                         'session_nr': session_nrs[index_session], "description": description, "name": name,
-                         'data': "{}/{}".format(folder, filename)},
-                        skip_duplicates=True)
+                    if filename.startswith("values"):
+                        values = np.load(folder + filename)
+                        _, _, _, annotator_id, annotation_date_ending = filename.split("_")
+                        annotation_date = annotation_date_ending[:-4]
+                    if filename.startswith("start_values"):
+                        start_times = np.load(folder + filename)
+                    if filename.startswith("stop_values"):
+                        stop_times = np.load(folder + filename)
+                    
+            self.insert1(
+                    {'patient_id': patient_ids[index_session], "annotator_id": annotator_id,
+                     'session_nr': session_nrs[index_session], "label_entry_date": annotation_date, "values": values,
+                     'start_times': start_times, "stop_times": stop_times},
+                     skip_duplicates=True)
 
 
 @dhv_schema
@@ -484,6 +600,34 @@ class MoviePauses(dj.Computed):
                  },
                 skip_duplicates=True)
 
+            
+# @dhv_schema
+# class Test(dj.Manual):  
+#     definition = """
+#     time_points: time
+#     ---
+#     value: int
+#     """
+
+    
+# @dhv_schema
+# class TestTimePoints(dj.Manual):  
+#     definition = """
+#     unit_id: int
+#     ---
+#     time_points: longblob
+#     """
+    
+    
+# @dhv_schema
+# class TestTimePoints_2(dj.Manual): 
+#     definition = """
+#     time_series: int
+#     ---
+#     unit_id=0: int
+#     pause=0: int
+#     character=0: int
+#     """
 
 def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
     return ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
@@ -527,7 +671,7 @@ def get_neural_rectime_of_patient(patient_id, session_nr):
 
 def populate_all_tables():
     MovieSession.populate()
-    VideoAnnotation.populate()
+    MovieAnnotation.populate()
     ElectrodeUnit.populate()
     SpikeTimesDuringMovie.populate()
     BinnedSpikesDuringMovie.populate()
@@ -656,7 +800,7 @@ def get_patient_level_data_cleaning(patient_id, session_nr, vector_name="continu
 
 
 def get_original_movie_label(label_name, annotation_date, annotator_id):
-    name_label = (VideoAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("movie_label")[0]
+    name_label = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
     return np.load(name_label)
 
 
@@ -714,3 +858,13 @@ def get_spikes_from_brain_region(patient_id, session_nr, brain_region, bin_size)
 
 def get_unit_ids_in_brain_region(patient_id, brain_region):
     return (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
+
+
+def get_info_continuous_watch_segments(patient_id, session_nr, annotator_id, annotation_date):
+    return (ContinuousWatchSegments() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "label_entry_date='{}'".format(annotation_date)).fetch('values', 'start_times', 'stop_times')
+
+
+def get_patient_aligned_label_time_frames(patient_id, session_nr, label_name, annotator_id, annotation_date):
+    values, start_times, stop_times = (PatientAlignedLabelTimeFrames() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date) & "label_name='{}'".format(label_name)).fetch("values", "start_times", "stop_times")
+    
+    return values[0], start_times[0], stop_times[0]
