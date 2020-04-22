@@ -7,7 +7,7 @@ PATH_TO_SESSION_DATA = PATH_TO_DATA + "/session_data"
 #ROOT_FOLDER_REPOSITORY = "/home/tamara/Documents/PhD/DeepHumanVision_pilot/"
 
 #PTS_MOVIE = [round((x * 0.04), 2) for x in range(1, 119695)]
-PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125725)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
+PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125726)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
 
 
 people = [["p1", "alana", "darcher", "lab member Alana", 'H'],
