@@ -59,6 +59,13 @@ current_standard_labels = [
     {'label_id': 10},
 ]
 
+sessions = {
+    "46": [1],
+    "50": [1],
+    "52": [1],
+    "53": [1],
+    "60": [1],
+}
 
 excluded_units = [
     {"patient_id": 46, "unit_id": 52, "reason_for_exclusion": "p1"}
