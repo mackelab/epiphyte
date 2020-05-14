@@ -1,10 +1,9 @@
+#PATH_TO_DATA = "/media/tamara/INTENSO1/data_dhv"
 PATH_TO_DATA = "/media/hard_drive_dhv/data_dhv"
 PATH_TO_LABELS = PATH_TO_DATA + "/movie_labels"
 PATH_PATIENT_ALIGNED_LABELS = PATH_TO_DATA + "/patient_aligned_labels"
 PATH_TO_PATIENT_DATA = PATH_TO_DATA + "/patient_data"
 PATH_TO_SESSION_DATA = PATH_TO_DATA + "/session_data"
-
-#ROOT_FOLDER_REPOSITORY = "/home/tamara/Documents/PhD/DeepHumanVision_pilot/"
 
 #PTS_MOVIE = [round((x * 0.04), 2) for x in range(1, 119695)]
 PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125726)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
@@ -59,13 +58,6 @@ current_standard_labels = [
     {'label_id': 10},
 ]
 
-sessions = {
-    "46": [1],
-    "50": [1],
-    "52": [1],
-    "53": [1],
-    "60": [1],
-}
 
 excluded_units = [
     {"patient_id": 46, "unit_id": 52, "reason_for_exclusion": "p1"}
@@ -79,6 +71,14 @@ patients = [
     {'patient_id': 53, 'age': 1, 'gender': 'x', 'year': 2016, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
     {'patient_id': 60, 'age': 1, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
 ]
+
+sessions = {
+    "46": [1],
+    "50": [1],
+    "52": [1],
+    "53": [1],
+    "60": [1],
+}
 
 watchlog_names = {46: "ffplay-watchlog-20151212-193220.log",
                   50: "ffplay-watchlog-20160502-211109.log",

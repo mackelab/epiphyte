@@ -289,3 +289,12 @@ def get_list_of_patient_ids(patient_dict):
         list_patient_ids.append(patient_dict[i]["patient_id"])
 
     return list_patient_ids
+
+
+def match_pts_to_neural_rec_time(pts, pts_vec, neural_recording_vec):
+    matching_pts = create_vectors_from_time_points.get_nearest_value_from_vector(np.array(pts_vec), pts)
+    indices = [i for i,x in enumerate(pts_vec) if x == matching_pts]
+    ret = []
+    for ind in indices:
+        ret.append(neural_recording_vec[ind])
+    return ret

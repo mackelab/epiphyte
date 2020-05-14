@@ -31,7 +31,7 @@ dj.config['stores'] = {
 @dhv_schema
 class Patient(dj.Lookup):
     definition = """
-    # general patient data
+    # general patient data, imported from config file
     patient_id: int                                    # patient ID
     ---
     age: smallint                                      # age of patient
@@ -48,7 +48,7 @@ class Patient(dj.Lookup):
 @dhv_schema
 class Annotator(dj.Lookup):
     definition = """
-    # annatotors of the video
+    # annatotors of the video, imported from config file
     annotator_id: varchar(5)                    # unique ID for each annotator
     ---
     first_name: varchar(32)                      # first name of annotator
@@ -62,7 +62,7 @@ class Annotator(dj.Lookup):
 @dhv_schema
 class LabelProcessingMethod(dj.Lookup):
     definition = """
-    # algorithms related to movie labels
+    # algorithms related to movie annotations
     algorithm_name: varchar(16)                     # unique name for each algorithm
     ---
     description: varchar(128)                    # description of algorithm
@@ -130,7 +130,7 @@ class MovieSession(dj.Imported):
 @dhv_schema
 class LabelName(dj.Lookup):
     definition = """
-    # names of existing labels
+    # names of existing labels, imported from config file
     label_name: varchar(32)   # label name
     """
 
@@ -138,34 +138,11 @@ class LabelName(dj.Lookup):
 
 
 @dhv_schema
-class VideoAnnotation(dj.Imported):
-    definition = """
-    -> Annotator    # creator of movie annotation
-    -> LabelName                           # name of annotation
-    annotation_date: date   # date of annotation
-    ---
-    movie_label: attach     # frames with labeling
-    category: varchar(32)   # category of label; e.g.: 'character', 'emotion', 'location'
-    additional_information = "" : varchar(128)   # space for additional information
-    """
-
-    def _make_tuples(self, key):
-        directory = "{}/movie_labels/".format(config.PATH_TO_DATA)
-        print(directory)
-        for filename in os.listdir(directory):
-            if os.path.isfile(directory + filename) and filename.endswith(".npy"):
-                label_id, name, annotator, date, category = filename[:-4].split("_")
-                self.insert1({'label_name': name,
-                              'annotator_id': annotator,
-                              'movie_label': directory + filename,
-                              'annotation_date': date[0:4] + "-" + date[4:6] + "-" + date[6:8],
-                              'category': category
-                              }, skip_duplicates=True)
-
-
-@dhv_schema
 class MovieAnnotation(dj.Imported):
     definition = """
+    # information about video annotations (e.g. labels of characters); 
+    # this table contains start and end time points and values of the segments of the annotations;
+    # all time points are in Neural Recording Time;
     -> Annotator   # creator of movie annotation
     -> LabelName   # name of annotation
     annotation_date: date    # date of annotation
@@ -207,6 +184,7 @@ class MovieAnnotation(dj.Imported):
 @dhv_schema
 class ElectrodeUnit(dj.Imported):
     definition = """
+    # Contains information about the implanted electrodes of each patient
     -> Patient                       # patient ID
     unit_id: int                     # unique ID for unit (for respective  patient)
     ---
@@ -248,6 +226,8 @@ class ElectrodeUnit(dj.Imported):
 @dhv_schema
 class SpikeTimesDuringMovie(dj.Imported):
     definition = """
+    # This table contains all spike times of all units of all patients in Neural Recording Time
+    # Each entry contains a vector of all spike times of one unit of one patient
     -> ElectrodeUnit                # unit from which data was recorded
     -> MovieSession                 # session ID
     ---
@@ -283,49 +263,9 @@ class SpikeTimesDuringMovie(dj.Imported):
 
 
 @dhv_schema
-class BinnedSpikesDuringMovie(dj.Imported):
-    definition = """
-    -> SpikeTimesDuringMovie
-    bin_size: smallint                # size of bin in ms
-    ---
-    spike_vector: attach              # in case bin_size is not 0: number of spikes; otherwise: times of spikes (original data)
-    """
-
-    def _make_tuples(self, key):
-        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        for index_session in range(0, len(patient_ids)):
-            path_binaries = '{}/spikes/'.format(config.PATH_TO_DATA)
-            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            # get all sub-folders in the folder, which contain the binned binaries
-            sub_folders = [f.path for f in os.scandir(folder) if f.is_dir()]
-            # iterate through sub-folders and add files to data base with respective bin sizes
-            for subfolder in sub_folders:
-                bin_size = subfolder.split("/")[-1]
-                for filename in os.listdir(subfolder + "/"):
-                    if filename.startswith("CSC"):
-                        csc_nr, unit, _ = filename[:-4].split("_")
-                        unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
-                        unit_id = \
-                            ((ElectrodeUnit & "csc = '{}'".format(csc_nr[3:]) & "patient_id='{}'".format(
-                                patient_ids[index_session])
-                              & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch("unit_id"))[
-                                0]
-                        spikes_file = (subfolder + "/" + filename)
-                        self.insert1(
-                            {'patient_id': patient_ids[index_session], 'bin_size': bin_size, 'unit_id': unit_id,
-                             'session_nr': session_nrs[index_session], 'spike_vector': spikes_file},
-                            skip_duplicates=True)
-                        print("Added {} for binning {} of patient {} to data base".format(csc_nr + " " + unit,
-                                                                                          bin_size,
-                                                                                          patient_ids[index_session]))
-
-
-@dhv_schema
 class ProcessedMovieAnnotation(dj.Computed):
     definition = """
+    # This table contains information about processed annotations, so different algorithms can be used to for example average labels
     -> LabelName
     -> LabelProcessingMethod
     last_entry_date: date    # date of most recent annotation entry
@@ -354,58 +294,6 @@ class ProcessedMovieAnnotation(dj.Computed):
             entry_keys = [dict(k, **base_key) for k in entry_keys]  # add master's columns into entry_keys
             self.Entry.insert(entry_keys)
 
-
-@dhv_schema
-class PatientAlignedLabel(dj.Computed):
-    definition = """
-    # Movie Annotations aligned to patient time
-    -> VideoAnnotation     # label
-    -> MovieSession        # movie watching session ID
-    ---
-    label_in_patient_time: longblob    # label matched to patient time (pts)
-    """
-
-    def make(self, key):
-        entry_key_video_annot, original_label = (VideoAnnotation & key).fetch('KEY', 'movie_label')
-        entry_key_movie_session, pts_vec = (MovieSession & key).fetch("KEY", 'order_movie_frames')
-        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=np.load(original_label[0]),
-                                                                        patient_pts=np.load(pts_vec[0]))
-
-        self.insert1({'annotator_id': entry_key_video_annot[0]['annotator_id'],
-                      'label_name': entry_key_video_annot[0]['label_name'],
-                      'annotation_date': entry_key_video_annot[0]['annotation_date'],
-                      'patient_id': entry_key_movie_session[0]['patient_id'],
-                      'session_nr': entry_key_movie_session[0]['session_nr'],
-                      'label_in_patient_time': np.array(patient_aligned_label)}, skip_duplicates=True)
-        
-
-@dhv_schema
-class PatientAlignedLabelTimeFrames(dj.Computed):
-    definition = """
-    -> MovieAnnotation     # label
-    -> MovieSession        # movie watching session ID
-    ---
-    values: longblob       # list of values that represent label
-    start_times: longblob  # list of start times of label segments in neural recoring time
-    stop_times: longblob   # list of stop times of label segments in neural recording time
-    additionl_information="":varchar(30)
-    """
-    def make(self, key):
-        for row in PatientAlignedLabel():
-            annotator_id = row.get("annotator_id")
-            label_name = row.get("label_name")
-            annotation_date = row.get("annotation_date")
-            session_nr = row.get("session_nr")
-            patient_id = row.get("patient_id")
-
-            label_in_patient_time = row.get("label_in_patient_time")
-            # only insert binary labels into the table
-            if len(set(label_in_patient_time)) <= 2:
-                neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
-                values_label, start_times_label, stop_times_label = processing_labels.get_start_stop_times_from_label(neural_rec_time, label_in_patient_time)
-
-                self.insert1({"annotator_id": annotator_id, "label_name": label_name, "annotation_date": annotation_date, "session_nr": session_nr, "patient_id": patient_id, "values": np.array(values_label), "start_times": np.array(start_times_label), "stop_times": np.array(stop_times_label)}, skip_duplicates=True)
-    
     
 @dhv_schema
 class PatientAlignedMovieAnnotation(dj.Computed):
@@ -416,7 +304,7 @@ class PatientAlignedMovieAnnotation(dj.Computed):
     ---
     label_in_patient_time: longblob    # label matched to patient time (pts)
     values: longblob       # list of values that represent label
-    start_times: longblob  # list of start times of label segments in neural recoring time
+    start_times: longblob  # list of start times of label segments in neural recording time
     stop_times: longblob   # list of stop times of label segments in neural recording time
     additionl_information="":varchar(30)
     """
@@ -443,46 +331,11 @@ class PatientAlignedMovieAnnotation(dj.Computed):
             
         print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
 
-@dhv_schema
-class BinnedPatientAlignedLabel(dj.Imported):
-    definition = """
-    # The patient aligned labels binned in certain milisecond bins
-    -> VideoAnnotation     # label
-    -> MovieSession        # movie watching session ID
-    bin_size: smallint     # bin size in milliseconds
-    ---
-    label_in_patient_time: attach    # label matched to patient time (pts)
-    """
-
-    def _make_tuples(self, key):
-        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        for index_session in range(0, len(patient_ids)):
-            path_binaries = '{}/patient_aligned_labels/'.format(config.PATH_TO_DATA)
-            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            # get all sub-folders in the folder, which contain the binned binaries
-            sub_folders = [f.path for f in os.scandir(folder) if f.is_dir()]
-            # iterate through sub-folders and add files to data base with respective bin sizes
-            for subfolder in sub_folders:
-                bin_size = subfolder.split("/")[-1]
-                for filename in os.listdir(subfolder + "/"):
-                    if filename.startswith("{}".format(patient_ids[index_session])):
-                        patient_id, annotator_id, label_name, date = helpers.extract_binned_patient_aligned_label_information(filename)
-                        label_file = (subfolder + "/" + filename)
-                        self.insert1(
-                            {'patient_id': patient_ids[index_session], 'bin_size': bin_size, 'annotator_id': annotator_id, 'annotation_date': date,
-                             'session_nr': session_nrs[index_session], 'label_in_patient_time': label_file, 'label_name': label_name},
-                            skip_duplicates=True)
-                        print("Added binned label {} with bin size {} of patient {} to data base".format(label_name,
-                                                                                          bin_size,
-                                                                                          patient_ids[index_session]))
-
 
 @dhv_schema
 class UnitLevelDataCleaning(dj.Imported):
     definition = """
+    # Contains information about data cleaning on a unit-level
     -> ElectrodeUnit                   # respective unit
     -> MovieSession                    # number of movie session
     -> Annotator                       # who created the cleaning?
@@ -518,6 +371,8 @@ class UnitLevelDataCleaning(dj.Imported):
 @dhv_schema
 class PatientLevelDataCleaning(dj.Manual):
     definition = """
+    # Contains information about data cleaning on a patient-level 
+    # (e.g. annotated time frames, where all units are firing too high)
     -> MovieSession                    # number of movie session
     -> Annotator                       # who created the cleaning?
     name: varchar(16)                  # unique name for data cleaning
@@ -530,6 +385,10 @@ class PatientLevelDataCleaning(dj.Manual):
 @dhv_schema
 class ContinuousWatchSegments(dj.Imported):
     definition = """
+    # This table Contains start and stop time points, where the watching behaviour of the patient changed from 
+    # continuous (watching the movie in the correct frame order) to non-continuous (e.g. jumping through the movie) or 
+    # the other way round:;
+    # all time points are in Neural Recording Time
     -> MovieSession                    # number of movie session
     -> Annotator                       # who created the cleaning?
     label_entry_date: date             # date of creation of label
@@ -569,6 +428,9 @@ class ContinuousWatchSegments(dj.Imported):
 @dhv_schema
 class MoviePauses(dj.Computed):
     definition = """
+    # This table contains information about pauses in movie playback;
+    # This is directly computed from the watch log;
+    # Time points are in Neural Recording Time
     -> MovieSession                    # movie watching session of patient
     ---
     start_times: longblob              # start time points of pauses
@@ -601,33 +463,21 @@ class MoviePauses(dj.Computed):
                 skip_duplicates=True)
 
             
-# @dhv_schema
-# class Test(dj.Manual):  
-#     definition = """
-#     time_points: time
-#     ---
-#     value: int
-#     """
+@dhv_schema
+class ManualAnnotation(dj.Manual):
+    definition = """
+    -> MovieSession                    # number of movie session
+    -> Annotator                       # who created the cleaning?
+    label_entry_date: date             # date of creation of label
+    name: varchar(32)
+    ---
+    x_zero: longblob                   # x0 coordinate of all boxes
+    x_one: longblob                    # x1 coordinate of all boxes
+    y_zero: longblob                   # y0 coordinate of all boxes
+    y_one: longblob                    # y1 coordinate of all boxes
+    additional_information="": varchar(46) # further notes
+    """
 
-    
-# @dhv_schema
-# class TestTimePoints(dj.Manual):  
-#     definition = """
-#     unit_id: int
-#     ---
-#     time_points: longblob
-#     """
-    
-    
-# @dhv_schema
-# class TestTimePoints_2(dj.Manual): 
-#     definition = """
-#     time_series: int
-#     ---
-#     unit_id=0: int
-#     pause=0: int
-#     character=0: int
-#     """
 
 def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
     return ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
