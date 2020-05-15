@@ -7,8 +7,6 @@ from scipy import stats
 
 import sys
 import os.path
-#sys.path.append('../analysis/nonbinary_analysis')
-from psth_plotting import PSTH
 
 def find_changepoint_tt(data, save=None, filename=None, comparison_tau=None):
     """
@@ -151,10 +149,8 @@ def run_cpt_tt(directory, save=None, file_key='CSC'):
         if filename.startswith(file_key):
             unit = np.load(directory + filename)
 
+            # TODO generalize filename aspects of the saving.
             name = filename[:-24]
-
-            psth.plot_psth_by_unit(name, 1, 3, plot_sum=False)
-            print(name)
 
             tau, ttest = find_changepoint_tt(unit, save=save, filename=name)
 
