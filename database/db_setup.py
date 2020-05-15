@@ -1,9 +1,7 @@
 import datajoint as dj
 import numpy as np
 import os
-import sys
 
-sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
 import database.config as config
 import database.helpers as helpers
 import preprocessing.data_preprocessing.data_utils as data_utils

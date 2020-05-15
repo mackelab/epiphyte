@@ -1,7 +1,6 @@
 import os
 import numpy as np
-import sys
-sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
+
 import database.config as config
 from annotation.stimulus_driven_annotation.movies.watch_log import WatchLog
 import re
