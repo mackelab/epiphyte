@@ -1,7 +1,5 @@
 import pandas as pd
-import sys
 
-sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
 from database.db_setup import *
 import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
 

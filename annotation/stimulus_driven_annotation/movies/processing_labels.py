@@ -1,7 +1,6 @@
 import json
 import numpy as np
-import sys
-sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
+
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
@@ -29,7 +28,6 @@ def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, d
             [int(values[i])]*(end_index_in_default_vec - start_index_in_default_vec + 1)
 
     return default_label
-
 
 
 def create_xml_for_advene(id_name, start_end_times_vector, label_name):

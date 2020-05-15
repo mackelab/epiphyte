@@ -26,12 +26,12 @@ VALUES (<value1>, <value2>, <value3>, ...);
 
 ## Create User
 ```
-create user 'tamara'@'%' identified by 'PASSWORD';
+create user '<user_name>'@'%' identified by 'PASSWORD';
 ```
 
 ## Grand Privileges
 ```
-grant select, insert on DeepHumanVision.* to 'tamara'@'%';
+grant select, insert on DeepHumanVision.* to '<user_name>'@'%';
 ```
 
 ## Trouble Shooting
