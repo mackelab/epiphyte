@@ -146,16 +146,16 @@ class MovieAnnotation(dj.Imported):
     values: longblob       # list of values that represent label
     start_times: longblob  # list of start times of label segments in movie play time (PTS)
     stop_times: longblob   # list of stop times of label segments in movie play time (PTS)
-    category: varchar(32)  # categoy of label; e.g. 'character', 'emotion', 'location'
+    category: varchar(32)  # category of label; e.g. 'character', 'emotion', 'location'
     indicator_function: longblob # full indicator function, one value for each movie frame
     additional_information="":varchar(30) # space for additional information
     """
+
     def _make_tuples(self, key):
         directory = "{}/movie_annotation/".format(config.PATH_TO_DATA)
         for filename in os.listdir(directory):
             if os.path.isfile(directory + filename) and filename.endswith(".npy"):
                 label_id, name, annotator, date, category = filename[:-4].split("_")
-
                 content = np.load("{}{}".format(directory, filename))
                 
                 values = np.array(content[0])
