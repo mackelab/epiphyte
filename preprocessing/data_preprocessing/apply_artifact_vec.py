@@ -1,6 +1,7 @@
 # 6 feb 2020, alana
 # functions related to removing the artifacts that occur on a bin-level (4 std from the average spiking for the whole
 # of a given recording.
+# 15 may 2020 notes/update: this will likely be replaced by Marcel & Gert's work. tbd.
 
 
 import os
