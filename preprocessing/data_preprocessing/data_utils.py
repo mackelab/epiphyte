@@ -208,7 +208,7 @@ class TimeConversion(object):
 
         # first convert cpu time to recording system time
         daq_time = cpu_time * m + b
-        return pts, daq_time
+        return pts, daq_time, cpu_time
 
     def convert_pauses(self):
         start, stop = read_watchlog_pauses(self.path_watchlog)

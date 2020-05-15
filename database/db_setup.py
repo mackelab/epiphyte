@@ -3,15 +3,15 @@ import numpy as np
 import os
 import sys
 
-sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
-import data_base.config as config
-import data_base.helpers as helpers
-import data_preprocessing.data_utils as data_utils
-import movie_annotation.processing_labels as processing_labels
-import data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
+import database.config as config
+import database.helpers as helpers
+import preprocessing.data_preprocessing.data_utils as data_utils
+import annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
+import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
-dhv_schema = dj.schema('dhv', locals())
+dhv_schema = dj.schema('dhv_deploy', locals())
 
 dj.config['stores'] = {
     'shared': dict(
@@ -90,8 +90,6 @@ class MovieSession(dj.Imported):
         for folder_name in os.listdir(config.PATH_TO_DATA + "/session_data/"):
             if folder_name.startswith("session"):
                 patient_id, session_nr, date, time = helpers.extract_session_information(folder_name)
-                watchlog_name = config.watchlog_names[int(patient_id)]
-
                 path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
                                                                  config.watchlog_names[int(patient_id)])
                 path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
@@ -104,7 +102,7 @@ class MovieSession(dj.Imported):
                 pts, rectime, cpu_time = time_conversion.convert()
 
                 cpu_time = cpu_time
-                neural_recording_time = rectime
+                # neural_recording_time = rectime
                 path_order_movie_frames = "{}/patient_data/{}/session_{}/order_of_movie_frames/pts.npy".format(
                     config.PATH_TO_DATA, patient_id, session_nr)
                 np.save(path_order_movie_frames, pts)
@@ -178,8 +176,7 @@ class MovieAnnotation(dj.Imported):
                       'indicator_function': np.array(ind_func)
                       }, skip_duplicates=True)
                 print("Added label {} to database.".format(name))
-    
-    
+
             
 @dhv_schema
 class ElectrodeUnit(dj.Imported):
@@ -198,29 +195,35 @@ class ElectrodeUnit(dj.Imported):
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
         for index_session in range(0, len(patient_ids)):
-            channel_names = helpers.get_channel_names("ChannelNames.txt")
-            path_binaries = '{}/spikes/'.format(config.PATH_TO_DATA)
-            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/"
+            path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
+            folder_channels = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
+                session_nrs[index_session]) + "/channel_names/"
+            if not os.path.exists(folder_channels):
+                os.makedirs(folder_channels)
+            print(folder_channels)
+            channel_names = helpers.get_channel_names("{}/ChannelNames.txt".format(folder_channels))
+            print(channel_names)
             i = 0
             # iterate through all files in the binaries folder to see which units were recorded
             folder_list = []
-            for filename in os.listdir(folder):
+            folder_spikes = "{}/spikes/".format(config.PATH_TO_DATA) + str(patient_ids[index_session]) + '/session_' + str(session_nrs[index_session]) + "/"
+            for filename in os.listdir(folder_spikes):
                 if filename.startswith("CSC"):
                     folder_list.append(filename)
             folder_list.sort(key=helpers.natural_keys)
-
+            print(folder_list)
             for filename in folder_list:
                 csc_nr, unit = filename[:-4].split("_")
+                print(csc_nr, int(csc_nr[3:]) - 1)
                 unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
                 self.insert1({'unit_id': i, 'csc': csc_nr[3:], 'unit_type': unit_type, 'unit_nr': unit_nr,
                               'patient_id': patient_ids[index_session],
-                              'brain_region': channel_names[int(csc_nr[3:]) - 1]},
+                              'brain_region': channel_names[i]},
                              skip_duplicates=True)
                 i += 1
-            # delete downloaded channel names file
-            if os.path.exists("ChannelNames.txt"):
-                os.remove("ChannelNames.txt")
+            # # delete downloaded channel names file
+            # if os.path.exists("ChannelNames.txt"):
+            #     os.remove("ChannelNames.txt")
 
 
 @dhv_schema
@@ -249,7 +252,6 @@ class SpikeTimesDuringMovie(dj.Imported):
                     unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
                     spikes_file = (path_binaries + str(patient_ids[index_session]) + '/session_' + str(
                         session_nrs[index_session]) + "/" + filename)
-                    # print("csc: {}, nr: {}, patient ID: {}, unit_type: {}".format(csc_nr, unit_nr, patient_id, unit_type))
                     unit_id = ((ElectrodeUnit & "csc = '{}'".format(csc_nr[3:]) & "patient_id='{}'".format(
                         patient_ids[index_session])
                                 & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch(
@@ -315,7 +317,6 @@ class PatientAlignedMovieAnnotation(dj.Computed):
         patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0],
                                                                         patient_pts=np.load(pts_vec[0]))
         neural_rec_time = get_neural_rectime_of_patient(entry_key_movie_session[0]['patient_id'], entry_key_movie_session[0]['session_nr'])
-        print(neural_rec_time)
         values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rec_time, patient_aligned_label)
         
         self.insert1({'annotator_id': entry_key_video_annot[0]['annotator_id'],
@@ -524,10 +525,6 @@ def populate_all_tables():
     MovieAnnotation.populate()
     ElectrodeUnit.populate()
     SpikeTimesDuringMovie.populate()
-    BinnedSpikesDuringMovie.populate()
-    ProcessedVideoAnnotation.populate()
-    PatientAlignedLabel.populate()
-    BinnedPatientAlignedLabel.populate()
 
 
 def get_number_of_units_for_patient(patient_id):
@@ -535,7 +532,7 @@ def get_number_of_units_for_patient(patient_id):
             .format(patient_id)).fetch("number_of_units")[0]
 
 
-def get_spiking_activity(patient_id, session_nr, bin_size, unit_id):
+def get_spiking_activity(patient_id, session_nr, unit_id):
     """
     Extract spiking vector from data base. If bin_size is None, the spike times will be returned, otherwise the
     binned firing rates
@@ -545,21 +542,21 @@ def get_spiking_activity(patient_id, session_nr, bin_size, unit_id):
     :param unit_id: Unit ID of which spiking activity shall be extracted
     """
     # if bin_size is None, return the spike times, otherwise return the binned firing rates
-    if bin_size is None:
-        try:
-            spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
-                session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
-        except:
-            print("The spiking data you were looking for doesn't exist in the data base.")
-            return -1
-    else:
-        try:
-            spikes = (BinnedSpikesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
-                session_nr) & "unit_id='{}'".format(unit_id) & "bin_size='{}'".format(bin_size)).fetch("spike_vector")[
-                0]
-        except:
-            print("The spiking data you were looking for doesn't exist in the data base.")
-            return -1
+
+    try:
+        spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
+            session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
+    except:
+        print("The spiking data you were looking for doesn't exist in the data base.")
+        return -1
+    # else:
+    #     try:
+    #         spikes = (BinnedSpikesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
+    #             session_nr) & "unit_id='{}'".format(unit_id) & "bin_size='{}'".format(bin_size)).fetch("spike_vector")[
+    #             0]
+    #     except:
+    #         print("The spiking data you were looking for doesn't exist in the data base.")
+    #         return -1
 
     spike_vec = np.load(spikes)
 
@@ -599,37 +596,37 @@ def get_all_binned_cleaned_spikes_of_patient(patient_id, session_nr, bin_size):
     return vec_binned_spikes
 
 
-def get_patient_aligned_label_simple_version(patient_id, label_name, session_nr):
-    # this function doesn't check annotator ID or annotation date, so it's best to only use this one
-    # if there is only one label with this name
-    return (PatientAlignedLabel() & "label_name='{}'".format(label_name) & "patient_id='{}'".format(patient_id)
-            & "session_nr='{}'".format(session_nr)).fetch("label_in_patient_time")[0]
-
-
-def get_patient_aligned_label(patient_id, session_nr, label_name, annotator_id, annotation_date):
-    """
-    this function returns the patient aligned label with the respective parameters
-
-    :param patient_id: patient ID (int)
-    :param session_nr: session number (int)
-    :param label_name: name of label (string)
-    :param annotator_id: ID of annotator of label (string)
-    :param annotation_date: date of creation of label (e.g. "2020-02-02")
-    :return:
-    """
-    return (PatientAlignedLabel() & "label_name='{}'".format(label_name) & "patient_id='{}'".format(patient_id)
-            & "session_nr='{}'".format(session_nr) & "annotator_id='{}'".format(annotator_id) &
-            "annotation_date='{}'".format(annotation_date)).fetch("label_in_patient_time")[0]
-
-
-def get_binned_patient_aligned_label(patient_id, session_nr, label_name, annotator_id, annotation_date, bin_size):
-    name_binned_label = (BinnedPatientAlignedLabel() & "patient_id='{}'".format(patient_id) &
-                         "label_name='{}'".format(label_name) & "bin_size='{}'".format(bin_size) &
-                         "session_nr='{}'".format(session_nr) & "annotator_id='{}'".format(annotator_id)
-                         & "annotation_date='{}'".format(annotation_date)).fetch("label_in_patient_time")[0]
-    binned_label = np.load(name_binned_label)
-    os.remove(name_binned_label)
-    return binned_label
+# def get_patient_aligned_label_simple_version(patient_id, label_name, session_nr):
+#     # this function doesn't check annotator ID or annotation date, so it's best to only use this one
+#     # if there is only one label with this name
+#     return (PatientAlignedLabel() & "label_name='{}'".format(label_name) & "patient_id='{}'".format(patient_id)
+#             & "session_nr='{}'".format(session_nr)).fetch("label_in_patient_time")[0]
+#
+#
+# def get_patient_aligned_label(patient_id, session_nr, label_name, annotator_id, annotation_date):
+#     """
+#     this function returns the patient aligned label with the respective parameters
+#
+#     :param patient_id: patient ID (int)
+#     :param session_nr: session number (int)
+#     :param label_name: name of label (string)
+#     :param annotator_id: ID of annotator of label (string)
+#     :param annotation_date: date of creation of label (e.g. "2020-02-02")
+#     :return:
+#     """
+#     return (PatientAlignedLabel() & "label_name='{}'".format(label_name) & "patient_id='{}'".format(patient_id)
+#             & "session_nr='{}'".format(session_nr) & "annotator_id='{}'".format(annotator_id) &
+#             "annotation_date='{}'".format(annotation_date)).fetch("label_in_patient_time")[0]
+#
+#
+# def get_binned_patient_aligned_label(patient_id, session_nr, label_name, annotator_id, annotation_date, bin_size):
+#     name_binned_label = (BinnedPatientAlignedLabel() & "patient_id='{}'".format(patient_id) &
+#                          "label_name='{}'".format(label_name) & "bin_size='{}'".format(bin_size) &
+#                          "session_nr='{}'".format(session_nr) & "annotator_id='{}'".format(annotator_id)
+#                          & "annotation_date='{}'".format(annotation_date)).fetch("label_in_patient_time")[0]
+#     binned_label = np.load(name_binned_label)
+#     os.remove(name_binned_label)
+#     return binned_label
 
 
 def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
@@ -654,12 +651,12 @@ def get_original_movie_label(label_name, annotation_date, annotator_id):
     return np.load(name_label)
 
 
-def get_all_patient_aligned_labels_of_patient(patient_id, session_nr):
-    patient_aligned_label_information = (
-                PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "session_nr={}".format(session_nr)).proj(
-        "annotator_id", "label_name", "annotation_date", "label_in_patient_time")
-
-    return patient_aligned_label_information
+# def get_all_patient_aligned_labels_of_patient(patient_id, session_nr):
+#     patient_aligned_label_information = (
+#                 PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "session_nr={}".format(session_nr)).proj(
+#         "annotator_id", "label_name", "annotation_date", "label_in_patient_time")
+#
+#     return patient_aligned_label_information
 
 
 def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, annotator_id):
@@ -670,18 +667,18 @@ def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, 
     return cont_watch
 
 
-def get_movie_cutting_vec(patient_id, session_nr, bin_size):
-    vorspann = get_binned_patient_aligned_label(patient_id, session_nr, "vorspann", "p5", "2020-02-21", bin_size)
-    abspann = get_binned_patient_aligned_label(patient_id, session_nr, "abspann", "p5", "2020-02-21", bin_size)
-    kidssegment = get_binned_patient_aligned_label(patient_id, session_nr, "kidssegment", "p5", "2020-02-21", bin_size)
-    return vorspann + abspann + kidssegment
-
-
-def get_movie_cutting_vec_excluding_pauses(patient_id, session_nr, bin_size):
-    vorspann = get_patient_aligned_label(patient_id, session_nr, "vorspann", "p5", "2020-02-21")
-    abspann = get_patient_aligned_label(patient_id, session_nr, "abspann", "p5", "2020-02-21")
-    kidssegment = get_patient_aligned_label(patient_id, session_nr, "kidssegment", "p5", "2020-02-21")
-    return vorspann + abspann + kidssegment
+# def get_movie_cutting_vec(patient_id, session_nr, bin_size):
+#     vorspann = get_binned_patient_aligned_label(patient_id, session_nr, "vorspann", "p5", "2020-02-21", bin_size)
+#     abspann = get_binned_patient_aligned_label(patient_id, session_nr, "abspann", "p5", "2020-02-21", bin_size)
+#     kidssegment = get_binned_patient_aligned_label(patient_id, session_nr, "kidssegment", "p5", "2020-02-21", bin_size)
+#     return vorspann + abspann + kidssegment
+#
+#
+# def get_movie_cutting_vec_excluding_pauses(patient_id, session_nr, bin_size):
+#     vorspann = get_patient_aligned_label(patient_id, session_nr, "vorspann", "p5", "2020-02-21")
+#     abspann = get_patient_aligned_label(patient_id, session_nr, "abspann", "p5", "2020-02-21")
+#     kidssegment = get_patient_aligned_label(patient_id, session_nr, "kidssegment", "p5", "2020-02-21")
+#     return vorspann + abspann + kidssegment
 
 
 def get_start_stop_times_pauses(patient_id, session_nr):
@@ -714,7 +711,7 @@ def get_info_continuous_watch_segments(patient_id, session_nr, annotator_id, ann
     return (ContinuousWatchSegments() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "label_entry_date='{}'".format(annotation_date)).fetch('values', 'start_times', 'stop_times')
 
 
-def get_patient_aligned_label_time_frames(patient_id, session_nr, label_name, annotator_id, annotation_date):
-    values, start_times, stop_times = (PatientAlignedLabelTimeFrames() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date) & "label_name='{}'".format(label_name)).fetch("values", "start_times", "stop_times")
-    
-    return values[0], start_times[0], stop_times[0]
+# def get_patient_aligned_label_time_frames(patient_id, session_nr, label_name, annotator_id, annotation_date):
+#     values, start_times, stop_times = (PatientAlignedLabelTimeFrames() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date) & "label_name='{}'".format(label_name)).fetch("values", "start_times", "stop_times")
+#
+#     return values[0], start_times[0], stop_times[0]

@@ -1,9 +1,9 @@
 import pandas as pd
 import sys
 
-sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
-from data_base.db_setup import *
-import data_preprocessing.pause_handling as pause_handling
+sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
+from database.db_setup import *
+import preprocessing.data_preprocessing.pause_handling as pause_handling
 
 
 def get_index_nearest_timestamp_in_vector(vector, timestamp):

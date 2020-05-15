@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import sys
-sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
-import data_base.config as config
-from movie_annotation.watch_log import WatchLog
+sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
+import database.config as config
+from annotation.stimulus_driven_annotation.movies.watch_log import WatchLog
 import re
 
 
@@ -291,10 +291,10 @@ def get_list_of_patient_ids(patient_dict):
     return list_patient_ids
 
 
-def match_pts_to_neural_rec_time(pts, pts_vec, neural_recording_vec):
-    matching_pts = create_vectors_from_time_points.get_nearest_value_from_vector(np.array(pts_vec), pts)
-    indices = [i for i,x in enumerate(pts_vec) if x == matching_pts]
-    ret = []
-    for ind in indices:
-        ret.append(neural_recording_vec[ind])
-    return ret
+# def match_pts_to_neural_rec_time(pts, pts_vec, neural_recording_vec):
+#     matching_pts = create_vectors_from_time_points.get_nearest_value_from_vector(np.array(pts_vec), pts)
+#     indices = [i for i,x in enumerate(pts_vec) if x == matching_pts]
+#     ret = []
+#     for ind in indices:
+#         ret.append(neural_recording_vec[ind])
+#     return ret

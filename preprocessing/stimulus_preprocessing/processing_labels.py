@@ -1,8 +1,9 @@
 import json
 import numpy as np
 import sys
-sys.path.append("/home/tamara/Documents/PhD/DeepHumanVision_deploy/")
-import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
+import data_base.config as config
+import data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
 def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, default_value=0):
@@ -32,7 +33,7 @@ def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, d
 
 
 
-def create_xml_for_advene(id_name, start_end_times_vector, label_name):
+def create_xml_for_advene(id_name, star_end_times_vector, label_name):
     """
 
     :param id_name: name of ID in XML file
@@ -43,7 +44,7 @@ def create_xml_for_advene(id_name, start_end_times_vector, label_name):
     new_annotations = ""
     id_ = 0
 
-    for start, end in start_end_times_vector:
+    for start, end in star_end_times_vector:
         string_new_annotation = '<annotation id="{}{}" type="#{}"><millisecond-fragment begin="{}" end="{}"/><content>num=1</content></annotation>'.format(
             id_name, id_, label_name, int(start * 1000), int(end * 1000))
 
@@ -164,33 +165,33 @@ def get_start_stop_times_from_label(neural_rec_time, patient_aligned_label):
     return values, start_times, stop_times
 
 
-# def get_time_frames_from_patient_aligned_labels():
-#     df = pd.DataFrame(columns=["annotator_id", "label_name", "annotation_date", "session_nr", "patient_id", "values", "start_times", "stop_times"])
-#     for row in PatientAlignedLabel():
-#         annotator_id = row.get("annotator_id")
-#         label_name = row.get("label_name")
-#         annotation_date = row.get("annotation_date")
-#         session_nr = row.get("session_nr")
-#         patient_id = row.get("patient_id")
-#
-#         label_in_patient_time = row.get("label_in_patient_time")
-#
-#         neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
-#         values_label, start_times_label, stop_times_label = get_start_stop_times_from_label(neural_rec_time, label_in_patient_time)
-#
-#         start_times_pauses, stop_times_pauses = get_start_stop_times_pauses(patient_id, session_nr)
-#         rec_on = neural_rec_time[0]
-#         rec_off = neural_rec_time[-1]
-#         total_msec = rec_off - rec_on
-#         total_bins = int(total_msec / bin_size)
-#         bins = np.linspace(rec_on, rec_off, total_bins)
-#         bins_no_pauses = pause_handling.rm_pauses_bins(bins, start_times_pauses, stop_times_pauses)
-#
-#         binned_label = create_vectors_from_time_points.create_vector_from_start_stop_times_reference(bins_no_pauses, np.array(values_label), np.array(start_times_label), np.array(stop_times_label))
-#
-#         df = df.append({"annotator_id": annotator_id, "label_name": label_name, "annotation_date": annotation_date, "session_nr": session_nr, "patient_id": patient_id, "values": values_label, "start_times": start_times_label, "stop_times": stop_times_label}, ignore_index=True)
-#
-#     return df
+def get_time_frames_from_patient_aligned_labels():
+    df = pd.DataFrame(columns=["annotator_id", "label_name", "annotation_date", "session_nr", "patient_id", "values", "start_times", "stop_times"])
+    for row in PatientAlignedLabel():
+        annotator_id = row.get("annotator_id")
+        label_name = row.get("label_name")
+        annotation_date = row.get("annotation_date")
+        session_nr = row.get("session_nr")
+        patient_id = row.get("patient_id")
+
+        label_in_patient_time = row.get("label_in_patient_time")
+        
+        neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
+        values_label, start_times_label, stop_times_label = get_start_stop_times_from_label(neural_rec_time, label_in_patient_time)
+
+        start_times_pauses, stop_times_pauses = get_start_stop_times_pauses(patient_id, session_nr)
+        rec_on = neural_rec_time[0]
+        rec_off = neural_rec_time[-1]
+        total_msec = rec_off - rec_on
+        total_bins = int(total_msec / bin_size)
+        bins = np.linspace(rec_on, rec_off, total_bins)
+        bins_no_pauses = pause_handling.rm_pauses_bins(bins, start_times_pauses, stop_times_pauses)
+
+        binned_label = create_vectors_from_time_points.create_vector_from_start_stop_times_reference(bins_no_pauses, np.array(values_label), np.array(start_times_label), np.array(stop_times_label))
+
+        df = df.append({"annotator_id": annotator_id, "label_name": label_name, "annotation_date": annotation_date, "session_nr": session_nr, "patient_id": patient_id, "values": values_label, "start_times": start_times_label, "stop_times": stop_times_label}, ignore_index=True)
+        
+    return df
 
 
 if __name__ == '__main__':
