@@ -1,40 +1,38 @@
-import sys
 import os.path
 
-sys.path.append("/home/tamara/Documents/DeepHumanVision_pilot/")
-import data_preprocessing.pause_handling as pause_handling
-from data_base.db_setup import *
-import data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
+from database.db_setup import *
+import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
-def bin_patient_aligned_label(patient_id, session_nr, label_name, bin_size, annotator_id=None, annotation_date=None):
-    dts_patient_path = \
-        (MovieSession & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr)).fetch('cpu_time')[
-            0]
-    dts_patient = np.load(dts_patient_path) / 1000
-    # remove downloaded data
-    if os.path.exists(dts_patient_path):
-        os.remove(dts_patient_path)
-
-    if annotator_id is not None and annotation_date is not None:
-        patient_aligned_label = (PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "label_name='{}'".format(
-            label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(
-            annotation_date)).fetch("label_in_patient_time")[0]
-    else:
-        patient_aligned_label = \
-            (PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "label_name='{}'".format(label_name)).fetch(
-                "label_in_patient_time")[0]
-
-    # print(len(dts_patient), len(patient_aligned_label))
-
-    label_dts_patient = dts_patient * patient_aligned_label
-
-    total_msec = dts_patient[-1] - dts_patient[0]
-    total_bins = int(total_msec / bin_size)
-    bins = np.linspace(dts_patient[0], dts_patient[-1], total_bins)
-    label_patient_binned, _ = np.histogram(label_dts_patient, bins=bins)
-
-    return np.array([0 if x == 0 else 1 for x in label_patient_binned])
+# def bin_patient_aligned_label(patient_id, session_nr, label_name, bin_size, annotator_id=None, annotation_date=None):
+#     dts_patient_path = \
+#         (MovieSession & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr)).fetch('cpu_time')[
+#             0]
+#     dts_patient = np.load(dts_patient_path) / 1000
+#     # remove downloaded data
+#     if os.path.exists(dts_patient_path):
+#         os.remove(dts_patient_path)
+#
+#     if annotator_id is not None and annotation_date is not None:
+#         patient_aligned_label = (PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "label_name='{}'".format(
+#             label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(
+#             annotation_date)).fetch("label_in_patient_time")[0]
+#     else:
+#         patient_aligned_label = \
+#             (PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "label_name='{}'".format(label_name)).fetch(
+#                 "label_in_patient_time")[0]
+#
+#     # print(len(dts_patient), len(patient_aligned_label))
+#
+#     label_dts_patient = dts_patient * patient_aligned_label
+#
+#     total_msec = dts_patient[-1] - dts_patient[0]
+#     total_bins = int(total_msec / bin_size)
+#     bins = np.linspace(dts_patient[0], dts_patient[-1], total_bins)
+#     label_patient_binned, _ = np.histogram(label_dts_patient, bins=bins)
+#
+#     return np.array([0 if x == 0 else 1 for x in label_patient_binned])
 
 
 def bin_patient_aligned_label_excluding_pauses(patient_aligned_label, bin_size, patient_id, session_nr):
@@ -259,15 +257,3 @@ def create_binned_vector_from_time_points(patient_id, session_nr, values, start_
                                                                                                              start_times),
                                                                                                          np.array(
                                                                                                              stop_times))
-
-
-if __name__ == '__main__':
-    pat_id = 46
-
-    # path_binaries = "/media/tamara/INTENSO1/data_dhv/spikes/{}/session_1/".format(pat_id)
-    path_label = "/media/tamara/INTENSO1/data_dhv/patient_aligned_labels/{}/session_1/".format(pat_id)
-    rec_refs_file = "/media/tamara/INTENSO1/data_dhv/spikes/{}/session_1/rec_refs{}.npy".format(pat_id, pat_id)
-    bin_size = 1000
-
-    univ_bin(pat_id, path_label, '1000', 'CSC', np.linspace(0, 1, 5625))
-

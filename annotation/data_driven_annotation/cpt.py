@@ -8,6 +8,7 @@ from scipy import stats
 import sys
 import os.path
 
+
 def find_changepoint_tt(data, save=None, filename=None, comparison_tau=None):
     """
     Detects the changepoint in a spike train using parametric statistic testing.

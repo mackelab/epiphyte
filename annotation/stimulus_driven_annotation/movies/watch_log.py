@@ -39,7 +39,7 @@ class WatchLog:
                 i -= 1
             last_line = lines[i]  # TODO change this to make it generally applicable
 
-        # return cpu time stamp of first and last line in watchlog
+        # return cpu time stamp of first and last line in watch log
         # divide by 1000 to get seconds
         return int(int(first_line.split()[-1]) / 1000), int(int(last_line.split()[-1]) / 1000)
 
@@ -70,8 +70,6 @@ class WatchLog:
                  new_cpu_time: list of corresponding cpu times
         """
         excluded_time_points_based_on_max_movie_time = [0 if x > MAX_MOVIE_TIME else 1 for x in pts_time_stamps]
-        # new_pts_time = [a*b for a, b in zip(excluded_time_points_based_on_max_movie_time, self.pts_time_stamps)]
-        # new_cpu_time = [a*b for a, b in zip(excluded_time_points_based_on_max_movie_time, self.dts_time_stamps)]
 
         cut_down_pts = []
         cut_down_dts = []
@@ -91,26 +89,3 @@ class WatchLog:
             data = logfile.read()
         lines = data.splitlines()
         return lines
-
-
-if __name__ == '__main__':
-    # watch_log = WatchLog("/home/tamara/Documents/PhD/DeepHumanVision_pilot/movie_annotation/labels/watchlogs/ffplay-watchlog-20190723-182704.log")
-    # watch_log = WatchLog("/home/tamara/Documents/PhD/DeepHumanVision_pilot/movie_annotation/log_files/watchlog_tom_summer.log")
-    watch_log = WatchLog("/media/tamara/INTENSO1/data_dhv/patient_data/50/session_1/watchlogs/ffplay-watchlog-20160502-211109.log")
-
-    print(len(watch_log.pts_time_stamps))
-    print(max(watch_log.pts_time_stamps))
-
-    start, end = watch_log.extract_start_and_end_time()
-    print("start: {}, end: {}".format(start, end))
-
-    print(watch_log.dts_time_stamps)
-
-    #new_pts, new_cpu, excluded_indices = watch_log.cut_time_to_movie_pts(watch_log.pts_time_stamps, watch_log.dts_time_stamps)
-    #print("len new pts: {}, len new cpu: {}, len old pts: {}, len old cpu: {}".format(len(new_pts), len(new_cpu), len(watch_log.pts_time_stamps), len(watch_log.dts_time_stamps)))
-    #print(max(new_pts))
-    #print(min(excluded_indices), max(excluded_indices))
-    #np.save("pts_patient_46.npy", watch_log.pts_time_stamps)
-
-    print(len(watch_log.pts_time_stamps))
-    print(watch_log.excluded_indices)

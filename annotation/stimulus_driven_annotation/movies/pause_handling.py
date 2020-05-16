@@ -1,5 +1,6 @@
 import numpy as np 
 
+
 def pause_start_bin(bins, start):
     """
     Make sure that the bin labelled as the start of a pause point 
@@ -14,6 +15,7 @@ def pause_start_bin(bins, start):
     else: 
         start_bin = ind_start
     return start_bin 
+
 
 def pause_stop_bin(bins, stop): 
     """
@@ -30,12 +32,14 @@ def pause_stop_bin(bins, stop):
         stop_bin = ind_stop
     return stop_bin
 
+
 def make_pause_interval(bin_start, bin_stop):
     """
     Lists out the range of (indices) in the pause between the start and the stop of it. 
     """
     pause = list(range(bin_start, (bin_stop + 1), 1))
     return pause 
+
 
 def rm_pauses_bins(bins, start, stop, return_intervals=False):
     """
@@ -63,7 +67,8 @@ def rm_pauses_bins(bins, start, stop, return_intervals=False):
         output = no_pauses
         
     return output
-    
+
+
 def rm_pauses_spikes(unit, start, stop, return_intervals=False):
     """
     Remove spikes in a unit vector which occur during a pause. 
@@ -83,4 +88,3 @@ def rm_pauses_spikes(unit, start, stop, return_intervals=False):
         output = unit_no_pauses
     
     return output
-    

@@ -4,6 +4,7 @@
 import numpy as np
 import os
 
+
 def clip_array(unit, cont_watch):
     """
     Applies the continuous watch vector to a spike train to pare down the activity binary for further analysis.
