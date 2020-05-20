@@ -1,7 +1,7 @@
 import os.path
 
-import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
 from database.db_setup import *
+import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
@@ -43,7 +43,7 @@ def bin_label(patient_id, session_nr, values, start_times, stop_times, bin_size,
                                                                                          np.array(stop_times))
 
 
-def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses):
+def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses, output_edges=False):
     """
     This function bins spikes, which are represented as a list of time points
     :param patient_id: the ID of a patient (int)
@@ -51,6 +51,8 @@ def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses):
     :param spike_times: a vector (np.array) of time points of spikes
     :param bin_size: the bin size of the binning in milliseconds (int)
     :param exclude_pauses: defining whether pauses in movie play back should be excluded (boolean)
+    :param output_edges: defining whether the edges used to bin the spikes should be outputted (necessary for tracking timepoints that are annotated during 
+                            binning) (boolean, default = False)
     :return array with binned spikes
     """
     rectime = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
@@ -75,5 +77,10 @@ def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses):
         # bin spikes
         binned_spikes, _ = np.histogram(spike_times, bins=bins)
 
-    return binned_spikes
+    if output_edges:
+        ret = [binned_spikes, bins]
+    else: 
+        ret = binned_spikes
+    
+    return ret
 
