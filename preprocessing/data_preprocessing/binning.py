@@ -27,7 +27,7 @@ def bin_label(patient_id, session_nr, values, start_times, stop_times, bin_size,
     total_bins = int(total_msec / bin_size)
     bins = np.linspace(rec_on, rec_off, total_bins)
 
-    if exclude_pauses:
+    if exclude_pauses:  
         start_times_pauses, stop_times_pauses = get_start_stop_times_pauses(patient_id, session_nr)
         bins_no_pauses = pause_handling.rm_pauses_bins(bins, start_times_pauses, stop_times_pauses)
         reference_vector = bins_no_pauses
