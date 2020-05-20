@@ -63,6 +63,9 @@ class RasterPlot(param.Parameterized):
         data_array = []
         for i in range(nr_units):
             spikes = get_spiking_activity(self.patient_id, self.session_nr, i)
+            # delete downloaded file from working directory
+            if os.path.exists("neural_rec_time.npy"):
+                os.remove("neural_rec_time.npy")
             data_array.append(list(np.array(spikes) - neural_rec_time[0]))
 
         ret = []
@@ -134,7 +137,7 @@ class StaticRasterPlot(param.Parameterized):
 
     @param.depends('patient_id', 'session_nr')
     def load_raster(self):
-        name_plot = "raster_plot_{}".format(self.patient_id)
+        name_plot = "images/raster_plot_{}".format(self.patient_id)
 
         return pn.panel("{}.png".format(name_plot))
 
