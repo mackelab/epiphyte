@@ -108,6 +108,9 @@ def bin_label(patient_id, session_nr, values, start_times, stop_times, bin_size,
     else:
         reference_vector = bins
 
+    if os.path.exists("neural_rec_time.npy"):
+        os.remove("neural_rec_time.npy")
+
     return create_vectors_from_time_points.create_vector_from_start_stop_times_reference(reference_vector,
                                                                                          np.array(values),
                                                                                          np.array(start_times),
