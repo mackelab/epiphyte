@@ -61,6 +61,11 @@ def extract_session_information(session_string):
 
 
 def extract_name_unit_id_from_unit_level_data_cleaning(filename):
+    """
+    This function splits the name of the unit level data cleaning into its parts
+    :param filename: the file name (string)
+    :return name: the name of the data cleaning, unit_id: the ID of the unit, annotator: the annotator ID
+    """
     # file name looks something like this: "4stddev_unit0.npy" or more general: "[name]_unit[id]"
     name, unit_id, annotator = filename.split("_")
     unit_id = unit_id[4:]
@@ -69,10 +74,21 @@ def extract_name_unit_id_from_unit_level_data_cleaning(filename):
 
 
 def match_label_to_patient_pts_time(default_label, patient_pts):
+    """
+    This function matches a label to the patient watch log
+    :param default_label: the default movie label as an indicator function (np.array)
+    :param patient_pts: indicating the watch behaviour of the patient (np.array)
+    :return indicator function aligned to patient pts (np.array)
+    """
     return [default_label[int(round((patient_pts[i]/0.04), 0))] for i in range(0, len(patient_pts))]
 
 
 def get_list_of_patient_ids(patient_dict):
+    """
+    This function returns all patient IDs
+    :param patient_dict: a dictionary in which the patient information is held
+    :return list of patient IDs
+    """
     list_patient_ids = []
     for i in range(0, len(patient_dict)):
         list_patient_ids.append(patient_dict[i]["patient_id"])

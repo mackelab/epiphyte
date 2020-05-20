@@ -518,14 +518,12 @@ def get_neural_rectime_of_patient(patient_id, session_nr):
     return np.load((MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("neural_recording_time")[0])
 
 
-def populate_all_tables():
-    MovieSession.populate()
-    MovieAnnotation.populate()
-    ElectrodeUnit.populate()
-    SpikeTimesDuringMovie.populate()
-
-
 def get_number_of_units_for_patient(patient_id):
+    """
+    this function returns the number of recorded units from a patient
+    :param patient_id: patient ID (int)
+    :return int value, number of recorded units
+    """
     return ((Patient.aggr(ElectrodeUnit.proj(), number_of_units="count(*)")) & "patient_id='{}'"
             .format(patient_id)).fetch("number_of_units")[0]
 
@@ -539,22 +537,12 @@ def get_spiking_activity(patient_id, session_nr, unit_id):
     :param bin_size: None or size of bin
     :param unit_id: Unit ID of which spiking activity shall be extracted
     """
-    # if bin_size is None, return the spike times, otherwise return the binned firing rates
-
     try:
         spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
             session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
     except:
         print("The spiking data you were looking for doesn't exist in the data base.")
         return -1
-    # else:
-    #     try:
-    #         spikes = (BinnedSpikesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
-    #             session_nr) & "unit_id='{}'".format(unit_id) & "bin_size='{}'".format(bin_size)).fetch("spike_vector")[
-    #             0]
-    #     except:
-    #         print("The spiking data you were looking for doesn't exist in the data base.")
-    #         return -1
 
     spike_vec = np.load(spikes)
 
@@ -564,70 +552,15 @@ def get_spiking_activity(patient_id, session_nr, unit_id):
     return spike_vec
 
 
-def get_all_binned_spikes_of_patient(patient_id, session_nr, bin_size):
-    """
-    Returns a vector with all binned spikes for a patient, ordered by unit_id
-    :param patient_id: int
-    :param session_nr: int
-    :param bin_size: int
-    :return: sequence of all binned spikes
-    """
-    vec_binned_spikes = []
-    for i in range(0, get_number_of_units_for_patient(patient_id)):
-        binned_spikes = get_spiking_activity(patient_id=patient_id, session_nr=session_nr, bin_size=bin_size, unit_id=i)
-        vec_binned_spikes.append(binned_spikes)
-    return vec_binned_spikes
-
-
-def get_all_binned_cleaned_spikes_of_patient(patient_id, session_nr, bin_size):
-    """
-    Returns a vector with all binned spikes for a patient, ordered by unit_id
-    :param patient_id: int
-    :param session_nr: int
-    :param bin_size: int
-    :return: sequence of all binned spikes after cleaning
-    """
-    vec_binned_spikes = []
-    for i in range(0, get_number_of_units_for_patient(patient_id)):
-        binned_spikes = get_spiking_activity(patient_id=patient_id, session_nr=session_nr, bin_size=bin_size, unit_id=i)
-        vec_binned_spikes.append(binned_spikes)
-    return vec_binned_spikes
-
-
-# def get_patient_aligned_label_simple_version(patient_id, label_name, session_nr):
-#     # this function doesn't check annotator ID or annotation date, so it's best to only use this one
-#     # if there is only one label with this name
-#     return (PatientAlignedLabel() & "label_name='{}'".format(label_name) & "patient_id='{}'".format(patient_id)
-#             & "session_nr='{}'".format(session_nr)).fetch("label_in_patient_time")[0]
-#
-#
-# def get_patient_aligned_label(patient_id, session_nr, label_name, annotator_id, annotation_date):
-#     """
-#     this function returns the patient aligned label with the respective parameters
-#
-#     :param patient_id: patient ID (int)
-#     :param session_nr: session number (int)
-#     :param label_name: name of label (string)
-#     :param annotator_id: ID of annotator of label (string)
-#     :param annotation_date: date of creation of label (e.g. "2020-02-02")
-#     :return:
-#     """
-#     return (PatientAlignedLabel() & "label_name='{}'".format(label_name) & "patient_id='{}'".format(patient_id)
-#             & "session_nr='{}'".format(session_nr) & "annotator_id='{}'".format(annotator_id) &
-#             "annotation_date='{}'".format(annotation_date)).fetch("label_in_patient_time")[0]
-#
-#
-# def get_binned_patient_aligned_label(patient_id, session_nr, label_name, annotator_id, annotation_date, bin_size):
-#     name_binned_label = (BinnedPatientAlignedLabel() & "patient_id='{}'".format(patient_id) &
-#                          "label_name='{}'".format(label_name) & "bin_size='{}'".format(bin_size) &
-#                          "session_nr='{}'".format(session_nr) & "annotator_id='{}'".format(annotator_id)
-#                          & "annotation_date='{}'".format(annotation_date)).fetch("label_in_patient_time")[0]
-#     binned_label = np.load(name_binned_label)
-#     os.remove(name_binned_label)
-#     return binned_label
-
-
 def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
+    """
+    This function extracts a unit level cleaning vector from the database
+    :param patient_id: patient ID (int)
+    :param session_nr: session number of experiment (int)
+    :param unit_id: ID of recorded unit (int)
+    :param name: name of cleaning vector (string)
+    :return extracted vector from database (np.array)
+    """
     name_vec = ((UnitLevelDataCleaning() & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id) & "session_nr='{}'".format(session_nr) & "name='{}'".format(name)).fetch("data")[0])
     cleaning_vec = np.load(name_vec)
     if os.path.exists(name_vec):
@@ -635,7 +568,13 @@ def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
     return cleaning_vec
 
 
-def get_patient_level_data_cleaning(patient_id, session_nr, vector_name="continuous_pts"):
+def get_patient_level_data_cleaning(patient_id, session_nr, vector_name):
+    """
+    :param patient_id: patient ID (int)
+    :param session_nr: session number of experiment (int)
+    :param vector_name: name ov the patient level cleaning vector (string)
+    :return extracted vector from database (np.array)
+    """
     name_pts_cont_watch = \
     (PatientLevelDataCleaning() & "name='{}'".format(vector_name) & "patient_id = '{}'".format(patient_id) & "session_nr='{}'".format(session_nr)).fetch("data")[0]
     cont_watch = np.load(name_pts_cont_watch)
@@ -645,38 +584,31 @@ def get_patient_level_data_cleaning(patient_id, session_nr, vector_name="continu
 
 
 def get_original_movie_label(label_name, annotation_date, annotator_id):
+    """
+    This function returns the original movie label from the database
+    :param label_name: name of the label (string)
+    :param annotation_date: date of annotation (date)
+    :param annotator_id: ID of annotator (int)
+    :return extracted vector from database (np.array)
+    """
     name_label = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
     return np.load(name_label)
 
 
-# def get_all_patient_aligned_labels_of_patient(patient_id, session_nr):
-#     patient_aligned_label_information = (
-#                 PatientAlignedLabel & "patient_id='{}'".format(patient_id) & "session_nr={}".format(session_nr)).proj(
-#         "annotator_id", "label_name", "annotation_date", "label_in_patient_time")
-#
-#     return patient_aligned_label_information
-
-
 def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, annotator_id):
+    """
+    This function returns the patient level cleaning vector from the database
+    :param patient_id: patient ID (int)
+    :param session_nr: session number of experiment (int)
+    :param name_of_vec: name of the vector that should be extracted (string)
+    :param annotator_id: ID of annotator of annotation (string)
+    :return extracted vector from database (np.array)
+    """
     name_pts_cont_watch = (PatientLevelDataCleaning() & "name='{}'".format(name_of_vec)
                            & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr)
                            & "annotator_id='{}'".format(annotator_id)).fetch("data")[0]
     cont_watch = np.load(name_pts_cont_watch)
     return cont_watch
-
-
-# def get_movie_cutting_vec(patient_id, session_nr, bin_size):
-#     vorspann = get_binned_patient_aligned_label(patient_id, session_nr, "vorspann", "p5", "2020-02-21", bin_size)
-#     abspann = get_binned_patient_aligned_label(patient_id, session_nr, "abspann", "p5", "2020-02-21", bin_size)
-#     kidssegment = get_binned_patient_aligned_label(patient_id, session_nr, "kidssegment", "p5", "2020-02-21", bin_size)
-#     return vorspann + abspann + kidssegment
-#
-#
-# def get_movie_cutting_vec_excluding_pauses(patient_id, session_nr, bin_size):
-#     vorspann = get_patient_aligned_label(patient_id, session_nr, "vorspann", "p5", "2020-02-21")
-#     abspann = get_patient_aligned_label(patient_id, session_nr, "abspann", "p5", "2020-02-21")
-#     kidssegment = get_patient_aligned_label(patient_id, session_nr, "kidssegment", "p5", "2020-02-21")
-#     return vorspann + abspann + kidssegment
 
 
 def get_start_stop_times_pauses(patient_id, session_nr):
@@ -692,24 +624,39 @@ def get_start_stop_times_pauses(patient_id, session_nr):
     return start_times, stop_times
 
 
-def get_spikes_from_brain_region(patient_id, session_nr, brain_region, bin_size):
+def get_spikes_from_brain_region(patient_id, session_nr, brain_region):
+    """
+    this function extracts all spiking vectors from a specific brain region
+    :param patient_id: patient ID (int)
+    :param session_nr: session number of experiment (int)
+    :param brain_region: brain region of interest in its abbreviation (str)
+    :return spike times from brain region (np.array)
+    """
     unit_ids = get_unit_ids_in_brain_region(patient_id, brain_region)
     spikes = []
     for i in unit_ids:
-        spikes.append(get_spiking_activity(patient_id, session_nr, bin_size, i))
+        spikes.append(get_spiking_activity(patient_id, session_nr, i))
 
     return spikes
 
 
 def get_unit_ids_in_brain_region(patient_id, brain_region):
+    """
+    This function returns the unit IDs from within a certain brain region of a patient
+    :param patient_id: patient ID (int)
+    :param brain_region: brain region of interest - abbreviation (string)
+    :return list of unit IDs (np.array)
+    """
     return (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
 
 
 def get_info_continuous_watch_segments(patient_id, session_nr, annotator_id, annotation_date):
+    """
+    This function returns the start times, stop times and values of the continuous watch segment
+    :param patient_id: ID of patient (int)
+    :param session_nr: session number of experiment (int)
+    :param annotator_id: ID of annotator (string)
+    :param annotation_date: data of annotation (date)
+    :return start times, stop times, values
+    """
     return (ContinuousWatchSegments() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "label_entry_date='{}'".format(annotation_date)).fetch('values', 'start_times', 'stop_times')
-
-
-# def get_patient_aligned_label_time_frames(patient_id, session_nr, label_name, annotator_id, annotation_date):
-#     values, start_times, stop_times = (PatientAlignedLabelTimeFrames() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date) & "label_name='{}'".format(label_name)).fetch("values", "start_times", "stop_times")
-#
-#     return values[0], start_times[0], stop_times[0]
