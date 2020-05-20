@@ -1,6 +1,7 @@
 # DeepHumanVision
 
-We created a data processing pipeline for large datasets of single spiking activity, in combination with meta-data.
+This project is a processing pipeline for high-dimensional single-unit neural activity colligated with meta data. With this, we want to contribute towards sharing and organizing large amounts of data in neuroscience, while tracking meta-data and allowing updates and interactions.
+
 
 ## Installing the package
 
