@@ -3,6 +3,7 @@ PATH_TO_LABELS = PATH_TO_DATA + "/movie_labels"
 PATH_PATIENT_ALIGNED_LABELS = PATH_TO_DATA + "/patient_aligned_labels"
 PATH_TO_PATIENT_DATA = PATH_TO_DATA + "/patient_data"
 PATH_TO_SESSION_DATA = PATH_TO_DATA + "/session_data"
+PATH_TO_REPO = "/home/tamara/Documents/PhD/DeepHumanVision_deploy"
 
 PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125726)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
 
@@ -23,7 +24,7 @@ algorithms_labels = [
 ]
 
 excluded_units = [
-    {"patient_id": 46, "unit_id": 52, "reason_for_exclusion": "p1"}
+    {"patient_id": 60, "unit_id": 52, "reason_for_exclusion": "p1"}
 ]
 
 
@@ -43,4 +44,4 @@ daq_names = {
              60: "timedDAQ-log-20170101-120000.log",
             }
 
-label_names = zip(['tom', 'summer', 'rachel', 'mckenzie', 'paul'])
+label_names = zip(['character1', 'character2', 'location1'])
