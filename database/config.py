@@ -3,7 +3,8 @@ PATH_TO_LABELS = PATH_TO_DATA + "/movie_labels"
 PATH_PATIENT_ALIGNED_LABELS = PATH_TO_DATA + "/patient_aligned_labels"
 PATH_TO_PATIENT_DATA = PATH_TO_DATA + "/patient_data"
 PATH_TO_SESSION_DATA = PATH_TO_DATA + "/session_data"
-PATH_TO_REPO = "/home/tamara/Documents/PhD/DeepHumanVision_deploy"
+PATH_TO_REPO = "/run/media/al/WORK-SCHOOL/phd/dhv/DeepHumanVision_deploy"
+
 
 PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125726)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
 

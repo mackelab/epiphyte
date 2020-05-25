@@ -16,10 +16,16 @@ nev_type = np.dtype([('', 'V6'),
 def nev_read(filename):
     """
     Neuralynx .nev file reading function.
+    Modified to accept npy binaries for generating mock data.
     Returns an array of timestamps and nttls.
     """
-    eventmap = np.memmap(filename, dtype=nev_type, mode='r', offset=NLX_OFFSET)
-    return np.array([eventmap['timestamp'], eventmap['nttl']]).T
+
+    if filename.lower().endswith((".nev")):
+        eventmap = np.memmap(filename, dtype=nev_type, mode='r', offset=NLX_OFFSET)
+        ret = np.array([eventmap['timestamp'], eventmap['nttl']]).T
+    elif filename.lower().endswith((".npy")):
+        ret = np.load(filename)
+    return ret
 
 
 def nev_string_read(filename):
@@ -61,20 +67,24 @@ def process_movie_events(ev_array):
 
 def process_events(ev_array):
 
-    onsets = (ev_array[:, 1] == 101).nonzero()[0]
-    n_101 = onsets.shape[0]
+    if float(101) in ev_array[:, 1]:
+        onsets = (ev_array[:, 1] == 101).nonzero()[0]
+        n_101 = onsets.shape[0]
 
-    # use the first 8 as marker that screening is over
-    first_8 = (ev_array[:, 1] == 8).nonzero()[0][0]
+        # use the first 8 as marker that screening is over
+        first_8 = (ev_array[:, 1] == 8).nonzero()[0][0]
 
-    # go back to last 4 before first 8
-    last_4 = (ev_array[:first_8, 1] == 4).nonzero()[0][-2]
-    # print(first_8, last_4)
+        # go back to last 4 before first 8
+        last_4 = (ev_array[:first_8, 1] == 4).nonzero()[0][-2]
+        # print(first_8, last_4)
 
-    assert n_101 in (4, 8)
+        assert n_101 in (4, 8)
 
-    movie_events = ev_array[last_4 + 1:onsets[4], :]
-    ret = process_movie_events(movie_events)
+        movie_events = ev_array[last_4 + 1:onsets[4], :]
+        ret = process_movie_events(movie_events)
+
+    elif not float(0) in ev_array[:,1]:
+        ret = ev_array
 
     return ret
 
