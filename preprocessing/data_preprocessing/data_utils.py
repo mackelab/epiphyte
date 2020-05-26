@@ -239,11 +239,12 @@ class TimeConversion(object):
         """
     
         event_mat = process_events(nev_read(self.path_evts))
-        pts, cpu_time = read_watchlog(self.path_watchlog)
         m, b = get_coeff(event_mat, self.path_daqlog)
-
+        pts, cpu_time = read_watchlog(self.path_watchlog)
+        
         # first convert cpu time to recording system time
         daq_time = cpu_time * m + b
+        
         return pts, daq_time, cpu_time
 
     def convert_pauses(self):
