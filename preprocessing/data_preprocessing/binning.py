@@ -51,8 +51,7 @@ def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses, ou
     :param spike_times: a vector (np.array) of time points of spikes
     :param bin_size: the bin size of the binning in milliseconds (int)
     :param exclude_pauses: defining whether pauses in movie play back should be excluded (boolean)
-    :param output_edges: defining whether the edges used to bin the spikes should be outputted (necessary for tracking timepoints that are annotated during 
-                            binning) (boolean, default = False)
+    :param output_edges: defining whether the edges used to bin the spikes should be outputted (necessary for tracking timepoints that are annotated during binning) (boolean, default = False)
     :return array with binned spikes
     """
     rectime = get_neural_rectime_of_patient(patient_id, session_nr) / 1000

@@ -586,6 +586,9 @@ def get_patient_level_data_cleaning(patient_id, session_nr, vector_name):
 def get_original_movie_label(label_name, annotation_date, annotator_id):
     """
     This function returns the original movie label from the database
+    
+    TODO: does this still work with new storage method? 
+    
     :param label_name: name of the label (string)
     :param annotation_date: date of annotation (date)
     :param annotator_id: ID of annotator (int)
@@ -593,6 +596,29 @@ def get_original_movie_label(label_name, annotation_date, annotator_id):
     """
     name_label = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
     return np.load(name_label)
+
+def get_patient_aligned_annotations(patient_id, label_name, annotator_id, annotation_date):
+    """
+    This function returns the values, start, and stop times.  
+    
+    :param patient_id: number of patient (int)
+    :param label_name: name of the label (string)
+    :param annotator_id: ID of annotator (int)
+    :param annotation_date: date of annotation (date)
+    
+    :return 
+     - values (np.array)
+     - starts (np.array)
+     - stops (np.array)
+    """
+    
+    values, starts, stops = (PatientAlignedMovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date) &  "patient_id='{}'".format(patient_id)).fetch("values", "start_times", "stop_times")
+    
+    values = values[0]
+    starts = starts[0] / 1000
+    stops  = stops[0] / 1000
+    
+    return values, starts, stops
 
 
 def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, annotator_id):
@@ -659,4 +685,5 @@ def get_info_continuous_watch_segments(patient_id, session_nr, annotator_id, ann
     :param annotation_date: data of annotation (date)
     :return start times, stop times, values
     """
-    return (ContinuousWatchSegments() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "label_entry_date='{}'".format(annotation_date)).fetch('values', 'start_times', 'stop_times')
+    values, starts, stops = (ContinuousWatchSegments() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "label_entry_date='{}'".format(annotation_date)).fetch('values', 'start_times', 'stop_times')
+    return values[0], starts[0], stops[0]

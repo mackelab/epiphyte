@@ -1,3 +1,7 @@
+"""
+Functions related to processing the db stored time points (start/stop/values) into vectors for use in analysis. 
+"""
+
 import pandas as pd
 
 from database.db_setup import *
@@ -199,7 +203,7 @@ def get_value_matching_start_point(time_point, values, start_times, end_times):
     :param start_times: array
         vector with all start times
     :param end_times: array
-        vector with all stop times
+        vector with all stop timesthe
 
     :return float
         value that corresponds to the given time point
@@ -298,7 +302,7 @@ def get_value_in_time_frame(time_point1, time_point2, values, start_times, end_t
         upper bound of time frame that is regarded
     :param values: array
         vector with all values
-    :param start_times: array
+    :param start_times: array  
         vector with all start time points
     :param end_times: array
         vector with all stop time points
