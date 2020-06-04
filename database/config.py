@@ -1,6 +1,6 @@
 import os
 
-PATH_TO_REPO = "/home/hitchhiker/Documents//DeepHumanVision_deploy"
+PATH_TO_REPO = "/home/hitchhiker/Documents/DeepHumanVision_deploy"
 PATH_TO_DATA = os.path.join(PATH_TO_REPO, "mock_data") 
 PATH_TO_LABELS = os.path.join(PATH_TO_DATA, "movie_labels")
 PATH_PATIENT_ALIGNED_LABELS = os.path.join(PATH_TO_DATA, "patient_aligned_labels")
@@ -26,25 +26,33 @@ algorithms_labels = [
     {"algorithm_name": "4stddev", "description": "masking data that is greater then 4 std deviations away from mean"},
 ]
 
+# Example of manually setting an excluded unit
 excluded_units = [
-    {"patient_id": 60, "unit_id": 52, "reason_for_exclusion": "p1"}
+    {"patient_id": 1, "unit_id": 12, "reason_for_exclusion": "p1"}
 ]
 
 
 patients = [
-    {'patient_id': 60, 'age': 1, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
+    {'patient_id': 1, 'age': 1, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
+    {'patient_id': 2, 'age': 100, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
+    {'patient_id': 3, 'age': 50, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"}
 ]
 
 sessions = {
-    "60": [1],
+    "1": [1],
+    "2": [1],
+    "3": [1]
 }
 
 watchlog_names = {
-                  60: "ffplay-watchlog-20170101-120000.log",
+                    1: "ffplay-watchlog-20200526-232347.log",
+                    2: "ffplay-watchlog-20200526-232347.log",
+                    3: "ffplay-watchlog-20200526-232347.log"
                   }
 
-daq_names = {
-             60: "timedDAQ-log-20170101-120000.log",
+daq_names = {1: "timedDAQ-log-20200526-232347.log",
+             2: "timedDAQ-log-20200526-232347.log",
+             3: "timedDAQ-log-20200526-232347.log"
             }
 
 label_names = zip(['character1', 'character2', 'location1'])

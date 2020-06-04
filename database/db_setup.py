@@ -9,7 +9,7 @@ import annotation.stimulus_driven_annotation.movies.processing_labels as process
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
-dhv_schema = dj.schema('dhv_deploy', locals())
+dhv_schema = dj.schema('db_deploy_mock', locals())
 
 dj.config['stores'] = {
     'shared': dict(
@@ -92,8 +92,9 @@ class MovieSession(dj.Imported):
                                                                  config.watchlog_names[int(patient_id)])
                 path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
                                                                   config.daq_names[int(patient_id)])
-                path_events = "{}/{}/session_{}/event_file/Events.nev".format(config.PATH_TO_PATIENT_DATA, patient_id,
-                                                                              session_nr)
+                for file in os.listdir("{}/{}/session_{}/event_file/".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr)):
+                    if file.startswith("Events"):
+                        path_events = "{}/{}/session_{}/event_file/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr, file)
 
                 time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
                                                             path_to_events=path_events)
@@ -101,6 +102,12 @@ class MovieSession(dj.Imported):
 
                 cpu_time = cpu_time
                 # neural_recording_time = rectime
+                
+                save_dir = "{}/patient_data/{}/session_{}/order_of_movie_frames/".format(config.PATH_TO_DATA, patient_id, session_nr)
+
+                if not os.path.exists(save_dir):
+                    os.makedirs(save_dir)
+
                 path_order_movie_frames = "{}/patient_data/{}/session_{}/order_of_movie_frames/pts.npy".format(
                     config.PATH_TO_DATA, patient_id, session_nr)
                 np.save(path_order_movie_frames, pts)
@@ -192,31 +199,59 @@ class ElectrodeUnit(dj.Imported):
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+        
+        #TODO: reformat test with multiple session data 
         for index_session in range(0, len(patient_ids)):
+            
+            ### doesn't fit existing file structure or strx on the remote workstation
+#             path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
+#             folder_channels = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
+#                 session_nrs[index_session]) + "/channel_names/"
+#             if not os.path.exists(folder_channels):
+#                 os.makedirs(folder_channels)
+#             print(folder_channels)
+
             path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
-            folder_channels = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/channel_names/"
-            if not os.path.exists(folder_channels):
-                os.makedirs(folder_channels)
-            print(folder_channels)
-            channel_names = helpers.get_channel_names("{}/ChannelNames.txt".format(folder_channels))
+            path_channels = '{}/session_data/'.format(config.PATH_TO_DATA)
+            folder_channels = "session_{}_{}".format(patient_ids[index_session], session_nrs[index_session])
+            
+            complete_session_name = []
+            for session_folder in os.listdir(path_channels):
+                if session_folder.startswith(folder_channels):
+                    channel_names = helpers.get_channel_names(os.path.join(path_channels, "{}/ChannelNames.txt".format(session_folder)))
+                    
+                    complete_session_name.append(session_folder)
             print(channel_names)
-            i = 0
+            print("number of channel names: {}".format(len(channel_names)))
             # iterate through all files in the binaries folder to see which units were recorded
             folder_list = []
-            folder_spikes = "{}/spikes/".format(config.PATH_TO_DATA) + str(patient_ids[index_session]) + '/session_' + str(session_nrs[index_session]) + "/"
-            for filename in os.listdir(folder_spikes):
+            
+            dir_w_dir = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]))
+            
+            folder_spikes_nm = []
+            for folder in os.listdir(dir_w_dir):
+                if folder.startswith("spik"):
+                    # accounting for differences in file structure btw mock and real data
+                    folder_spikes_nm.append(folder)
+                
+            dir_w_spikes = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]), folder_spikes_nm[0])
+            
+            for filename in os.listdir(dir_w_spikes):
                 if filename.startswith("CSC"):
                     folder_list.append(filename)
+                    
             folder_list.sort(key=helpers.natural_keys)
-            print(folder_list)
-            for filename in folder_list:
+            i = 0
+            print(len(folder_list))
+            print(len(channel_names))
+            for index, filename in enumerate(folder_list):
                 csc_nr, unit = filename[:-4].split("_")
                 print(csc_nr, int(csc_nr[3:]) - 1)
+                print(channel_names[index])
                 unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
-                self.insert1({'unit_id': i, 'csc': csc_nr[3:], 'unit_type': unit_type, 'unit_nr': unit_nr,
+                self.insert1({'unit_id': index, 'csc': csc_nr[3:], 'unit_type': unit_type, 'unit_nr': unit_nr,
                               'patient_id': patient_ids[index_session],
-                              'brain_region': channel_names[i]},
+                              'brain_region': channel_names[index]},
                              skip_duplicates=True)
                 i += 1
             # # delete downloaded channel names file
