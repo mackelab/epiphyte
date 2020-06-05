@@ -199,19 +199,10 @@ class ElectrodeUnit(dj.Imported):
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        print(patient_ids)
-        print(session_nrs)
+
         #TODO: reformat test with multiple session data 
         for index_session in range(0, len(patient_ids)):
-            print(patient_ids[index_session])
-            ### doesn't fit existing file structure or strx on the remote workstation
-#             path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
-#             folder_channels = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-#                 session_nrs[index_session]) + "/channel_names/"
-#             if not os.path.exists(folder_channels):
-#                 os.makedirs(folder_channels)
-#             print(folder_channels)
-
+        
             path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
             path_channels = '{}/session_data/'.format(config.PATH_TO_DATA)
             folder_channels = "session_{}_{}".format(patient_ids[index_session], session_nrs[index_session])
@@ -220,11 +211,8 @@ class ElectrodeUnit(dj.Imported):
             for session_folder in os.listdir(path_channels):
                 if session_folder.startswith(folder_channels):
                     channel_names = helpers.get_channel_names(os.path.join(path_channels, "{}/ChannelNames.txt".format(session_folder)))
-                    print("number of channel names: {}".format(len(channel_names)))
-
                     complete_session_name.append(session_folder)
-            print(channel_names)
-            print("number of channel names: {}".format(len(channel_names)))
+                        
             # iterate through all files in the binaries folder to see which units were recorded
             folder_list = []
             
@@ -243,9 +231,7 @@ class ElectrodeUnit(dj.Imported):
                     folder_list.append(filename)
                     
             folder_list.sort(key=helpers.natural_keys)
-            i = 0
-            print(len(folder_list))
-            print(len(channel_names))
+
             for index, filename in enumerate(folder_list):
                 csc_nr, unit = filename[:-4].split("_")
                 print(csc_nr, int(csc_nr[3:]) - 1)
@@ -255,10 +241,6 @@ class ElectrodeUnit(dj.Imported):
                               'patient_id': patient_ids[index_session],
                               'brain_region': channel_names[index]},
                              skip_duplicates=True)
-                i += 1
-            # # delete downloaded channel names file
-            # if os.path.exists("ChannelNames.txt"):
-            #     os.remove("ChannelNames.txt")
 
 
 @dhv_schema
@@ -274,29 +256,51 @@ class SpikeTimesDuringMovie(dj.Imported):
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+        
         for index_session in range(0, len(patient_ids)):
-            path_binaries = '{}/spikes/'.format(config.PATH_TO_DATA)
-            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
+            
+#             path_binaries = '{}/spikes/'.format(config.PATH_TO_DATA)
+#             folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
+#                 session_nrs[index_session]) + "/"
+            
+#             if not os.path.exists(folder):
+#                 os.makedirs(folder)
+                
+            path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
+            path_channels = '{}/session_data/'.format(config.PATH_TO_DATA)
+            folder_channels = "session_{}_{}".format(patient_ids[index_session], session_nrs[index_session])
+            
+            # iterate through all files in the binaries folder to see which units were recorded
+            folder_list = []
+            
+            dir_w_dir = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]))
+            
+            # get name of directory with spiking data inside (any file with "spik" as start)
+            # accounting for differences in file structure btw mock and real data
+            folder_spikes_nm = []
+            for folder in os.listdir(dir_w_dir):
+                if folder.startswith("spik"):
+                    folder_spikes_nm.append(folder)
+                
+            dir_w_spikes = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]), folder_spikes_nm[0])
+             
             # iterate through all files in the sessions folder and add them to the data base
-            for filename in os.listdir(folder):
+            for filename in os.listdir(dir_w_spikes):
                 if filename.startswith("CSC"):
-                    csc_nr, unit = filename[:-4].split("_")
+                    file_name_only, file_extension = os.path.splitext(filename)
+                    
+                    csc_nr, unit = file_name_only.split("_")
                     unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
-                    spikes_file = (path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                        session_nrs[index_session]) + "/" + filename)
-                    unit_id = ((ElectrodeUnit & "csc = '{}'".format(csc_nr[3:]) & "patient_id='{}'".format(
-                        patient_ids[index_session])
-                                & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch(
-                        "unit_id"))[0]
+#                     spikes_file = (path_binaries + str(patient_ids[index_session]) + '/session_' + str(session_nrs[index_session]) + "/" + filename)
+                    spikes_file = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]), folder_spikes_nm[0], filename)
+                    # TODO: check which file types should be expected for the spiking data import 
+                    print(spikes_file)
+                    
+                    unit_id = ((ElectrodeUnit & "csc = '{}'".format(csc_nr[3:]) & "patient_id='{}'".format(patient_ids[index_session])
+                                & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch("unit_id"))[0]
                     self.insert1({'patient_id': patient_ids[index_session], "unit_id": unit_id,
-                                  'session_nr': session_nrs[index_session], 'spike_times': spikes_file},
-                                 skip_duplicates=True)
-
-                    print("Added spikes from {} of patient {} to data base".format(csc_nr + " " + unit,
-                                                                                   patient_ids[index_session]))
+                                  'session_nr': session_nrs[index_session], 'spike_times': spikes_file}, skip_duplicates=True)
+                    #print("Added spikes from {} of patient {} to data base".format(csc_nr + " " + unit, patient_ids[index_session]))
 
 
 @dhv_schema
