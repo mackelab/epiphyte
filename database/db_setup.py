@@ -199,10 +199,11 @@ class ElectrodeUnit(dj.Imported):
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        
+        print(patient_ids)
+        print(session_nrs)
         #TODO: reformat test with multiple session data 
         for index_session in range(0, len(patient_ids)):
-            
+            print(patient_ids[index_session])
             ### doesn't fit existing file structure or strx on the remote workstation
 #             path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
 #             folder_channels = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
@@ -219,7 +220,8 @@ class ElectrodeUnit(dj.Imported):
             for session_folder in os.listdir(path_channels):
                 if session_folder.startswith(folder_channels):
                     channel_names = helpers.get_channel_names(os.path.join(path_channels, "{}/ChannelNames.txt".format(session_folder)))
-                    
+                    print("number of channel names: {}".format(len(channel_names)))
+
                     complete_session_name.append(session_folder)
             print(channel_names)
             print("number of channel names: {}".format(len(channel_names)))
