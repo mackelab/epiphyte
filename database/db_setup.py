@@ -2,6 +2,8 @@ import datajoint as dj
 import numpy as np
 import os
 
+from datetime import datetime
+
 import database.config as config
 import database.helpers as helpers
 import preprocessing.data_preprocessing.data_utils as data_utils
@@ -353,8 +355,8 @@ class PatientAlignedMovieAnnotation(dj.Computed):
     def make(self, key):
         entry_key_video_annot, original_label = (MovieAnnotation & key).fetch('KEY', 'indicator_function')
         entry_key_movie_session, pts_vec = (MovieSession & key).fetch("KEY", 'order_movie_frames')
-        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0],
-                                                                        patient_pts=np.load(pts_vec[0]))
+
+        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0], patient_pts=np.load(pts_vec[0]))
         neural_rec_time = get_neural_rectime_of_patient(entry_key_movie_session[0]['patient_id'], entry_key_movie_session[0]['session_nr'])
         values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rec_time, patient_aligned_label)
         
@@ -447,6 +449,7 @@ class ContinuousWatchSegments(dj.Imported):
                 session_nrs[index_session]) + "/"
             if not os.path.exists(folder):
                 os.makedirs(folder)
+                
             for filename in os.listdir(folder):
                 if filename.endswith(".npy"):
                     if filename.startswith("values"):
@@ -487,14 +490,16 @@ class MoviePauses(dj.Computed):
                                                              config.watchlog_names[int(patient_ids[i])])
             path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
                                                               config.daq_names[int(patient_ids[i])])
-            path_events = "{}/{}/session_{}/event_file/Events.nev".format(config.PATH_TO_PATIENT_DATA, patient_ids[i],
-                                                                          session_nrs[i])
-
+            # bridge btw .npy and .nev file types for Events file
+            for file in os.listdir("{}/{}/session_{}/event_file/".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i])):
+                    if file.startswith("Events"):
+                        path_events = "{}/{}/session_{}/event_file/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i], file)
+                        
             time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
                                                         path_to_events=path_events)
             start, stop = time_conversion.convert_pauses()
 
-            description = "time points of pauses, extracted from watch log - Mar 2020"
+            description = "time points of pauses, extracted from watch log - {}".format(datetime.today())
 
             self.insert1(
                 {'patient_id': patient_ids[i], 'session_nr': session_nrs[i], "description": description,
