@@ -201,3 +201,57 @@ def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
             file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
         file.close()
         
+def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
+    """
+    Generate a movie watchlog file with pauses and skips.
+    """
+    
+    nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
+    perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
+
+    cpu_time = []
+
+    for i in range(nr_movie_frames):
+        seed += 41000
+        cpu_time.append(seed)    
+        
+    ## add in pauses
+    nr_pauses = int(uniform(1,6))
+
+    # randomly select indices from perfect watchlog 
+    indices = random.sample(range(len(cpu_time)), nr_pauses)
+    
+    for i, index in enumerate(indices): 
+        pause_len = int(uniform(100000000, 3000000000))
+        cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
+        
+    nr_skips = int(uniform(1,4))
+
+    # randomly select indices from perfect watchlog 
+    indices = random.sample(range(len(perfect_pts)), nr_skips)
+
+    skip_pts = np.array(copy.copy(perfect_pts))
+    
+    for i, index in enumerate(indices): 
+        skip_len = int(uniform(10, 2000))
+        skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
+    
+    
+    wlsave_dir = "{}/mock_data/patient_data/{}/session_{}/watchlogs/".format(config.PATH_TO_REPO, patient_id, session_nr)
+
+    if not os.path.exists(wlsave_dir):
+        os.makedirs(wlsave_dir)
+
+    wl_name_save = "{}/mock_data/patient_data/{}/session_{}/watchlogs/ffplay-watchlog-20200526-232347.log".format(config.PATH_TO_REPO, patient_id, session_nr)
+
+    if os.path.exists(wl_name_save):
+        os.remove(wl_name_save)
+        
+    with open(wl_name_save, 'a') as file:
+    file.write("movie_stimulus.avi\n")
+    for i in range(nr_movie_frames):
+        if i not in indices:
+            file.write("pts\t{}\ttime\t{}\n".format(skip_pts[i], cpu_time[i]))
+        if i in indices: 
+            file.write("Pausing\nContinuing\tafter\tpause")
+    file.close()
