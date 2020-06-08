@@ -18,11 +18,14 @@ pip install -e .
 ### (3) Set up a DataJoint database
 
 **Prerequesites:**
-- install docker (link)
+- install [docker](https://www.docker.com/)
+- install [docker compose](https://docs.docker.com/compose/install/)
 
-**Actual setup**
+**Actual setup:**
+- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/get-database.html) to set up docker container with database
 - run docker container
 ```
 sudo docker-compose up -d
 ```
-(link and more information coming)
+- run [database/database_set_up.ipynb](https://github.com/mackelab/DeepHumanVision_deploy/blob/master/database/database_set_up.ipynb) notebook to fill the database with the mock data
+- now everything should be set up and ready to go
