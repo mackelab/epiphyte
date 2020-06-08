@@ -22,7 +22,7 @@ pip install -e .
 - install [docker compose](https://docs.docker.com/compose/install/)
 
 **Actual setup:**
-- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/get-database.html) to set up docker container with database
+- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/get-database.html) to set up docker container with database (see section "Setting up a local database server (Intermediate)")
 - run docker container
 ```
 sudo docker-compose up -d
