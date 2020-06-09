@@ -6,6 +6,7 @@ import os
 import sys
 import numpy as np
 import random
+import copy
 from random import uniform
 
 # local application imports 
@@ -21,7 +22,7 @@ def generate_spikes(patient_id, session_nr, nr_units, begin_recording_time, stop
     """
     spikes = []
     for i in range(nr_units):
-        nr_spikes = int(uniform(10000, 16000))
+        nr_spikes = int(uniform(8000, 12000))
         spike_vec = []
         for j in range(nr_spikes):
             spike_vec.append(uniform(begin_recording_time, stop_recording_time))
@@ -223,6 +224,7 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
     
     for i, index in enumerate(indices): 
         pause_len = int(uniform(100000000, 3000000000))
+        cpu_time = np.array(cpu_time)
         cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
         
     nr_skips = int(uniform(1,4))
@@ -248,10 +250,10 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
         os.remove(wl_name_save)
         
     with open(wl_name_save, 'a') as file:
-    file.write("movie_stimulus.avi\n")
-    for i in range(nr_movie_frames):
-        if i not in indices:
-            file.write("pts\t{}\ttime\t{}\n".format(skip_pts[i], cpu_time[i]))
-        if i in indices: 
-            file.write("Pausing\nContinuing\tafter\tpause")
+        file.write("movie_stimulus.avi\n")
+        for i in range(nr_movie_frames):
+            if i not in indices:
+                file.write("pts\t{}\ttime\t{}\n".format(skip_pts[i], cpu_time[i]))
+            if i in indices: 
+                file.write("Pausing\nContinuing\tafter\tpause")
     file.close()

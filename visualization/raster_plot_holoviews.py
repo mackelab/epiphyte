@@ -4,7 +4,7 @@ from holoviews import opts
 from holoviews import streams
 import panel as pn
 import param
-import datetime
+from datetime import datetime
 from holoviews.operation import decimate
 from bokeh.models import HoverTool
 # use Bokeh as the underlying plotting library
@@ -24,12 +24,14 @@ for patient in patients:
 session_nrs = [1]
 
 # Set default parameters for initial plotting
-default_patient_id = 60
+default_patient_id = 1
 default_session_nr = 1
 
 # define which regions should be able to highlight
 # keep in mind that each option has to be implemented further below
-highlights = ["None", "Pause", "Continuous Watch"]
+# highlights = ["None", "Pause", "Continuous Watch"]
+highlights = ["None", "Pause"]
+
 
 # instantiate the input text boxes where information can be added to enable uploading data to the database
 input_name = pn.widgets.TextInput(name="Name of Annotation", placeholder="Enter a name for the annotation")
@@ -80,7 +82,7 @@ class RasterPlot(param.Parameterized):
         # Toggle variable decimate_plot to specify whether you'd like to use decimate
         # Decimate only plots a maximum number of elements at each zoom step, this way the plot is much faster
         # If decimate is not activated, the plot is clean, but very slow
-        decimate_plot = True
+        decimate_plot = False
         if decimate_plot:
             scatter = scatter.opts(color='blue', marker='dash', size=25, alpha=1, line_width=0.6, angle=90,
                                    xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID')
@@ -100,17 +102,17 @@ class RasterPlot(param.Parameterized):
         start_times_pauses = start_times_pauses - neural_rec_time[0]
         stop_times_pauses = stop_times_pauses - neural_rec_time[0]
 
-        cont_watch_values = (
-                    ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
-                self.session_nr)).fetch("values")[0]
-        ind_cont_watch = np.where(cont_watch_values != 0)
-        start_cont_watch = (
-                    ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
-                self.session_nr)).fetch("start_times")[0]
-        stop_cont_watch = (ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
-            self.session_nr)).fetch("stop_times")[0]
-        start_cont_watch = start_cont_watch[ind_cont_watch] - neural_rec_time[0]
-        stop_cont_watch = stop_cont_watch[ind_cont_watch] - neural_rec_time[0]
+#         cont_watch_values = (
+#                     ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
+#                 self.session_nr)).fetch("values")[0]
+#         ind_cont_watch = np.where(cont_watch_values != 0)
+#         start_cont_watch = (
+#                     ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
+#                 self.session_nr)).fetch("start_times")[0]
+#         stop_cont_watch = (ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
+#             self.session_nr)).fetch("stop_times")[0]
+#         start_cont_watch = start_cont_watch[ind_cont_watch] - neural_rec_time[0]
+#         stop_cont_watch = stop_cont_watch[ind_cont_watch] - neural_rec_time[0]
 
         # The user can select a region which should be highlighted on top of the raster plot.
         # Here every option of the highlights variable from above has to be implemented
@@ -118,10 +120,10 @@ class RasterPlot(param.Parameterized):
             ov = hv.NdOverlay(
                 {i: hv.VSpan(start_times_pauses[i], stop_times_pauses[i]).opts(color='orange', alpha=0.4) for i in
                  range(len(start_times_pauses))})
-        if self.highlight == "Continuous Watch":
-            ov = hv.NdOverlay(
-                {i: hv.VSpan(start_cont_watch[i], stop_cont_watch[i]).opts(color='green', alpha=0.4) for i in
-                 range(len(start_cont_watch))})
+#         if self.highlight == "Continuous Watch":
+#             ov = hv.NdOverlay(
+#                 {i: hv.VSpan(start_cont_watch[i], stop_cont_watch[i]).opts(color='green', alpha=0.4) for i in
+#                  range(len(start_cont_watch))})
         if self.highlight == 'None':
             ov = hv.NdOverlay({i: hv.VSpan(0, 0).opts(color='white', alpha=0) for i in range(1)})
 
@@ -137,7 +139,7 @@ class StaticRasterPlot(param.Parameterized):
 
     @param.depends('patient_id', 'session_nr')
     def load_raster(self):
-        name_plot = "images/raster_plot_{}".format(self.patient_id)
+        name_plot = "{}/visualization/images/raster_plot_{}".format(config.PATH_TO_REPO, self.patient_id)
 
         return pn.panel("{}.png".format(name_plot))
 
@@ -177,7 +179,7 @@ class AddingToDB(param.Parameterized):
     def add_data_to_database(self):
         if not input_name.value == '' and not input_annotator_id.value == '':
 
-            now = datetime.datetime.now()
+            now = datetime.now()
             t = now.strftime("%Y-%m-%d")
 
             try:
