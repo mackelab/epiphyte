@@ -6,8 +6,8 @@ import os
 import sys
 import numpy as np
 import random
-import copy
 from random import uniform
+import copy
 
 # local application imports 
 import database.config as config
@@ -22,7 +22,7 @@ def generate_spikes(patient_id, session_nr, nr_units, begin_recording_time, stop
     """
     spikes = []
     for i in range(nr_units):
-        nr_spikes = int(uniform(8000, 12000))
+        nr_spikes = int(uniform(10000, 16000))
         spike_vec = []
         for j in range(nr_spikes):
             spike_vec.append(uniform(begin_recording_time, stop_recording_time))
@@ -220,24 +220,27 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
     nr_pauses = int(uniform(1,6))
 
     # randomly select indices from perfect watchlog 
-    indices = random.sample(range(len(cpu_time)), nr_pauses)
+    indices_pause = random.sample(range(len(cpu_time) - 5000), nr_pauses)
     
-    for i, index in enumerate(indices): 
+    cpu_time = np.array(cpu_time)
+    
+    for i, index in enumerate(indices_pause): 
         pause_len = int(uniform(100000000, 3000000000))
-        cpu_time = np.array(cpu_time)
         cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
         
     nr_skips = int(uniform(1,4))
 
     # randomly select indices from perfect watchlog 
-    indices = random.sample(range(len(perfect_pts)), nr_skips)
+    indices_skip = random.sample(range(len(perfect_pts) - 5000), nr_skips)
 
     skip_pts = np.array(copy.copy(perfect_pts))
     
-    for i, index in enumerate(indices): 
+    for i, index in enumerate(indices_skip): 
         skip_len = int(uniform(10, 2000))
         skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
     
+    # test for rounding issue
+    skip_pts = [round(frame, 2) for frame in skip_pts]
     
     wlsave_dir = "{}/mock_data/patient_data/{}/session_{}/watchlogs/".format(config.PATH_TO_REPO, patient_id, session_nr)
 
@@ -252,8 +255,9 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
     with open(wl_name_save, 'a') as file:
         file.write("movie_stimulus.avi\n")
         for i in range(nr_movie_frames):
-            if i not in indices:
+            if i not in indices_pause:
                 file.write("pts\t{}\ttime\t{}\n".format(skip_pts[i], cpu_time[i]))
-            if i in indices: 
-                file.write("Pausing\nContinuing\tafter\tpause")
+            if i in indices_pause: 
+                file.write("Pausing\nContinuing\tafter\tpause\n")
+    
     file.close()

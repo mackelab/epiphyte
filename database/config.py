@@ -1,7 +1,7 @@
 import os
 
 #PATH_TO_REPO = "/home/hitchhiker/Documents/DeepHumanVision_deploy"
-PATH_TO_REPO = "/home/tamara/Documents/PhD/DeepHumanVision_deploy"
+PATH_TO_REPO = "/home/hitchhiker/Documents/DeepHumanVision_deploy"
 PATH_TO_DATA = os.path.join(PATH_TO_REPO, "mock_data") 
 PATH_TO_LABELS = os.path.join(PATH_TO_DATA, "movie_labels")
 PATH_PATIENT_ALIGNED_LABELS = os.path.join(PATH_TO_DATA, "patient_aligned_labels")

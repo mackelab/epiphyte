@@ -10,7 +10,6 @@ import preprocessing.data_preprocessing.data_utils as data_utils
 import annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
-
 dhv_schema = dj.schema('db_deploy_mock', locals())
 
 dj.config['stores'] = {
