@@ -295,7 +295,7 @@ class SpikeTimesDuringMovie(dj.Imported):
 #                     spikes_file = (path_binaries + str(patient_ids[index_session]) + '/session_' + str(session_nrs[index_session]) + "/" + filename)
                     spikes_file = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]), folder_spikes_nm[0], filename)
                     # TODO: check which file types should be expected for the spiking data import 
-                    print(spikes_file)
+                    #print(spikes_file)
                     
                     unit_id = ((ElectrodeUnit & "csc = '{}'".format(csc_nr[3:]) & "patient_id='{}'".format(patient_ids[index_session])
                                 & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch("unit_id"))[0]
@@ -354,8 +354,11 @@ class PatientAlignedMovieAnnotation(dj.Computed):
     def make(self, key):
         entry_key_video_annot, original_label = (MovieAnnotation & key).fetch('KEY', 'indicator_function')
         entry_key_movie_session, pts_vec = (MovieSession & key).fetch("KEY", 'order_movie_frames')
-
-        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0], patient_pts=np.load(pts_vec[0]))
+        
+        print(entry_key_movie_session)
+        print(pts_vec)
+        
+        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0], patient_pts=np.load(pts_vec[0]) )
         neural_rec_time = get_neural_rectime_of_patient(entry_key_movie_session[0]['patient_id'], entry_key_movie_session[0]['session_nr'])
         values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rec_time, patient_aligned_label)
         
