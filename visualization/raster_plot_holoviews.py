@@ -82,7 +82,7 @@ class RasterPlot(param.Parameterized):
         # Toggle variable decimate_plot to specify whether you'd like to use decimate
         # Decimate only plots a maximum number of elements at each zoom step, this way the plot is much faster
         # If decimate is not activated, the plot is clean, but very slow
-        decimate_plot = False
+        decimate_plot = True
         if decimate_plot:
             scatter = scatter.opts(color='blue', marker='dash', size=25, alpha=1, line_width=0.6, angle=90,
                                    xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID')
