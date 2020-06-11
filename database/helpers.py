@@ -85,7 +85,7 @@ def match_label_to_patient_pts_time(default_label, patient_pts):
 
     # testing with re-indexing:
     
-    return [default_label[int(round((frame/0.04), 0)) - 1] for i, frame in enumerate(patient_pts)]
+    return [default_label[(int(round((frame/0.04), 0)) - 1)] for i, frame in enumerate(patient_pts)]
 
 
 def get_list_of_patient_ids(patient_dict):

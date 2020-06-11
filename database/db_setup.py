@@ -100,7 +100,7 @@ class MovieSession(dj.Imported):
                 time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
                                                             path_to_events=path_events)
                 pts, rectime, cpu_time = time_conversion.convert()
-
+                
                 cpu_time = cpu_time
                 # neural_recording_time = rectime
                 
@@ -354,9 +354,6 @@ class PatientAlignedMovieAnnotation(dj.Computed):
     def make(self, key):
         entry_key_video_annot, original_label = (MovieAnnotation & key).fetch('KEY', 'indicator_function')
         entry_key_movie_session, pts_vec = (MovieSession & key).fetch("KEY", 'order_movie_frames')
-        
-        print(entry_key_movie_session)
-        print(pts_vec)
         
         patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0], patient_pts=np.load(pts_vec[0]) )
         neural_rec_time = get_neural_rectime_of_patient(entry_key_movie_session[0]['patient_id'], entry_key_movie_session[0]['session_nr'])

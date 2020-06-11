@@ -235,12 +235,32 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
 
     skip_pts = np.array(copy.copy(perfect_pts))
     
+    max_skip = 500
+
     for i, index in enumerate(indices_skip): 
-        skip_len = int(uniform(10, 2000))
-        skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
-    
+        # note: careful about values here -- can exceed mocked movie length. 
+        # currently set so that the max possible skip is the penultimate frame
+        if len(indices_skip) > 1:
+            skip_len = int(uniform((max_skip * -1), max_skip))
+            skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
+            max_skip -= skip_len
+
+        if len(indices_skip) == 1:
+            skip_len = max_skip
+            skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
+
     # test for rounding issue
     skip_pts = [round(frame, 2) for frame in skip_pts]
+
+    # prevents generated frame from exceeding the mock movie length
+    skip_pts_revised = []
+    for i, frame in enumerate(skip_pts):
+        if frame > (nr_movie_frames * 0.04):
+            skip_pts_revised.append(nr_movie_frames * 0.04)
+        if frame <= (nr_movie_frames * 0.04):
+            skip_pts_revised.append(frame)
+        if frame < 0: 
+            skip_pts_revised.append(0.0)
     
     wlsave_dir = "{}/mock_data/patient_data/{}/session_{}/watchlogs/".format(config.PATH_TO_REPO, patient_id, session_nr)
 
@@ -256,7 +276,7 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
         file.write("movie_stimulus.avi\n")
         for i in range(nr_movie_frames):
             if i not in indices_pause:
-                file.write("pts\t{}\ttime\t{}\n".format(skip_pts[i], cpu_time[i]))
+                file.write("pts\t{}\ttime\t{}\n".format(skip_pts_revised[i], cpu_time[i]))
             if i in indices_pause: 
                 file.write("Pausing\nContinuing\tafter\tpause\n")
     
