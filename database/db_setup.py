@@ -422,6 +422,9 @@ class PatientLevelDataCleaning(dj.Manual):
     description = "" : varchar(128)    # description of data cleaning
     """
 
+#####
+##### replace with MovieSkips(dj.Computed) style table --- calculate in the database from the watchlogs, 
+##### and not expect to import from mock ata generation 
 
 @dhv_schema
 class ContinuousWatchSegments(dj.Imported):
@@ -465,8 +468,51 @@ class ContinuousWatchSegments(dj.Imported):
                      'session_nr': session_nrs[index_session], "label_entry_date": annotation_date, "values": values,
                      'start_times': start_times, "stop_times": stop_times},
                      skip_duplicates=True)
+# #####
+# #####
 
-
+@dhv_schema
+class MovieSkips(dj.Computed):
+    definition = """
+    # This table Contains start and stop time points, where the watching behaviour of the patient changed from 
+    # continuous (watching the movie in the correct frame order) to non-continuous (e.g. jumping through the movie) or 
+    # the other way round:;
+    # all time points are in Neural Recording Time
+    -> MovieSession                    # number of movie session
+    ---
+    values: longblob                   # values of continuous watch segments
+    start_times: longblob              # start time points of segments
+    stop_times: longblob               # end time points of segments
+    notes = "" : varchar(128)          # further notes
+    """
+    
+    def make(self, key):
+        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+        
+        for i in range(len(patient_ids)):
+            path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
+                                                             config.watchlog_names[int(patient_ids[i])])
+            path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
+                                                              config.daq_names[int(patient_ids[i])])
+            # bridge btw .npy and .nev file types for Events file
+            for file in os.listdir("{}/{}/session_{}/event_file/".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i])):
+                    if file.startswith("Events"):
+                        path_events = "{}/{}/session_{}/event_file/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i], file)
+            
+            time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
+                                                        path_to_events=path_events)
+            
+            starts, stops, values = time_conversion.convert_skips()
+            
+            notes = "time points of continuous watch, extracted from watch log - {}".format(datetime.today())
+             
+            self.insert1(
+                {'patient_id': patient_ids[i], 'session_nr': session_nrs[i], "notes": notes,
+                 'start_times': np.array(starts), 'stop_times': np.array(stops), 'values': np.array(values)
+                 },
+                skip_duplicates=True)
+            
+                    
 @dhv_schema
 class MoviePauses(dj.Computed):
     definition = """

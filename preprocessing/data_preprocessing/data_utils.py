@@ -270,3 +270,51 @@ class TimeConversion(object):
         convert_stop = make_msec(convert_stop)
 
         return convert_start, convert_stop
+
+
+    def convert_skips(self):
+        """
+        Using the pts from the watchlog, this function checks for breaks in the otherwise continuous
+        playback, and outputs the start and stop times in terms of neural recording time (DAQ). 
+        """
+        pts, daq_time, cpu_time = self.convert()
+        
+        threshold = 1
+        max_jump = np.max(np.abs(np.diff(pts)))
+        
+        
+        if max_jump >= threshold:
+            print("There is a skip in the movie frame playback that is bigger than {} frames.\nThe biggest skip is {} frames.".format((threshold / 0.04), (max_jump / 0.04)))
+            
+            # list of indices where the pts jumped by 25+ frames
+            beyond_threshold = np.where(np.abs(np.diff(pts)) > threshold)[0]
+            print("Timepoints of skips, in neural_rec_time: {}".format(daq_time[beyond_threshold]))
+            
+            ## setting up start/stop values
+            timepoints_of_skips = []
+            timepoints_of_skips.append(daq_time[0]) # set first start point to the start of the rec_log
+
+            for index in beyond_threshold:
+                timepoints_of_skips.append(daq_time[index])
+                timepoints_of_skips.append(daq_time[index + 1])
+
+            timepoints_of_skips.append(daq_time[-1])
+            
+            ## specifying starts and stops from timepoint collection 
+            start_values = timepoints_of_skips[0:-1:2]
+            stop_values = timepoints_of_skips[1::2]
+            values = np.array(range(0, len(start_values)))
+            print("Start timepoints: {}".format(start_values))
+            print("Stop timepoints: {}".format(stop_values))
+            print("")
+            
+        else:
+            print("There's not any skips in the movie frame playback that are bigger than {} frames.\nThe biggest skip is {} frames.".format((threshold / 0.04), (max_jump / 0.04)))
+            print(" ")
+            start_values = daq_time[0]
+            stop_values = daq_time[-1]
+            values = np.array([0])
+        
+        
+        return start_values, stop_values, values
+        
