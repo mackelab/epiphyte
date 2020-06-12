@@ -28,6 +28,8 @@ def generate_spikes(patient_id, session_nr, nr_units, begin_recording_time, stop
             spike_vec.append(uniform(begin_recording_time, stop_recording_time))
         spikes.append(spike_vec)
     
+    spikes = np.sort(spikes)
+    
     # Directory set-up
     save_dir = "{}/mock_data/patient_data/{}/session_{}/spiking_data/".format(config.PATH_TO_REPO, patient_id, session_nr)
 

@@ -422,54 +422,6 @@ class PatientLevelDataCleaning(dj.Manual):
     description = "" : varchar(128)    # description of data cleaning
     """
 
-#####
-##### replace with MovieSkips(dj.Computed) style table --- calculate in the database from the watchlogs, 
-##### and not expect to import from mock ata generation 
-
-@dhv_schema
-class ContinuousWatchSegments(dj.Imported):
-    definition = """
-    # This table Contains start and stop time points, where the watching behaviour of the patient changed from 
-    # continuous (watching the movie in the correct frame order) to non-continuous (e.g. jumping through the movie) or 
-    # the other way round:;
-    # all time points are in Neural Recording Time
-    -> MovieSession                    # number of movie session
-    -> Annotator                       # who created the cleaning?
-    label_entry_date: date             # date of creation of label
-    ---
-    values: longblob                   # values of continuous watch segments
-    start_times: longblob              # start time points of segments
-    stop_times: longblob               # end time points of segments
-    notes = "" : varchar(128)          # further notes
-    """
-
-    def _make_tuples(self, key):
-        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        for index_session in range(0, len(patient_ids)):
-            path_binaries = '{}/continuous_watch/'.format(config.PATH_TO_DATA)
-            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-                
-            for filename in os.listdir(folder):
-                if filename.endswith(".npy"):
-                    if filename.startswith("values"):
-                        values = np.load(folder + filename)
-                        _, _, _, annotator_id, annotation_date_ending = filename.split("_")
-                        annotation_date = annotation_date_ending[:-4]
-                    if filename.startswith("start_values"):
-                        start_times = np.load(folder + filename)
-                    if filename.startswith("stop_values"):
-                        stop_times = np.load(folder + filename)
-                    
-            self.insert1(
-                    {'patient_id': patient_ids[index_session], "annotator_id": annotator_id,
-                     'session_nr': session_nrs[index_session], "label_entry_date": annotation_date, "values": values,
-                     'start_times': start_times, "stop_times": stop_times},
-                     skip_duplicates=True)
-# #####
-# #####
 
 @dhv_schema
 class MovieSkips(dj.Computed):
@@ -767,7 +719,7 @@ def get_unit_ids_in_brain_region(patient_id, brain_region):
     return (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
 
 
-def get_info_continuous_watch_segments(patient_id, session_nr, annotator_id, annotation_date):
+def get_info_continuous_watch_segments(patient_id, session_nr):
     """
     This function returns the start times, stop times and values of the continuous watch segment
     :param patient_id: ID of patient (int)
@@ -776,5 +728,5 @@ def get_info_continuous_watch_segments(patient_id, session_nr, annotator_id, ann
     :param annotation_date: data of annotation (date)
     :return start times, stop times, values
     """
-    values, starts, stops = (ContinuousWatchSegments() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr) & "annotator_id='{}'".format(annotator_id) & "label_entry_date='{}'".format(annotation_date)).fetch('values', 'start_times', 'stop_times')
+    values, starts, stops = (MovieSkips() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch('values', 'start_times', 'stop_times')
     return values[0], starts[0], stops[0]
