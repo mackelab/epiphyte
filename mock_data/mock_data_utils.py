@@ -91,7 +91,7 @@ def generate_pings():
     """
     Recreate how Neurolynx interfaces with a local computer. 
     """
-    len_context_files = random.randint(100, 200) # generate length of events.nev & DAQ file. 
+    len_context_files = random.randint(4000, 5400) # generate length of events.nev & DAQ file. 
 
     # recreate pings
     if len_context_files % 8 == 0:
@@ -126,26 +126,35 @@ def generate_events(patient_id, session_nr, len_context_files, signal_tile, begi
 
     np.save(evname_save, events_mat)
     
-def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed=1590528227608515):
+def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed=1590528227608515, stimulus_len=83.816666):
     """
     Generate mock DAQ log. 
     
     Must use same values for signal_tile and len_context_files as the events.nev mock-up
+    
+    params:
+    stimulus_len: length of the stimulus presentation, in minutes
+    
     """
     #uses same values for signal_tile and len_context_files as the events.nev mock-up
     values = signal_tile
     index = np.arange(len_context_files)
-
+    
+    # generate projected end time for the DAQ log, in unix time microseconds
+    end_time = seed + (stimulus_len * 60 * 1000 * 1000) 
+    add_interval = end_time / len_context_files
+    
     pre = []
     post = []
 
     for i in range(len_context_files):
-        interval_diff = (np.random.normal(2575, 305) / 2)
+        interval_diff = (np.random.normal(1000, 200) / 2)
 
         pre.append(int(seed - interval_diff))
         post.append(int(seed + interval_diff))
-        seed += np.random.normal(1000144, 100)
-
+        #seed += np.random.normal(1000144, 100)
+        seed += add_interval 
+        
     log_lines = list(zip(values, index, pre, post))
 
     daqsave_dir = "{}/mock_data/patient_data/{}/session_{}/daq_files/".format(config.PATH_TO_REPO, patient_id, session_nr)
@@ -164,14 +173,14 @@ def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, see
             file.write("{}\t{}\t{}\t{}\n".format(datum[0], datum[1], datum[2], datum[3]))
         file.close()
     
-def make_events_and_daq(patient_id, session_nr, begin_recording_time, stop_recording_time, seed=1590528227608515):
+def make_events_and_daq(patient_id, session_nr, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
     """
     Put together events and daq code, compute all at once. 
     """
     len_context_files, signal_tile = generate_pings()
     
     generate_events(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time)
-    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed)
+    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed, stimulus_len)
     
     
 def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
@@ -181,7 +190,7 @@ def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
 
     nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
     perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
-
+    
     cpu_time = []
 
     for i in range(nr_movie_frames):
@@ -204,7 +213,7 @@ def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
             file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
         file.close()
         
-def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
+def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, stimulus_len=83.816666):
     """
     Generate a movie watchlog file with pauses and skips.
     """
@@ -212,10 +221,14 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515):
     nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
     perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
 
+    # generate projected end time for the DAQ log, in unix time microseconds
+    end_time = seed + (stimulus_len * 60 * 1000 * 1000) 
+    add_interval = end_time / len_context_files
+    
     cpu_time = []
-
+    
     for i in range(nr_movie_frames):
-        seed += 41000
+        seed += add_interval
         cpu_time.append(seed)    
         
     ## add in pauses

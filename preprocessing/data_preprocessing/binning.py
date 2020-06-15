@@ -57,7 +57,7 @@ def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses, ou
     rectime = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
     rec_on = rectime[0]
     rec_off = rectime[-1]
-
+    
     total_msec = rec_off - rec_on
     total_bins = int(total_msec / bin_size)
     bins = np.linspace(rec_on, rec_off, total_bins)
