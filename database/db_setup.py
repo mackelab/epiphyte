@@ -573,11 +573,9 @@ def get_number_of_units_for_patient(patient_id):
 
 def get_spiking_activity(patient_id, session_nr, unit_id):
     """
-    Extract spiking vector from data base. If bin_size is None, the spike times will be returned, otherwise the
-    binned firing rates
+    Extract spiking vector from data base.
     :param patient_id: ID of patient
     :param session_nr: session number
-    :param bin_size: None or size of bin
     :param unit_id: Unit ID of which spiking activity shall be extracted
     """
     try:

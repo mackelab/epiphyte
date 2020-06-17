@@ -141,8 +141,13 @@ def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, see
     index = np.arange(len_context_files)
     
     # generate projected end time for the DAQ log, in unix time microseconds
-    end_time = seed + (stimulus_len * 60 * 1000 * 1000) 
-    add_interval = end_time / len_context_files
+    movie_len_unix = (stimulus_len * 60 * 1000 * 1000)
+    end_time = seed + movie_len_unix 
+    add_interval = int((end_time - seed) / len_context_files)
+    
+    print(movie_len_unix)
+    print(end_time)
+    print(add_interval)
     
     pre = []
     post = []
@@ -173,15 +178,7 @@ def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, see
             file.write("{}\t{}\t{}\t{}\n".format(datum[0], datum[1], datum[2], datum[3]))
         file.close()
     
-def make_events_and_daq(patient_id, session_nr, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
-    """
-    Put together events and daq code, compute all at once. 
-    """
-    len_context_files, signal_tile = generate_pings()
-    
-    generate_events(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time)
-    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed, stimulus_len)
-    
+
     
 def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
     """
@@ -213,6 +210,7 @@ def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
             file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
         file.close()
         
+        
 def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, stimulus_len=83.816666):
     """
     Generate a movie watchlog file with pauses and skips.
@@ -222,8 +220,13 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, s
     perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
 
     # generate projected end time for the DAQ log, in unix time microseconds
-    end_time = seed + (stimulus_len * 60 * 1000 * 1000) 
-    add_interval = end_time / len_context_files
+    movie_len_unix = (stimulus_len * 60 * 1000 * 1000)
+    end_time = seed + movie_len_unix 
+    add_interval = int((end_time - seed) / nr_movie_frames)
+    
+    print(movie_len_unix)
+    print(end_time)
+    print(add_interval)
     
     cpu_time = []
     
@@ -240,7 +243,7 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, s
     cpu_time = np.array(cpu_time)
     
     for i, index in enumerate(indices_pause): 
-        pause_len = int(uniform(100000000, 3000000000))
+        pause_len = int(uniform(100000000, 3000000000)) ## TODO: this might be causing too big a difference btw wl and daq
         cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
         
     nr_skips = int(uniform(1,4))
@@ -296,3 +299,15 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, s
                 file.write("Pausing\nContinuing\tafter\tpause\n")
     
     file.close()
+
+    
+def make_events_and_daq(patient_id, session_nr, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
+    """
+    Put together events and daq code, compute all at once. 
+    """
+    len_context_files, signal_tile = generate_pings()
+    
+    generate_events(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time)
+    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed, stimulus_len)
+
+    
