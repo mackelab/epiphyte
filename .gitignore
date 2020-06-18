@@ -7,8 +7,6 @@ data_preprocessing/produce_binaries_scratch.ipynb
 affect_annotation/keyparse_class.pyc
 affect_annotation/.ipynb_checkpoints/
 
-.gitignore
-
 data_preprocessing/.ipynb_checkpoints/
 data_preprocessing/Untitled.ipynb
 
@@ -44,7 +42,7 @@ analysis/binary_analysis/__pycache__/
 
 
 
-.gitignore
+
 analysis/plotting/.ipynb_checkpoints/
 analysis/plotting/__pycache__/
 test_dir/
@@ -216,7 +214,7 @@ analysis/binary_analysis/perm_results/46/label_tom/SUA/segmented/
 
 *.png
 *.pdf
-*.npy
+
 *can_be_deleted*
 /movie_annotation/annotation_reader.df_events_processed.csv
 /movie_annotation/.~lock.data_labels_test.csv#

@@ -521,24 +521,19 @@ class ManualAnnotation(dj.Manual):
     """
 
 
-def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
-    return ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
-             & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch('unit_id'))[0]
-
+#######################
+# Retrieval Functions #
+#######################
 
 def get_brain_region(patient_id, unit_id):
+   # name_vec = (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id)).fetch('brain_region')[0]
+    
+#     region = np.load(name_vec)
+    
+#     if os.path.exists(name_vec):
+#         os.remove(name_vec)  
+    
     return (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id)).fetch('brain_region')[0]
-
-
-def get_pts_of_patient(patient_id, session_nr):
-    """
-    Get the order of the movie in the way the patient watched it
-    :param patient_id: ID of patient
-    :param session_nr: number of movie watch session
-    :return: vector of movie frames in the order the patient watched the movie
-    """
-    return np.load((MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("order_movie_frames")[0])
-
 
 def get_dts_of_patient(patient_id, session_nr):
     """
@@ -548,7 +543,27 @@ def get_dts_of_patient(patient_id, session_nr):
     :return: vector of cpu time that correspond to pts time stamps (extracted from watch log)
     """
     print("Note: Divide the patient dts vector by 1000 to get milliseconds")
-    return np.load((MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("cpu_time")[0])
+    
+    name_vec = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("cpu_time")[0]
+    
+    dts = np.load(name_vec)
+    
+    if os.path.exists(name_vec):
+        os.remove(name_vec)   
+    
+    return dts
+
+def get_info_continuous_watch_segments(patient_id, session_nr):
+    """
+    This function returns the start times, stop times and values of the continuous watch segment
+    :param patient_id: ID of patient (int)
+    :param session_nr: session number of experiment (int)
+    :param annotator_id: ID of annotator (string)
+    :param annotation_date: data of annotation (date)
+    :return start times, stop times, values
+    """
+    values, starts, stops = (MovieSkips() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch('values', 'start_times', 'stop_times')
+    return values[0], starts[0], stops[0]
 
 
 def get_neural_rectime_of_patient(patient_id, session_nr):
@@ -558,7 +573,14 @@ def get_neural_rectime_of_patient(patient_id, session_nr):
     :param session_nr: number of movie watch session
     :return: vector of neural recording time that correspond to pts time stamps
     """
-    return np.load((MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("neural_recording_time")[0])
+    name_vec = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("neural_recording_time")[0]
+    
+    rectime = np.load(name_vec)
+    
+    if os.path.exists(name_vec):
+        os.remove(name_vec)   
+    
+    return rectime
 
 
 def get_number_of_units_for_patient(patient_id):
@@ -567,61 +589,14 @@ def get_number_of_units_for_patient(patient_id):
     :param patient_id: patient ID (int)
     :return int value, number of recorded units
     """
-    return ((Patient.aggr(ElectrodeUnit.proj(), number_of_units="count(*)")) & "patient_id='{}'"
-            .format(patient_id)).fetch("number_of_units")[0]
+    name_vec = ((Patient.aggr(ElectrodeUnit.proj(), number_of_units="count(*)")) & "patient_id='{}'".format(patient_id)).fetch("number_of_units")[0]
 
-
-def get_spiking_activity(patient_id, session_nr, unit_id):
-    """
-    Extract spiking vector from data base.
-    :param patient_id: ID of patient
-    :param session_nr: session number
-    :param unit_id: Unit ID of which spiking activity shall be extracted
-    """
-    try:
-        spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
-            session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
-    except:
-        print("The spiking data you were looking for doesn't exist in the data base.")
-        return -1
-
-    spike_vec = np.load(spikes)
-
-    if os.path.exists(spikes):
-        os.remove(spikes)
-
-    return spike_vec
-
-
-def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
-    """
-    This function extracts a unit level cleaning vector from the database
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param unit_id: ID of recorded unit (int)
-    :param name: name of cleaning vector (string)
-    :return extracted vector from database (np.array)
-    """
-    name_vec = ((UnitLevelDataCleaning() & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id) & "session_nr='{}'".format(session_nr) & "name='{}'".format(name)).fetch("data")[0])
-    cleaning_vec = np.load(name_vec)
+    number = np.load(name_vec)
+    
     if os.path.exists(name_vec):
         os.remove(name_vec)
-    return cleaning_vec
-
-
-def get_patient_level_data_cleaning(patient_id, session_nr, vector_name):
-    """
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param vector_name: name ov the patient level cleaning vector (string)
-    :return extracted vector from database (np.array)
-    """
-    name_pts_cont_watch = \
-    (PatientLevelDataCleaning() & "name='{}'".format(vector_name) & "patient_id = '{}'".format(patient_id) & "session_nr='{}'".format(session_nr)).fetch("data")[0]
-    cont_watch = np.load(name_pts_cont_watch)
-    os.remove(name_pts_cont_watch)
-
-    return cont_watch
+    
+    return number
 
 
 def get_original_movie_label(label_name, annotation_date, annotator_id):
@@ -635,8 +610,13 @@ def get_original_movie_label(label_name, annotation_date, annotator_id):
     :param annotator_id: ID of annotator (int)
     :return extracted vector from database (np.array)
     """
-    name_label = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
-    return np.load(name_label)
+    name_vec = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
+    
+    name_label = np.load(name_vec)
+    if os.path.exists(name_vec):
+        os.remove(name_vec)
+    
+    return name_label
 
 def get_patient_aligned_annotations(patient_id, label_name, annotator_id, annotation_date):
     """
@@ -675,21 +655,61 @@ def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, 
                            & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr)
                            & "annotator_id='{}'".format(annotator_id)).fetch("data")[0]
     cont_watch = np.load(name_pts_cont_watch)
+    
+    if os.path.exists(name_pts_cont_watch):
+        os.remove(name_pts_cont_watch)
+        
     return cont_watch
 
-
-def get_start_stop_times_pauses(patient_id, session_nr):
+def get_patient_level_data_cleaning(patient_id, session_nr, vector_name):
     """
-    extract start and stop times of pauses from data base
     :param patient_id: patient ID (int)
-    :param session_nr: session number (int)
-    :return: two vectors, start and stop time points
+    :param session_nr: session number of experiment (int)
+    :param vector_name: name ov the patient level cleaning vector (string)
+    :return extracted vector from database (np.array)
     """
-    start_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("start_times")[0]
-    stop_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("stop_times")[0]
+    name_pts_cont_watch = \
+    (PatientLevelDataCleaning() & "name='{}'".format(vector_name) & "patient_id = '{}'".format(patient_id) & "session_nr='{}'".format(session_nr)).fetch("data")[0]
+    cont_watch = np.load(name_pts_cont_watch)
+    os.remove(name_pts_cont_watch)
 
-    return start_times, stop_times
+    return cont_watch
 
+def get_pts_of_patient(patient_id, session_nr):
+    """
+    Get the order of the movie in the way the patient watched it
+    :param patient_id: ID of patient
+    :param session_nr: number of movie watch session
+    :return: vector of movie frames in the order the patient watched the movie
+    """
+    name_vec = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("order_movie_frames")[0]
+    pts = np.load(name_vec)
+    
+    if os.path.exists(name_vec):
+        os.remove(name_vec)  
+    
+    return pts
+
+def get_spiking_activity(patient_id, session_nr, unit_id):
+    """
+    Extract spiking vector from data base.
+    :param patient_id: ID of patient
+    :param session_nr: session number
+    :param unit_id: Unit ID of which spiking activity shall be extracted
+    """
+    try:
+        spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
+            session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
+    except:
+        print("The spiking data you were looking for doesn't exist in the data base.")
+        return -1
+
+    spike_vec = np.load(spikes)
+
+    if os.path.exists(spikes):
+        os.remove(spikes)
+
+    return spike_vec
 
 def get_spikes_from_brain_region(patient_id, session_nr, brain_region):
     """
@@ -706,6 +726,38 @@ def get_spikes_from_brain_region(patient_id, session_nr, brain_region):
 
     return spikes
 
+def get_start_stop_times_pauses(patient_id, session_nr):
+    """
+    extract start and stop times of pauses from data base
+    :param patient_id: patient ID (int)
+    :param session_nr: session number (int)
+    :return: two vectors, start and stop time points
+    """
+    start_name = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("start_times")[0]
+    stop_name = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("stop_times")[0]
+    
+    start_times = np.load(start_name)
+    stop_times = np.load(stop_name)
+    
+    if os.path.exists(start_name):
+        os.remove(start_name)
+    
+    if os.path.exists(stop_name):
+        os.remove(stop_name)
+    
+    return start_times, stop_times
+
+def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
+    name_vec = ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
+             & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch('unit_id'))[0]
+    
+    unit_id = np.load(name_vec)
+    
+    if os.path.exists(name_vec):
+        os.remove(name_vec) 
+    
+    return unit_id
+
 
 def get_unit_ids_in_brain_region(patient_id, brain_region):
     """
@@ -714,17 +766,26 @@ def get_unit_ids_in_brain_region(patient_id, brain_region):
     :param brain_region: brain region of interest - abbreviation (string)
     :return list of unit IDs (np.array)
     """
-    return (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
+    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
 
+    ids = np.load(name_vec)
+    
+    if os.path.exists(name_vec):
+        os.remove(name_vec)
+    
+    return ids
 
-def get_info_continuous_watch_segments(patient_id, session_nr):
+def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
     """
-    This function returns the start times, stop times and values of the continuous watch segment
-    :param patient_id: ID of patient (int)
+    This function extracts a unit level cleaning vector from the database
+    :param patient_id: patient ID (int)
     :param session_nr: session number of experiment (int)
-    :param annotator_id: ID of annotator (string)
-    :param annotation_date: data of annotation (date)
-    :return start times, stop times, values
+    :param unit_id: ID of recorded unit (int)
+    :param name: name of cleaning vector (string)
+    :return extracted vector from database (np.array)
     """
-    values, starts, stops = (MovieSkips() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch('values', 'start_times', 'stop_times')
-    return values[0], starts[0], stops[0]
+    name_vec = ((UnitLevelDataCleaning() & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id) & "session_nr='{}'".format(session_nr) & "name='{}'".format(name)).fetch("data")[0])
+    cleaning_vec = np.load(name_vec)
+    if os.path.exists(name_vec):
+        os.remove(name_vec)
+    return cleaning_vec
