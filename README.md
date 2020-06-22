@@ -5,7 +5,9 @@ We present a toolbox for organizing neural activity alongside meta-data and stim
 
 ## Installing the package
 
-### (1) Create a virtual environment, by installing all requirements:
+#### Note: These installation instructions assume that you have basic fluency in Python and command line interfaces. If you would like to set-up this package from scratch, check out the more robust instructions [here.](https://github.com/mackelab/DeepHumanVision_deploy/wiki/Installation)
+
+### (1) Install the required packages by running the following command (Note: we highly recommend doing so within a virtual environment with Python==3.7):
 ```
 pip install -r requirements.txt
 ```
@@ -22,10 +24,11 @@ pip install -e .
 - install [docker compose](https://docs.docker.com/compose/install/)
 
 **Actual setup:**
-- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/get-database.html) to set up docker container with database (see section "Setting up a local database server (Intermediate)")
-- run docker container
+- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/local-database.html) to set up for using a docker container with database.
+- navigate to the top-level directory of DeepHumanVision_deploy and run the docker container:
 ```
 sudo docker-compose up -d
 ```
 - run [database/database_set_up.ipynb](https://github.com/mackelab/DeepHumanVision_deploy/blob/master/database/database_set_up.ipynb) notebook to fill the database with the mock data
-- now everything should be set up and ready to go
+- now everything should be set up and ready to go! 
+- for troubleshooting issues, check out [here](https://github.com/datajoint/mysql-docker).
