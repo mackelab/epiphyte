@@ -372,7 +372,7 @@ class PatientAlignedMovieAnnotation(dj.Computed):
             
         print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
 
-
+## TODO: potentially remove? does this expect binaires stored as npy to run?
 @dhv_schema
 class UnitLevelDataCleaning(dj.Imported):
     definition = """
@@ -408,7 +408,7 @@ class UnitLevelDataCleaning(dj.Imported):
                                   'data': "{}/{}".format(folder, filename)},
                                  skip_duplicates=True)
 
-
+##  TODO: decide if this table should removed for deploy version
 @dhv_schema
 class PatientLevelDataCleaning(dj.Manual):
     definition = """
@@ -590,13 +590,8 @@ def get_number_of_units_for_patient(patient_id):
     :return int value, number of recorded units
     """
     name_vec = ((Patient.aggr(ElectrodeUnit.proj(), number_of_units="count(*)")) & "patient_id='{}'".format(patient_id)).fetch("number_of_units")[0]
-
-    number = np.load(name_vec)
-    
-    if os.path.exists(name_vec):
-        os.remove(name_vec)
-    
-    return number
+   
+    return name_vec
 
 
 def get_original_movie_label(label_name, annotation_date, annotator_id):
@@ -611,12 +606,8 @@ def get_original_movie_label(label_name, annotation_date, annotator_id):
     :return extracted vector from database (np.array)
     """
     name_vec = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
-    
-    name_label = np.load(name_vec)
-    if os.path.exists(name_vec):
-        os.remove(name_vec)
-    
-    return name_label
+       
+    return name_vec
 
 def get_patient_aligned_annotations(patient_id, label_name, annotator_id, annotation_date):
     """
@@ -641,7 +632,7 @@ def get_patient_aligned_annotations(patient_id, label_name, annotator_id, annota
     
     return values, starts, stops
 
-
+#### unnecessary?
 def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, annotator_id):
     """
     This function returns the patient level cleaning vector from the database
@@ -674,6 +665,8 @@ def get_patient_level_data_cleaning(patient_id, session_nr, vector_name):
     os.remove(name_pts_cont_watch)
 
     return cont_watch
+
+####
 
 def get_pts_of_patient(patient_id, session_nr):
     """
@@ -733,28 +726,28 @@ def get_start_stop_times_pauses(patient_id, session_nr):
     :param session_nr: session number (int)
     :return: two vectors, start and stop time points
     """
-    start_name = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("start_times")[0]
-    stop_name = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("stop_times")[0]
-    
-    start_times = np.load(start_name)
-    stop_times = np.load(stop_name)
-    
-    if os.path.exists(start_name):
-        os.remove(start_name)
-    
-    if os.path.exists(stop_name):
-        os.remove(stop_name)
+    start_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("start_times")[0]
+    stop_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("stop_times")[0]
     
     return start_times, stop_times
 
 def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
-    name_vec = ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
+    """
+    Returns the unit_id associated with a given spike train. 
+    
+    csc_nr: int, channel number from which the unit was recorded
+    unit_type: char, type of unit (either M (multiple) or S (single))
+    unit_nr: int, refers to the ordinal set of units (MUA 1, MUA 2) -- necessary 
+                    as it is possible to sort several of the same unit type
+                    from a given channel
+    patient_id: int, patient id number
+    
+    output:
+    unit_id: int, scalar id number specific to the patient and the unit 
+    
+    """
+    unit_id = ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
              & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch('unit_id'))[0]
-    
-    unit_id = np.load(name_vec)
-    
-    if os.path.exists(name_vec):
-        os.remove(name_vec) 
     
     return unit_id
 
@@ -767,13 +760,9 @@ def get_unit_ids_in_brain_region(patient_id, brain_region):
     :return list of unit IDs (np.array)
     """
     name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
+    
+    return name_vec
 
-    ids = np.load(name_vec)
-    
-    if os.path.exists(name_vec):
-        os.remove(name_vec)
-    
-    return ids
 
 def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
     """
