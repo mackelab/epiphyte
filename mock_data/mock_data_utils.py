@@ -125,7 +125,7 @@ def generate_events(patient_id, session_nr, len_context_files, signal_tile, begi
 
     np.save(evname_save, events_mat)
     
-def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed=1590528227608515, stimulus_len=83.816666):
+def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
     """
     Generate mock DAQ log. 
     
@@ -135,18 +135,22 @@ def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, see
     stimulus_len: length of the stimulus presentation, in minutes
     
     """
+
+    
     #uses same values for signal_tile and len_context_files as the events.nev mock-up
     values = signal_tile
     index = np.arange(len_context_files)
     
     # generate projected end time for the DAQ log, in unix time microseconds
-    movie_len_unix = (stimulus_len * 60 * 1000 * 1000)
-    end_time = seed + movie_len_unix 
+    #movie_len_unix = (stimulus_len * 60 * 1000 * 1000)
+    rec_len_unix = (stop_recording_time - begin_recording_time) 
+    
+    end_time = seed + rec_len_unix 
     add_interval = int((end_time - seed) / len_context_files)
     
-    print(movie_len_unix)
-    print(end_time)
-    print(add_interval)
+    print("Recording length, in usec: ", rec_len_unix)
+    print("End time of recording, in epoch time: ",end_time)
+    print("Length of interval iteratively added: ", add_interval)
     
     pre = []
     post = []
@@ -160,6 +164,7 @@ def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, see
         seed += add_interval 
         
     log_lines = list(zip(values, index, pre, post))
+
 
     daqsave_dir = "{}/mock_data/patient_data/{}/session_{}/daq_files/".format(config.PATH_TO_REPO, patient_id, session_nr)
 
@@ -214,40 +219,51 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, s
     """
     Generate a movie watchlog file with pauses and skips.
     """
-    
     nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
     perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
-
+    
+    pause_pool = 5 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time
+    
+    wl_seed = seed + 1e9
     # generate projected end time for the DAQ log, in unix time microseconds
-    movie_len_unix = (stimulus_len * 60 * 1000 * 1000)
+    movie_len_unix = (stimulus_len * 60 * 1000 * 1000) - pause_pool
     end_time = seed + movie_len_unix 
     add_interval = int((end_time - seed) / nr_movie_frames)
     
-    print(movie_len_unix)
-    print(end_time)
-    print(add_interval)
+    print("Length of the stimulus, in usec: ", movie_len_unix)
+    print("End of stimulus, in epoch time: ", end_time)
+    print("Length of interval iteratively added : ", add_interval)
     
     cpu_time = []
     
     for i in range(nr_movie_frames):
-        seed += add_interval
-        cpu_time.append(seed)    
-        
+        wl_seed += add_interval
+        cpu_time.append(int(wl_seed))   
+    
+    ####
+    
     ## add in pauses
     nr_pauses = int(uniform(1,6))
-
+    min_pause = 0.1 * 1000 * 1000 * 60
+    
     # randomly select indices from perfect watchlog 
     indices_pause = random.sample(range(len(cpu_time) - 5000), nr_pauses)
-    
+        
     cpu_time = np.array(cpu_time)
     
     for i, index in enumerate(indices_pause): 
-        pause_len = int(uniform(100000000, 3000000000)) ## TODO: this might be causing too big a difference btw wl and daq
-        cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
-        
-    nr_skips = int(uniform(1,4))
+        if (len(indices_pause) - i) > 0: 
+            pause_len = random.randint(min_pause, pause_pool)
+            #pause_len = int(random.sample(range(min_pause, pause_pool))) ## TODO: this might be causing too big a difference btw wl and daq
+            cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
+            pause_pool -= pause_len
+        else:
+            pause_len = pause_pool
+            cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len))
 
     # randomly select indices from perfect watchlog 
+    nr_skips = int(uniform(1,4))
+    
     indices_skip = random.sample(range(len(perfect_pts) - 5000), nr_skips)
 
     skip_pts = np.array(copy.copy(perfect_pts))
@@ -279,6 +295,8 @@ def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, s
         if frame < 0: 
             skip_pts_revised.append(0.0)
     
+    ####
+
     wlsave_dir = "{}/mock_data/patient_data/{}/session_{}/watchlogs/".format(config.PATH_TO_REPO, patient_id, session_nr)
 
     if not os.path.exists(wlsave_dir):
@@ -307,6 +325,5 @@ def make_events_and_daq(patient_id, session_nr, begin_recording_time, stop_recor
     len_context_files, signal_tile = generate_pings()
     
     generate_events(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time)
-    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, seed, stimulus_len)
-
+    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time, seed, stimulus_len)
     
