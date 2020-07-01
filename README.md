@@ -24,7 +24,9 @@ pip install -e .
 - install [docker compose](https://docs.docker.com/compose/install/)
 
 **Actual setup:**
-- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/local-database.html) to set up for using a docker container with database **Note for macOS users:** we recommend installing MySQL via Homebrew (as opposed to the direct download via Docker or MySQL). For instructions, check out the [Homebrew instructions](https://gist.github.com/operatino/392614486ce4421063b9dece4dfe6c21) or [step 6 of the install tutorial](https://github.com/mackelab/DeepHumanVision_deploy/wiki/Installation#mac).
+- follow instructions on DataJoint [tutorial page](https://tutorials.datajoint.io/setting-up/local-database.html) to set up for using a docker container with database.
+
+**Note for macOS users:** we recommend installing MySQL via Homebrew (as opposed to the direct download via Docker or MySQL). For instructions, check out the [Homebrew instructions](https://gist.github.com/operatino/392614486ce4421063b9dece4dfe6c21) or [step 6 of the install tutorial](https://github.com/mackelab/DeepHumanVision_deploy/wiki/Installation#mac).
 - navigate to the top-level directory of DeepHumanVision_deploy and run the docker container:
 ```
 sudo docker-compose up -d
