@@ -719,6 +719,20 @@ def get_spikes_from_brain_region(patient_id, session_nr, brain_region):
 
     return spikes
 
+def get_spikes_from_patient_session(patient_id, session_nr):
+    """
+    Returns an array of size (total_units, 1) containing all the spike trains from a given patient for a 
+    given session.  
+    """
+    
+    unit_ids = get_unit_ids_for_patient(patient_id)
+    
+    spikes = []
+    for i in unit_ids:
+        spikes.append(get_spiking_activity(patient_id, session_nr, i))
+        
+    return spikes 
+
 def get_start_stop_times_pauses(patient_id, session_nr):
     """
     extract start and stop times of pauses from data base
@@ -751,6 +765,15 @@ def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
     
     return unit_id
 
+def get_unit_ids_for_patient(patient_id):
+    """
+    Returns a list of all unit ids for a given patient. 
+    
+    TODO: add session information to the ElectrodeUnit() table. 
+    """
+    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id)).fetch("unit_id")
+    
+    return name_vec
 
 def get_unit_ids_in_brain_region(patient_id, brain_region):
     """
