@@ -49,6 +49,95 @@ hover = HoverTool(tooltips=[
 ])
 boxes.opts(tools=[hover])
 
+#################################
+# Fxns for making static raster #
+#################################
+
+def get_patient_session_info():
+    
+    # set parameters for patient IDs and session numbers of experiment sessions
+    patients = config.patients
+    sessions = config.sessions
+    patient_ids = []
+    for patient in patients:
+        patient_ids.append(patient['patient_id'])
+    # TODO session number hard coded so far. Needs to be dynamically adapted to selected patient ID
+    session_nrs = [1]
+    
+    return patient_ids, session_nrs
+ 
+def make_static_raster():
+    # TODO modify to allow for multiple sessions for a single patient  
+    """
+    Creates the static rasterplots for each patient and saves in the directory ../visualization/images/.
+    
+    This function first checks if the static images have already been generated and saved locally. If not, 
+    will generate ones for any patients that have been added since last run. 
+    """
+    
+    patient_ids, session_ids = get_patient_session_info()
+    print("Patient ids: {}".format(patient_ids))
+    print("Sessions: {}".format(session_ids))
+    # check for existing image file; create if not present
+    
+    save_dir = "{}/visualization/images/".format(config.PATH_TO_REPO)
+
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+        
+    # for the list of patients in the database, check for existing static rasterplots
+    for patient in patient_ids:
+        session_id = session_ids[0]
+        pat_filename = os.path.join(save_dir, "raster_plot_{}".format(patient))
+        
+        if os.path.exists(pat_filename):
+            print("Static raster exists for patient {}.".format(patient))
+            continue
+        
+        print("Generating static raster for patient {}...".format(patient))
+        # for any patients without a static plot, generate one    
+        
+        rectime = get_neural_rectime_of_patient(patient, session_id)
+        rec_start = rectime[0]
+        rec_stop = rectime[-1]
+        
+        all_data = get_spikes_from_patient_session(patient, session_id) # this might not work yet
+        
+        fig = plt.figure(figsize=(240,80))
+        ax1 = fig.add_subplot(121)
+        ax1.eventplot(all_data, linewidths=0.1, linelengths=1.2)
+        
+        ratio = 0.3
+        xleft, xright = ax1.get_xlim()
+        ybottom, ytop = ax1.get_ylim()
+        
+        ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
+        ax1.set_yticks([])
+        #ax1.xaxis.set_tick_params(labelsize=30)
+        ax1.tick_params(axis='x', labelsize=60 )
+        
+        plt.title('Spikes, Patient {}'.format(patient), size=100)
+        plt.xlabel('Time in neural recording system scale (msec)', size=80)
+        plt.ylabel('Units', size=80)
+    
+        ax1.spines['left'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax1.spines['top'].set_visible(False)
+        
+        plt.tight_layout()
+
+        # save the newly generated plot
+        plt.savefig(pat_filename, bbox_inches="tight")
+        #plt.savefig(save + "{}_raster.svg".format(self.pat_id), bbox_inches="tight")
+        
+        print("Raster saved.")
+        
+        ## only for troubleshooting
+        # plt.show()
+    
+###############################
+# end static raster functions #
+###############################
 
 class RasterPlot(param.Parameterized):
     """
