@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 import holoviews as hv
 from holoviews import opts
 from holoviews import streams
@@ -74,6 +75,8 @@ def make_static_raster():
     This function first checks if the static images have already been generated and saved locally. If not, 
     will generate ones for any patients that have been added since last run. 
     """
+    ## Turn matplotlib to non-interactive mode, so that final plot output is suppressed. 
+    plt.ioff()
     
     patient_ids, session_ids = get_patient_session_info()
     print("Patient ids: {}".format(patient_ids))
@@ -88,7 +91,7 @@ def make_static_raster():
     # for the list of patients in the database, check for existing static rasterplots
     for patient in patient_ids:
         session_id = session_ids[0]
-        pat_filename = os.path.join(save_dir, "raster_plot_{}".format(patient))
+        pat_filename = os.path.join(save_dir, "raster_plot_{}.png".format(patient))
         
         if os.path.exists(pat_filename):
             print("Static raster exists for patient {}.".format(patient))
@@ -103,7 +106,7 @@ def make_static_raster():
         
         all_data = get_spikes_from_patient_session(patient, session_id) # this might not work yet
         
-        fig = plt.figure(figsize=(240,80))
+        fig = plt.figure(figsize=(60, 20))
         ax1 = fig.add_subplot(121)
         ax1.eventplot(all_data, linewidths=0.1, linelengths=1.2)
         
@@ -114,11 +117,11 @@ def make_static_raster():
         ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
         ax1.set_yticks([])
         #ax1.xaxis.set_tick_params(labelsize=30)
-        ax1.tick_params(axis='x', labelsize=60 )
+        ax1.tick_params(axis='x', labelsize=15 )
         
-        plt.title('Spikes, Patient {}'.format(patient), size=100)
-        plt.xlabel('Time in neural recording system scale (msec)', size=80)
-        plt.ylabel('Units', size=80)
+        plt.title('Spikes, Patient {}'.format(patient), size=25)
+        plt.xlabel('Time in neural recording system scale (msec)', size=20)
+        plt.ylabel('Units', size=20)
     
         ax1.spines['left'].set_visible(False)
         ax1.spines['right'].set_visible(False)
@@ -281,7 +284,7 @@ class AddingToDB(param.Parameterized):
                                   skip_duplicates=True)
                 return "## Data added to database"
             except:
-                s = "## Uploading to database didn't work."
+                s = "## Uploading to database didn't work. ### Make sure that annotator id corresponds to an existing id."
                 e = sys.exc_info()[0]
                 return s + str(e)
         else:
