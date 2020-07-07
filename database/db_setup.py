@@ -372,7 +372,7 @@ class PatientAlignedMovieAnnotation(dj.Computed):
             
         print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
 
-## TODO: potentially remove? does this expect binaires stored as npy to run?
+
 @dhv_schema
 class UnitLevelDataCleaning(dj.Imported):
     definition = """
@@ -769,7 +769,7 @@ def get_unit_ids_for_patient(patient_id):
     """
     Returns a list of all unit ids for a given patient. 
     
-    TODO: add session information to the ElectrodeUnit() table. 
+    TODO: add session information to the ElectrodeUnit() table. Note: actually, for us, this might not exist.
     """
     name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id)).fetch("unit_id")
     
