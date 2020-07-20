@@ -152,35 +152,67 @@ class RasterPlot(param.Parameterized):
 
     @param.depends('patient_id', 'session_nr', 'highlight')
     def load_raster(self):
+        # load info from the database
         nr_units = get_number_of_units_for_patient(self.patient_id)
         neural_rec_time = get_neural_rectime_of_patient(self.patient_id, self.session_nr) / 1000
+        
+        # collect all units for a given patient from the database 
         data_array = []
         for i in range(nr_units):
             spikes = get_spiking_activity(self.patient_id, self.session_nr, i)
             # delete downloaded file from working directory
             if os.path.exists("neural_rec_time.npy"):
                 os.remove("neural_rec_time.npy")
-            data_array.append(list(np.array(spikes) - neural_rec_time[0]))
-
+            data_array.append(list(np.array(spikes) - neural_rec_time[0])) # subtraction operation resets the x-axis & spike times to start at 0. a matter of taste. 
+        
+        # reformat unit/spiking data to make list with len n_units * n_spikes and format (spike_time, unit_id)
         ret = []
         for i in range(len(data_array)):
             # i is unit ID
             for j in data_array[i]:
                 # j is spike time
                 ret.append((j, i))
-
-        scatter = hv.Scatter(ret)
+        
+        # plot ret [(spike_time, unit_id)] as scatter object from holoviews 
+        # scatter = hv.Scatter(ret)
 
         # Toggle variable decimate_plot to specify whether you'd like to use decimate
         # Decimate only plots a maximum number of elements at each zoom step, this way the plot is much faster
         # If decimate is not activated, the plot is clean, but very slow
-        decimate_plot = True
-        if decimate_plot:
+        decimate_plot = False
+        spikes_overlay = True
+        if decimate_plot and not spikes_overlay:
+            print("test1")
+            # plot ret [(spike_time, unit_id)] as scatter object from holoviews 
+            scatter = hv.Scatter(ret)
             scatter = scatter.opts(color='blue', marker='dash', size=25, alpha=1, line_width=0.6, angle=90,
                                    xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID')
             # adjust the max_samples parameter if the plot is too slow or if you think it can handle even more spikes
             raster = decimate(scatter, max_samples=40000).opts(width=1500, height=800) * boxes
-        else:
+            
+        if spikes_overlay and not decimate_plot:
+            print("test2")
+            raster = hv.NdOverlay({i: hv.Spikes(data_array[i], kdims='Time').opts(position=0.1*i)
+                       for i in range(len(data_array))}).opts(yticks=[((i+1)*0.1-0.05, i) for i in range(len(data_array))]) * boxes # Note: to work, boxes must be added as a layer HERE
+        
+            raster = raster.opts(
+            opts.Spikes(height=(10*len(data_array)), width=(1500), line_width=0.15, spike_length=0.1),
+            opts.NdOverlay(show_legend=False))     
+        
+        # NOTE: doesn't work!!!
+        if spikes_overlay and decimate_plot: 
+            print("test3")
+            raster = hv.NdOverlay({i: hv.Spikes(data_array[i], kdims='Time').opts(position=0.1*i)
+                       for i in range(len(data_array))}).opts(yticks=[((i+1)*0.1-0.05, i) for i in range(len(data_array))]) * boxes # Note: to work, boxes must be added as a layer HERE
+        
+            raster = raster.opts(
+            opts.Spikes(height=(10*len(data_array)), width=(1500), line_width=0.15, spike_length=0.1),
+            opts.NdOverlay(show_legend=False))  
+            raster = decimate(raster, max_samples=40000)
+            
+        if not spikes_overlay and not decimate_plot:
+            # plot ret [(spike_time, unit_id)] as scatter object from holoviews 
+            scatter = hv.Scatter(ret)
             scatter = scatter.opts(color='blue', marker='dash', size=12, alpha=1, line_width=0.2, angle=90)
             raster = scatter.opts(width=1500, height=800, xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID') * boxes
 
