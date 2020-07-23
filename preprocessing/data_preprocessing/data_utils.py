@@ -265,9 +265,13 @@ class TimeConversion(object):
 
         convert_start = [time * m + b for i, time in enumerate(start)]
         convert_stop = [time * m + b for i, time in enumerate(stop)]
-
-        convert_start = make_msec(convert_start)
-        convert_stop = make_msec(convert_stop)
+        
+        #### NOTE: depending on the output set-up, comment/uncomment. 
+        ##### Generally, can use the highlights options on the interactive plot
+        ##### to indicate if time-scales are not coherent between the data and the 
+        ##### pauses. 
+        #convert_start = make_msec(convert_start)
+        #convert_stop = make_msec(convert_stop)
 
         return convert_start, convert_stop
 

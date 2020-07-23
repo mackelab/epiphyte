@@ -1,4 +1,6 @@
 # Project files
+
+
 dev/*
 
 data_preprocessing/__pycache__/
@@ -19,6 +21,11 @@ analysis/.ipynb_checkpoints/
 analysis/examples/.ipynb_checkpoints/
 
 epiphyte/
+
+mock_data/patient*
+mock_data/session*
+mock_data/unit*
+mock_data/movie*
 
 movie_annotation/__pycache__/
 analysis/__pycache__/

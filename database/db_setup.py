@@ -456,6 +456,9 @@ class MovieSkips(dj.Computed):
             
             starts, stops, values = time_conversion.convert_skips()
             
+            ###### hacky fix for the interactive plot 
+            ##### TODO: get pausing time stamps to align in magnitude 
+            
             notes = "time points of continuous watch, extracted from watch log - {}".format(datetime.today())
              
             self.insert1(

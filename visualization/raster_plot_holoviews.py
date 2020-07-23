@@ -11,6 +11,7 @@ from bokeh.models import HoverTool
 # use Bokeh as the underlying plotting library
 hv.extension('bokeh')
 import sys
+import os
 # import everything database related
 from database.db_setup import *
 
@@ -31,7 +32,7 @@ default_session_nr = 1
 # define which regions should be able to highlight
 # keep in mind that each option has to be implemented further below
 # highlights = ["None", "Pause", "Continuous Watch"]
-highlights = ["None", "Pause"]
+highlights = ["None", "Pause", "Skips"]
 
 
 # instantiate the input text boxes where information can be added to enable uploading data to the database
@@ -49,6 +50,7 @@ hover = HoverTool(tooltips=[
     ("index", "$index"),
 ])
 boxes.opts(tools=[hover])
+
 
 #################################
 # Fxns for making static raster #
@@ -75,8 +77,6 @@ def make_static_raster():
     This function first checks if the static images have already been generated and saved locally. If not, 
     will generate ones for any patients that have been added since last run. 
     """
-    ## Turn matplotlib to non-interactive mode, so that final plot output is suppressed. 
-    plt.ioff()
     
     patient_ids, session_ids = get_patient_session_info()
     print("Patient ids: {}".format(patient_ids))
@@ -91,8 +91,9 @@ def make_static_raster():
     # for the list of patients in the database, check for existing static rasterplots
     for patient in patient_ids:
         session_id = session_ids[0]
-        pat_filename = os.path.join(save_dir, "raster_plot_{}.png".format(patient))
+        pat_filename = os.path.join(save_dir, "raster_plot_{}".format(patient))
         
+        print("test_confirm")
         if os.path.exists(pat_filename):
             print("Static raster exists for patient {}.".format(patient))
             continue
@@ -106,7 +107,7 @@ def make_static_raster():
         
         all_data = get_spikes_from_patient_session(patient, session_id) # this might not work yet
         
-        fig = plt.figure(figsize=(60, 20))
+        fig = plt.figure(figsize=(240,80))
         ax1 = fig.add_subplot(121)
         ax1.eventplot(all_data, linewidths=0.1, linelengths=1.2)
         
@@ -117,11 +118,11 @@ def make_static_raster():
         ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
         ax1.set_yticks([])
         #ax1.xaxis.set_tick_params(labelsize=30)
-        ax1.tick_params(axis='x', labelsize=15 )
+        ax1.tick_params(axis='x', labelsize=60 )
         
-        plt.title('Spikes, Patient {}'.format(patient), size=25)
-        plt.xlabel('Time in neural recording system scale (msec)', size=20)
-        plt.ylabel('Units', size=20)
+        plt.title('Spikes, Patient {}'.format(patient), size=100)
+        plt.xlabel('Time in neural recording system scale (msec)', size=80)
+        plt.ylabel('Units', size=80)
     
         ax1.spines['left'].set_visible(False)
         ax1.spines['right'].set_visible(False)
@@ -138,6 +139,22 @@ def make_static_raster():
         ## only for troubleshooting
         # plt.show()
     
+# class StaticRaster:
+#     """
+#     Class structure to feed in the global parameters of patient & session information to 
+#     static raster generation.
+    
+#     note:: this doesn't need to be a class. 
+#     """
+#     def __init__(self):
+#         patient_ids, session_id = get_patient_session_info()
+        
+#         self.patient_ids = patient_ids
+#         self.session_id = session_id 
+        
+#     def class_static_raster(self):
+#         make_static_raster(self.patient_ids, self.session_id)
+        
 ###############################
 # end static raster functions #
 ###############################
@@ -152,67 +169,35 @@ class RasterPlot(param.Parameterized):
 
     @param.depends('patient_id', 'session_nr', 'highlight')
     def load_raster(self):
-        # load info from the database
         nr_units = get_number_of_units_for_patient(self.patient_id)
         neural_rec_time = get_neural_rectime_of_patient(self.patient_id, self.session_nr) / 1000
-        
-        # collect all units for a given patient from the database 
         data_array = []
         for i in range(nr_units):
             spikes = get_spiking_activity(self.patient_id, self.session_nr, i)
             # delete downloaded file from working directory
             if os.path.exists("neural_rec_time.npy"):
                 os.remove("neural_rec_time.npy")
-            data_array.append(list(np.array(spikes) - neural_rec_time[0])) # subtraction operation resets the x-axis & spike times to start at 0. a matter of taste. 
-        
-        # reformat unit/spiking data to make list with len n_units * n_spikes and format (spike_time, unit_id)
+            data_array.append(list(np.array(spikes) - neural_rec_time[0]))
+
         ret = []
         for i in range(len(data_array)):
             # i is unit ID
             for j in data_array[i]:
                 # j is spike time
                 ret.append((j, i))
-        
-        # plot ret [(spike_time, unit_id)] as scatter object from holoviews 
-        # scatter = hv.Scatter(ret)
+
+        scatter = hv.Scatter(ret)
 
         # Toggle variable decimate_plot to specify whether you'd like to use decimate
         # Decimate only plots a maximum number of elements at each zoom step, this way the plot is much faster
         # If decimate is not activated, the plot is clean, but very slow
-        decimate_plot = False
-        spikes_overlay = True
-        if decimate_plot and not spikes_overlay:
-            print("test1")
-            # plot ret [(spike_time, unit_id)] as scatter object from holoviews 
-            scatter = hv.Scatter(ret)
+        decimate_plot = True
+        if decimate_plot:
             scatter = scatter.opts(color='blue', marker='dash', size=25, alpha=1, line_width=0.6, angle=90,
                                    xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID')
             # adjust the max_samples parameter if the plot is too slow or if you think it can handle even more spikes
             raster = decimate(scatter, max_samples=40000).opts(width=1500, height=800) * boxes
-            
-        if spikes_overlay and not decimate_plot:
-            print("test2")
-            raster = hv.NdOverlay({i: hv.Spikes(data_array[i], kdims='Time').opts(position=0.1*i)
-                       for i in range(len(data_array))}).opts(yticks=[((i+1)*0.1-0.05, i) for i in range(len(data_array))]) * boxes # Note: to work, boxes must be added as a layer HERE
-        
-            raster = raster.opts(
-            opts.Spikes(height=(10*len(data_array)), width=(1500), line_width=0.15, spike_length=0.1),
-            opts.NdOverlay(show_legend=False))     
-        
-        # NOTE: doesn't work!!!
-        if spikes_overlay and decimate_plot: 
-            print("test3")
-            raster = hv.NdOverlay({i: hv.Spikes(data_array[i], kdims='Time').opts(position=0.1*i)
-                       for i in range(len(data_array))}).opts(yticks=[((i+1)*0.1-0.05, i) for i in range(len(data_array))]) * boxes # Note: to work, boxes must be added as a layer HERE
-        
-            raster = raster.opts(
-            opts.Spikes(height=(10*len(data_array)), width=(1500), line_width=0.15, spike_length=0.1),
-            opts.NdOverlay(show_legend=False))  
-            raster = decimate(raster, max_samples=40000)
-            
-        if not spikes_overlay and not decimate_plot:
-            # plot ret [(spike_time, unit_id)] as scatter object from holoviews 
-            scatter = hv.Scatter(ret)
+        else:
             scatter = scatter.opts(color='blue', marker='dash', size=12, alpha=1, line_width=0.2, angle=90)
             raster = scatter.opts(width=1500, height=800, xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID') * boxes
 
@@ -226,28 +211,23 @@ class RasterPlot(param.Parameterized):
         start_times_pauses = start_times_pauses - neural_rec_time[0]
         stop_times_pauses = stop_times_pauses - neural_rec_time[0]
 
-#         cont_watch_values = (
-#                     ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
-#                 self.session_nr)).fetch("values")[0]
-#         ind_cont_watch = np.where(cont_watch_values != 0)
-#         start_cont_watch = (
-#                     ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
-#                 self.session_nr)).fetch("start_times")[0]
-#         stop_cont_watch = (ContinuousWatchSegments() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(
-#             self.session_nr)).fetch("stop_times")[0]
-#         start_cont_watch = start_cont_watch[ind_cont_watch] - neural_rec_time[0]
-#         stop_cont_watch = stop_cont_watch[ind_cont_watch] - neural_rec_time[0]
+        start_times_skips = \
+        (MovieSkips() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(self.session_nr)).fetch("start_times")[0]
+        stop_times_skips = \
+        (MovieSkips() & "patient_id={}".format(self.patient_id) & "session_nr={}".format(self.session_nr)).fetch("stop_times")[0]
+        start_times_skips = start_times_skips - neural_rec_time[0]
+        stop_times_skips = stop_times_skips - neural_rec_time[0]
 
         # The user can select a region which should be highlighted on top of the raster plot.
         # Here every option of the highlights variable from above has to be implemented
-        if self.highlight == "Pause":
+        if self.highlight == "Pauses":
             ov = hv.NdOverlay(
-                {i: hv.VSpan(start_times_pauses[i], stop_times_pauses[i]).opts(color='orange', alpha=0.4) for i in
-                 range(len(start_times_pauses))})
-#         if self.highlight == "Continuous Watch":
-#             ov = hv.NdOverlay(
-#                 {i: hv.VSpan(start_cont_watch[i], stop_cont_watch[i]).opts(color='green', alpha=0.4) for i in
-#                  range(len(start_cont_watch))})
+                {i: hv.VSpan(start_times_pauses[i], stop_times_pauses[i]).opts(color='orange', alpha=0.4) for i in range(len(start_times_pauses))})
+            
+        if self.highlight == "Skips":
+            ov = hv.NdOverlay(
+                {i: hv.VSpan(start_times_skips[i], stop_times_skips[i]).opts(color='green', alpha=0.4) for i in range(len(start_times_skips))})
+            
         if self.highlight == 'None':
             ov = hv.NdOverlay({i: hv.VSpan(0, 0).opts(color='white', alpha=0) for i in range(1)})
 
@@ -316,7 +296,7 @@ class AddingToDB(param.Parameterized):
                                   skip_duplicates=True)
                 return "## Data added to database"
             except:
-                s = "## Uploading to database didn't work. ### Make sure that annotator id corresponds to an existing id."
+                s = "## Uploading to database didn't work."
                 e = sys.exc_info()[0]
                 return s + str(e)
         else:

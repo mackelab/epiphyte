@@ -215,7 +215,7 @@ def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
         file.close()
         
         
-def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, stimulus_len=83.816666):
+def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, stimulus_len=83.816666): 
     """
     Generate a movie watchlog file with pauses and skips.
     """
