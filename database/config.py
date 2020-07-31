@@ -1,11 +1,13 @@
 import os
-# pathlib - oop file sys -- each path acts as an obj 
-# from pathlib import Path 
+from pathlib import Path
   
-PATH_TO_REPO = "/home/hitchhiker/Documents/DeepHumanVision_deploy"
-#PATH_TO_REPO = Path("/home/hitchhiker/Documents/DeepHumanVision_deploy")
+CWD = Path.cwd() # makes an object out of the current working directory, "*/Epiphyte/database"
+PATH_TO_REPO = CWD.parent # reduces current working directory object to just the repository location on drive.
 
-PATH_TO_DATA = os.path.join(PATH_TO_REPO, "mock_data") 
+## PATH VARIABLES 
+## Note: expects existing directory structure -- configure to own data structure to adjust to 
+## non-mock data sets, or place actual data into the mock_data folder and rename at will. 
+PATH_TO_DATA = os.path.join(PATH_TO_REPO, "mock_data")
 PATH_TO_LABELS = os.path.join(PATH_TO_DATA, "movie_labels")
 PATH_PATIENT_ALIGNED_LABELS = os.path.join(PATH_TO_DATA, "patient_aligned_labels")
 PATH_TO_PATIENT_DATA = os.path.join(PATH_TO_DATA, "patient_data")
