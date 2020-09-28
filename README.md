@@ -8,9 +8,17 @@ We present a toolbox for organizing neural activity alongside meta-data and stim
 #### Note: These installation instructions assume that you have basic fluency in Python and command line interfaces. If you would like to set-up this package from scratch, check out the more robust instructions [here.](https://github.com/mackelab/Epiphyte/wiki/Installation)
 
 ### (1) Install the required packages by running the following command (Note: we highly recommend doing so within a virtual environment with Python==3.7):
+
+If using PyPip:
 ```
-pip install -r requirements.txt
+pip install -r requirements_pip.txt
 ```
+
+If using Conda:
+```
+conda create --name <env> --file requirements_conda.txt
+```
+
 
 ### (2) Go to the top-level folder of Epiphyte and install the package itself
 ```
