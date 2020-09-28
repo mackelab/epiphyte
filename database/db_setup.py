@@ -10,7 +10,7 @@ import preprocessing.data_preprocessing.data_utils as data_utils
 import annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
-dhv_schema = dj.schema('db_deploy_mock', locals())
+epi_schema = dj.schema('epiphyte_mock', locals())
 
 dj.config['stores'] = {
     'shared': dict(
@@ -27,7 +27,7 @@ dj.config['stores'] = {
     }}
 
 
-@dhv_schema
+@epi_schema
 class Patient(dj.Lookup):
     definition = """
     # general patient data, imported from config file
@@ -44,7 +44,7 @@ class Patient(dj.Lookup):
     contents = config.patients
 
 
-@dhv_schema
+@epi_schema
 class Annotator(dj.Lookup):
     definition = """
     # annatotors of the video, imported from config file
@@ -58,7 +58,7 @@ class Annotator(dj.Lookup):
     contents = config.annotators
 
 
-@dhv_schema
+@epi_schema
 class LabelProcessingMethod(dj.Lookup):
     definition = """
     # algorithms related to movie annotations
@@ -69,7 +69,7 @@ class LabelProcessingMethod(dj.Lookup):
     contents = config.algorithms_labels
 
 
-@dhv_schema
+@epi_schema
 class MovieSession(dj.Imported):
     definition = """
     # data of individual movie watching sessions
@@ -131,7 +131,7 @@ class MovieSession(dj.Imported):
                               }, skip_duplicates=True)
 
 
-@dhv_schema
+@epi_schema
 class LabelName(dj.Lookup):
     definition = """
     # names of existing labels, imported from config file
@@ -141,7 +141,7 @@ class LabelName(dj.Lookup):
     contents = config.label_names
 
 
-@dhv_schema
+@epi_schema
 class MovieAnnotation(dj.Imported):
     definition = """
     # information about video annotations (e.g. labels of characters); 
@@ -184,7 +184,7 @@ class MovieAnnotation(dj.Imported):
                 print("Added label {} to database.".format(name))
 
             
-@dhv_schema
+@epi_schema
 class ElectrodeUnit(dj.Imported):
     definition = """
     # Contains information about the implanted electrodes of each patient
@@ -244,7 +244,7 @@ class ElectrodeUnit(dj.Imported):
                              skip_duplicates=True)
 
 
-@dhv_schema
+@epi_schema
 class SpikeTimesDuringMovie(dj.Imported):
     definition = """
     # This table contains all spike times of all units of all patients in Neural Recording Time
@@ -259,13 +259,6 @@ class SpikeTimesDuringMovie(dj.Imported):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
         
         for index_session in range(0, len(patient_ids)):
-            
-#             path_binaries = '{}/spikes/'.format(config.PATH_TO_DATA)
-#             folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-#                 session_nrs[index_session]) + "/"
-            
-#             if not os.path.exists(folder):
-#                 os.makedirs(folder)
                 
             path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
             path_channels = '{}/session_data/'.format(config.PATH_TO_DATA)
@@ -304,7 +297,7 @@ class SpikeTimesDuringMovie(dj.Imported):
                     #print("Added spikes from {} of patient {} to data base".format(csc_nr + " " + unit, patient_ids[index_session]))
 
 
-@dhv_schema
+@epi_schema
 class ProcessedMovieAnnotation(dj.Computed):
     definition = """
     # This table contains information about processed annotations, so different algorithms can be used to for example average labels
@@ -337,7 +330,7 @@ class ProcessedMovieAnnotation(dj.Computed):
             self.Entry.insert(entry_keys)
 
     
-@dhv_schema
+@epi_schema
 class PatientAlignedMovieAnnotation(dj.Computed):
     definition = """
     # Movie Annotations aligned to patient time / time points are in neural recording time
@@ -373,7 +366,7 @@ class PatientAlignedMovieAnnotation(dj.Computed):
         print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
 
 
-@dhv_schema
+@epi_schema
 class UnitLevelDataCleaning(dj.Imported):
     definition = """
     # Contains information about data cleaning on a unit-level
@@ -408,22 +401,8 @@ class UnitLevelDataCleaning(dj.Imported):
                                   'data': "{}/{}".format(folder, filename)},
                                  skip_duplicates=True)
 
-##  TODO: decide if this table should removed for deploy version
-@dhv_schema
-class PatientLevelDataCleaning(dj.Manual):
-    definition = """
-    # Contains information about data cleaning on a patient-level 
-    # (e.g. annotated time frames, where all units are firing too high)
-    -> MovieSession                    # number of movie session
-    -> Annotator                       # who created the cleaning?
-    name: varchar(16)                  # unique name for data cleaning
-    ---
-    data: attach                       # actual data
-    description = "" : varchar(128)    # description of data cleaning
-    """
 
-
-@dhv_schema
+@epi_schema
 class MovieSkips(dj.Computed):
     definition = """
     # This table Contains start and stop time points, where the watching behaviour of the patient changed from 
@@ -468,7 +447,7 @@ class MovieSkips(dj.Computed):
                 skip_duplicates=True)
             
                     
-@dhv_schema
+@epi_schema
 class MoviePauses(dj.Computed):
     definition = """
     # This table contains information about pauses in movie playback;
@@ -508,7 +487,7 @@ class MoviePauses(dj.Computed):
                 skip_duplicates=True)
 
             
-@dhv_schema
+@epi_schema
 class ManualAnnotation(dj.Manual):
     definition = """
     -> MovieSession                    # number of movie session
@@ -523,20 +502,40 @@ class ManualAnnotation(dj.Manual):
     additional_information="": varchar(46) # further notes
     """
 
-
 #######################
 # Retrieval Functions #
 #######################
 
 def get_brain_region(patient_id, unit_id):
-   # name_vec = (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id)).fetch('brain_region')[0]
+    """
+    Returns the brain region of a given unit for a given patient. 
     
-#     region = np.load(name_vec)
-    
-#     if os.path.exists(name_vec):
-#         os.remove(name_vec)  
-    
+    """
     return (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id)).fetch('brain_region')[0]
+
+def get_cscs_for_patient(patient_id, session_nr):
+    """
+    For a given patient/session, returns a list of continuously sampling channels. 
+    """
+    vec = (ElectrodeUnit & "patient_id={}".format(patient_id) 
+                        & "session_nr={}".format(session_nr)).fetch("csc")
+    ret = np.unique(vec)
+    
+    return ret
+
+def get_date_and_time_session(patient_id, session_nr):
+    """
+    Get the data and time of an experimental session. 
+    
+    Output:
+    np.array: date object, time object
+    """
+    date, time = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("date", "time")
+     
+    date = date[0]
+    time = time[0]
+    
+    return date, time
 
 def get_dts_of_patient(patient_id, session_nr):
     """
@@ -635,41 +634,6 @@ def get_patient_aligned_annotations(patient_id, label_name, annotator_id, annota
     
     return values, starts, stops
 
-#### unnecessary?
-def get_patient_level_cleaning_vec_from_db(patient_id, session_nr, name_of_vec, annotator_id):
-    """
-    This function returns the patient level cleaning vector from the database
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param name_of_vec: name of the vector that should be extracted (string)
-    :param annotator_id: ID of annotator of annotation (string)
-    :return extracted vector from database (np.array)
-    """
-    name_pts_cont_watch = (PatientLevelDataCleaning() & "name='{}'".format(name_of_vec)
-                           & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr)
-                           & "annotator_id='{}'".format(annotator_id)).fetch("data")[0]
-    cont_watch = np.load(name_pts_cont_watch)
-    
-    if os.path.exists(name_pts_cont_watch):
-        os.remove(name_pts_cont_watch)
-        
-    return cont_watch
-
-def get_patient_level_data_cleaning(patient_id, session_nr, vector_name):
-    """
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param vector_name: name ov the patient level cleaning vector (string)
-    :return extracted vector from database (np.array)
-    """
-    name_pts_cont_watch = \
-    (PatientLevelDataCleaning() & "name='{}'".format(vector_name) & "patient_id = '{}'".format(patient_id) & "session_nr='{}'".format(session_nr)).fetch("data")[0]
-    cont_watch = np.load(name_pts_cont_watch)
-    os.remove(name_pts_cont_watch)
-
-    return cont_watch
-
-####
 
 def get_pts_of_patient(patient_id, session_nr):
     """
@@ -685,27 +649,26 @@ def get_pts_of_patient(patient_id, session_nr):
         os.remove(name_vec)  
     
     return pts
+    
 
-def get_spiking_activity(patient_id, session_nr, unit_id):
+def get_session_info(patient_id):
     """
-    Extract spiking vector from data base.
-    :param patient_id: ID of patient
-    :param session_nr: session number
-    :param unit_id: Unit ID of which spiking activity shall be extracted
+    For a specific patient, get the session information. 
+    
+    input:
+    patient_id: int, patient id number
+    returns: 
+    array or int, session info
     """
-    try:
-        spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
-            session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
-    except:
-        print("The spiking data you were looking for doesn't exist in the data base.")
-        return -1
+    sessions = (MovieSession & "patient_id={}".format(patient_id)).fetch("session_nr")
 
-    spike_vec = np.load(spikes)
+    if len(sessions) == 1:
+        ret = int(sessions[0])
+    else:
+        ret = sessions
+        
+    return ret
 
-    if os.path.exists(spikes):
-        os.remove(spikes)
-
-    return spike_vec
 
 def get_spikes_from_brain_region(patient_id, session_nr, brain_region):
     """
@@ -728,13 +691,34 @@ def get_spikes_from_patient_session(patient_id, session_nr):
     given session.  
     """
     
-    unit_ids = get_unit_ids_for_patient(patient_id)
+    unit_ids = get_unit_ids_for_patient(patient_id, session_nr)
     
     spikes = []
     for i in unit_ids:
         spikes.append(get_spiking_activity(patient_id, session_nr, i))
         
     return spikes 
+
+def get_spiking_activity(patient_id, session_nr, unit_id):
+    """
+    Extract spiking vector from data base.
+    :param patient_id: ID of patient
+    :param session_nr: session number
+    :param unit_id: Unit ID of which spiking activity shall be extracted
+    """
+    try:
+        spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
+            session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
+    except:
+        print("The spiking data you were looking for doesn't exist in the data base.")
+        return -1
+
+    spike_vec = np.load(spikes)
+
+    if os.path.exists(spikes):
+        os.remove(spikes)
+
+    return spike_vec
 
 def get_start_stop_times_pauses(patient_id, session_nr):
     """
@@ -747,6 +731,19 @@ def get_start_stop_times_pauses(patient_id, session_nr):
     stop_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("stop_times")[0]
     
     return start_times, stop_times
+
+def get_stimulus_name(stim_id):
+    """
+    Get stimulus name based on the id number. 
+    """
+    patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+    patient = patient_ids[0]
+    session = session_nrs[0]
+    
+    name = (ScreeningAnnotation & "patient_id={}".format(patient) & "session_nr={}".format(session)
+          & "position='{}'".format("pre") & "stim_id={}".format(stim_id)).fetch("stim_name")[0]
+    
+    return name 
 
 def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
     """
@@ -768,13 +765,26 @@ def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
     
     return unit_id
 
-def get_unit_ids_for_patient(patient_id):
+def get_unit_ids_in_channel(patient_id, session_nr, csc):
+    """
+    This function returns the unit IDs from within a certain brain region of a patient
+    :param patient_id: patient ID (int)
+    :param session_nr: session id number (int)
+    :param csc: csc number, aka the channel id (int)
+    :return list of unit IDs which were recorded from the csc/channel (np.array) 
+    """
+    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)
+                & "csc={}".format(csc)).fetch("unit_id")
+    
+    return name_vec
+
+def get_unit_ids_for_patient(patient_id, session_nr):
     """
     Returns a list of all unit ids for a given patient. 
     
     TODO: add session information to the ElectrodeUnit() table. Note: actually, for us, this might not exist.
     """
-    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id)).fetch("unit_id")
+    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("unit_id")
     
     return name_vec
 
@@ -804,3 +814,17 @@ def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
     if os.path.exists(name_vec):
         os.remove(name_vec)
     return cleaning_vec
+
+def get_unit_type(patient_id, session_nr, unit_id):
+    """
+    Get the cluster type of a unit (either single or multi).
+    
+    :param patient_id: patient ID (int)
+    :param session_nr: session number of experiment (int)
+    :param unit_id: ID of recorded unit (int)
+ 
+    :return unit type (char)
+    """
+    name_vec = (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr) & "unit_id='{}'".format(unit_id)).fetch('unit_type')[0]
+    
+    return name_vec

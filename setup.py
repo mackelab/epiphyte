@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="DeepHumanVision-Mackelab", 
+    name="Epiphyte", 
     version="0.0.1",
     author="Alana Darcher, Tamara Mueller",
-    author_email="tamara.mueller@tum.de",
-    description="Processing pipeline for single-unit neural activity",
-    long_description="Processing pipeline for high-dimensional single-unit neural activity colligated with meta data",
+    author_email="alana.darcher@gmail.com",
+    description="a Python toolkit for high-dimensional neural data recorded during naturalistic, continuous stimuli",
+    long_description="a Python toolkit for high-dimensional neural data recorded during naturalistic, continuous stimuli",
     long_description_content_type="text/markdown",
-    url="https://github.com/mackelab/DeepHumanVision_deploy",
+    url="https://github.com/mackelab/Epiphyte",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
