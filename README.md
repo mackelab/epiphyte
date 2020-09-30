@@ -42,3 +42,8 @@ sudo docker-compose up -d
 - run [database/database_set_up.ipynb](https://github.com/mackelab/Epiphyte/blob/master/database/database_set_up.ipynb) notebook to fill the database with the mock data
 - now everything should be set up and ready to go! 
 - for troubleshooting issues, check out [here](https://github.com/datajoint/mysql-docker).
+
+
+### Contact
+
+If you have questions/comments/suggestions, either open an issue within GitHub, or feel free to email: alana.darcher@gmail.com
