@@ -16,6 +16,10 @@ import os
 from database.db_setup import *
 
 
+##############################################
+# Setting formatting and plotting parameters #
+##############################################
+
 # set parameters for patient IDs and session numbers of experiment sessions
 patients = config.patients
 sessions = config.sessions
@@ -32,7 +36,7 @@ default_session_nr = 1
 # define which regions should be able to highlight
 # keep in mind that each option has to be implemented further below
 # highlights = ["None", "Pause", "Continuous Watch"]
-highlights = ["None", "Pause", "Skips"]
+highlights = ["None", "Pauses", "Skips"]
 
 
 # instantiate the input text boxes where information can be added to enable uploading data to the database
@@ -69,7 +73,7 @@ def get_patient_session_info():
     
     return patient_ids, session_nrs
  
-def make_static_raster():
+def make_static_raster(reset_timescale=False):
     # TODO modify to allow for multiple sessions for a single patient  
     """
     Creates the static rasterplots for each patient and saves in the directory ../visualization/images/.
@@ -91,11 +95,17 @@ def make_static_raster():
     # for the list of patients in the database, check for existing static rasterplots
     for patient in patient_ids:
         session_id = session_ids[0]
-        pat_filename = os.path.join(save_dir, "raster_plot_{}".format(patient))
         
-        print("test_confirm")
-        if os.path.exists(pat_filename):
-            print("Static raster exists for patient {}.".format(patient))
+        # if not reset_timescale:
+        #     pat_filename = os.path.join(save_dir, "raster_plot_{}".format(patient))
+        
+        if reset_timescale:
+            pat_filename = os.path.join(save_dir, "raster_plot_{}_rescaled".format(patient))
+        else:
+            pat_filename = os.path.join(save_dir, "raster_plot_{}".format(patient))
+
+        if os.path.exists("{}.png".format(pat_filename)):
+            print("Static raster exists for patient {}. Skipping to next.".format(patient))
             continue
         
         print("Generating static raster for patient {}...".format(patient))
@@ -107,7 +117,7 @@ def make_static_raster():
         
         all_data = get_spikes_from_patient_session(patient, session_id) # this might not work yet
         
-        fig = plt.figure(figsize=(240,80))
+        fig = plt.figure(figsize=(80,30))
         ax1 = fig.add_subplot(121)
         ax1.eventplot(all_data, linewidths=0.1, linelengths=1.2)
         
@@ -118,11 +128,11 @@ def make_static_raster():
         ax1.set_aspect(abs((xright-xleft)/(ybottom-ytop))*ratio)
         ax1.set_yticks([])
         #ax1.xaxis.set_tick_params(labelsize=30)
-        ax1.tick_params(axis='x', labelsize=60 )
+        ax1.tick_params(axis='x', labelsize=15 )
         
-        plt.title('Spikes, Patient {}'.format(patient), size=100)
-        plt.xlabel('Time in neural recording system scale (msec)', size=80)
-        plt.ylabel('Units', size=80)
+        plt.title('Spikes, Patient {}'.format(patient), size=25)
+        plt.xlabel('Time in neural recording system scale (msec)', size=20)
+        plt.ylabel('Units', size=20)
     
         ax1.spines['left'].set_visible(False)
         ax1.spines['right'].set_visible(False)
@@ -138,25 +148,10 @@ def make_static_raster():
         
         ## only for troubleshooting
         # plt.show()
-    
-# class StaticRaster:
-#     """
-#     Class structure to feed in the global parameters of patient & session information to 
-#     static raster generation.
-    
-#     note:: this doesn't need to be a class. 
-#     """
-#     def __init__(self):
-#         patient_ids, session_id = get_patient_session_info()
-        
-#         self.patient_ids = patient_ids
-#         self.session_id = session_id 
-        
-#     def class_static_raster(self):
-#         make_static_raster(self.patient_ids, self.session_id)
+
         
 ###############################
-# end static raster functions #
+# Interactive raster functions #
 ###############################
 
 class RasterPlot(param.Parameterized):
