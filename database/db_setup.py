@@ -26,6 +26,9 @@ dj.config['stores'] = {
         'location': os.path.abspath('./dj-store')
     }}
 
+########################################################
+# Table Definitions (in order of population procedure) #
+########################################################
 
 @epi_schema
 class Patient(dj.Lookup):
@@ -43,7 +46,6 @@ class Patient(dj.Lookup):
 
     contents = config.patients
 
-
 @epi_schema
 class Annotator(dj.Lookup):
     definition = """
@@ -56,18 +58,6 @@ class Annotator(dj.Lookup):
     """
 
     contents = config.annotators
-
-
-@epi_schema
-class LabelProcessingMethod(dj.Lookup):
-    definition = """
-    # algorithms related to movie annotations
-    algorithm_name: varchar(16)                     # unique name for each algorithm
-    ---
-    description: varchar(128)                    # description of algorithm
-    """
-    contents = config.algorithms_labels
-
 
 @epi_schema
 class MovieSession(dj.Imported):
@@ -130,60 +120,6 @@ class MovieSession(dj.Imported):
                               'channel_names': path_channel_names
                               }, skip_duplicates=True)
 
-
-@epi_schema
-class LabelName(dj.Lookup):
-    definition = """
-    # names of existing labels, imported from config file
-    label_name: varchar(32)   # label name
-    """
-
-    contents = config.label_names
-
-
-@epi_schema
-class MovieAnnotation(dj.Imported):
-    definition = """
-    # information about video annotations (e.g. labels of characters); 
-    # this table contains start and end time points and values of the segments of the annotations;
-    # all time points are in Neural Recording Time;
-    -> Annotator   # creator of movie annotation
-    -> LabelName   # name of annotation
-    annotation_date: date    # date of annotation
-    ---
-    values: longblob       # list of values that represent label
-    start_times: longblob  # list of start times of label segments in movie play time (PTS)
-    stop_times: longblob   # list of stop times of label segments in movie play time (PTS)
-    category: varchar(32)  # category of label; e.g. 'character', 'emotion', 'location'
-    indicator_function: longblob # full indicator function, one value for each movie frame
-    additional_information="":varchar(30) # space for additional information
-    """
-
-    def _make_tuples(self, key):
-        directory = "{}/movie_annotation/".format(config.PATH_TO_DATA)
-        for filename in os.listdir(directory):
-            if os.path.isfile(directory + filename) and filename.endswith(".npy"):
-                label_id, name, annotator, date, category = filename[:-4].split("_")
-                content = np.load("{}{}".format(directory, filename))
-                
-                values = np.array(content[0])
-                start_times = np.array(content[1])
-                stop_times = np.array(content[2])
-                
-                ind_func = processing_labels.make_label_from_start_stop_times(values, start_times, stop_times, config.PTS_MOVIE_new)
-                
-                self.insert1({'label_name': name,
-                      'annotator_id': annotator,
-                      'annotation_date': date[0:4] + "-" + date[4:6] + "-" + date[6:8],
-                      'category': category,
-                      'values': values,
-                      'start_times': start_times,
-                      'stop_times': stop_times,
-                      'indicator_function': np.array(ind_func)
-                      }, skip_duplicates=True)
-                print("Added label {} to database.".format(name))
-
-            
 @epi_schema
 class ElectrodeUnit(dj.Imported):
     definition = """
@@ -243,7 +179,6 @@ class ElectrodeUnit(dj.Imported):
                               'brain_region': channel_names[index]},
                              skip_duplicates=True)
 
-
 @epi_schema
 class SpikeTimesDuringMovie(dj.Imported):
     definition = """
@@ -296,6 +231,58 @@ class SpikeTimesDuringMovie(dj.Imported):
                                   'session_nr': session_nrs[index_session], 'spike_times': spikes_file}, skip_duplicates=True)
                     #print("Added spikes from {} of patient {} to data base".format(csc_nr + " " + unit, patient_ids[index_session]))
 
+@epi_schema
+class LabelProcessingMethod(dj.Lookup):
+    definition = """
+    # algorithms related to movie annotations
+    algorithm_name: varchar(16)                     # unique name for each algorithm
+    ---
+    description: varchar(128)                    # description of algorithm
+    """
+    contents = config.algorithms_labels
+
+@epi_schema
+class MovieAnnotation(dj.Imported):
+    definition = """
+    # information about video annotations (e.g. labels of characters); 
+    # this table contains start and end time points and values of the segments of the annotations;
+    # all time points are in Neural Recording Time;
+    -> Annotator   # creator of movie annotation
+    -> LabelName   # name of annotation
+    annotation_date: date    # date of annotation
+    ---
+    values: longblob       # list of values that represent label
+    start_times: longblob  # list of start times of label segments in movie play time (PTS)
+    stop_times: longblob   # list of stop times of label segments in movie play time (PTS)
+    category: varchar(32)  # category of label; e.g. 'character', 'emotion', 'location'
+    indicator_function: longblob # full indicator function, one value for each movie frame
+    additional_information="":varchar(30) # space for additional information
+    """
+
+    def _make_tuples(self, key):
+        directory = "{}/movie_annotation/".format(config.PATH_TO_DATA)
+        for filename in os.listdir(directory):
+            if os.path.isfile(directory + filename) and filename.endswith(".npy"):
+                label_id, name, annotator, date, category = filename[:-4].split("_")
+                content = np.load("{}{}".format(directory, filename))
+
+                values = np.array(content[0])
+                start_times = np.array(content[1])
+                stop_times = np.array(content[2])
+
+                ind_func = processing_labels.make_label_from_start_stop_times(values, start_times, stop_times,
+                                                                              config.PTS_MOVIE_new)
+
+                self.insert1({'label_name': name,
+                              'annotator_id': annotator,
+                              'annotation_date': date[0:4] + "-" + date[4:6] + "-" + date[6:8],
+                              'category': category,
+                              'values': values,
+                              'start_times': start_times,
+                              'stop_times': stop_times,
+                              'indicator_function': np.array(ind_func)
+                              }, skip_duplicates=True)
+                print("Added label {} to database.".format(name))
 
 @epi_schema
 class ProcessedMovieAnnotation(dj.Computed):
@@ -318,7 +305,7 @@ class ProcessedMovieAnnotation(dj.Computed):
     def key_source(self):
         # dj.U() is used to promote a non primary-key column into a primary key column
         return dj.U('last_entry_date') * (
-                    LabelName.aggr(MovieAnnotation, last_entry_date='MAX(annotation_date)') * LabelProcessingMethod)
+                LabelName.aggr(MovieAnnotation, last_entry_date='MAX(annotation_date)') * LabelProcessingMethod)
 
     def make(self, key):
         base_key = dict(key)  # make a copy for Part table entries
@@ -329,7 +316,6 @@ class ProcessedMovieAnnotation(dj.Computed):
             entry_keys = [dict(k, **base_key) for k in entry_keys]  # add master's columns into entry_keys
             self.Entry.insert(entry_keys)
 
-    
 @epi_schema
 class PatientAlignedMovieAnnotation(dj.Computed):
     definition = """
@@ -364,43 +350,6 @@ class PatientAlignedMovieAnnotation(dj.Computed):
                      }, skip_duplicates=True)
             
         print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
-
-
-@epi_schema
-class UnitLevelDataCleaning(dj.Imported):
-    definition = """
-    # Contains information about data cleaning on a unit-level
-    -> ElectrodeUnit                   # respective unit
-    -> MovieSession                    # number of movie session
-    -> Annotator                       # who created the cleaning?
-    name: varchar(16)                  # unique name for data cleaning
-    ---
-    data: attach                       # actual data
-    description = "" : varchar(128)    # description of data cleaning
-    """
-
-    def _make_tuples(self, key):
-        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        for index_session in range(0, len(patient_ids)):
-            path_binaries = '{}/unit_level_data_cleaning/'.format(config.PATH_TO_DATA)
-            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
-                session_nrs[index_session]) + "/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            for filename in os.listdir(folder):
-                if filename.endswith(".npy"):
-                    name, unit_id, annotator = helpers.extract_name_unit_id_from_unit_level_data_cleaning(filename)
-                    if name == '4stddev':
-                        description = "removing all bins where the firing rate is greater than 4 std dev from mean"
-                    elif name=="smoothed4stddev":
-                        description = "removing all bins where smoothed firing rate is greater than 4 std dev from mean"
-                    else:
-                        description = ""
-                    self.insert1({'patient_id': patient_ids[index_session], "unit_id": unit_id, "annotator_id": annotator,
-                                  'session_nr': session_nrs[index_session], "description": description, "name": name,
-                                  'data': "{}/{}".format(folder, filename)},
-                                 skip_duplicates=True)
-
 
 @epi_schema
 class MovieSkips(dj.Computed):
@@ -446,7 +395,7 @@ class MovieSkips(dj.Computed):
                  },
                 skip_duplicates=True)
             
-                    
+
 @epi_schema
 class MoviePauses(dj.Computed):
     definition = """
@@ -486,7 +435,50 @@ class MoviePauses(dj.Computed):
                  },
                 skip_duplicates=True)
 
-            
+@epi_schema
+class UnitLevelDataCleaning(dj.Imported):
+    definition = """
+    # Contains information about data cleaning on a unit-level
+    -> ElectrodeUnit                   # respective unit
+    -> MovieSession                    # number of movie session
+    -> Annotator                       # who created the cleaning?
+    name: varchar(16)                  # unique name for data cleaning
+    ---
+    data: attach                       # actual data
+    description = "" : varchar(128)    # description of data cleaning
+    """
+
+    def _make_tuples(self, key):
+        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+        for index_session in range(0, len(patient_ids)):
+            path_binaries = '{}/unit_level_data_cleaning/'.format(config.PATH_TO_DATA)
+            folder = path_binaries + str(patient_ids[index_session]) + '/session_' + str(
+                session_nrs[index_session]) + "/"
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            for filename in os.listdir(folder):
+                if filename.endswith(".npy"):
+                    name, unit_id, annotator = helpers.extract_name_unit_id_from_unit_level_data_cleaning(filename)
+                    if name == '4stddev':
+                        description = "removing all bins where the firing rate is greater than 4 std dev from mean"
+                    elif name=="smoothed4stddev":
+                        description = "removing all bins where smoothed firing rate is greater than 4 std dev from mean"
+                    else:
+                        description = ""
+                    self.insert1({'patient_id': patient_ids[index_session], "unit_id": unit_id, "annotator_id": annotator,
+                                  'session_nr': session_nrs[index_session], "description": description, "name": name,
+                                  'data': "{}/{}".format(folder, filename)},
+                                 skip_duplicates=True)
+
+@epi_schema
+class LabelName(dj.Lookup):
+    definition = """
+    # names of existing labels, imported from config file
+    label_name: varchar(32)   # label name
+    """
+
+    contents = config.label_names
+
 @epi_schema
 class ManualAnnotation(dj.Manual):
     definition = """
@@ -501,6 +493,7 @@ class ManualAnnotation(dj.Manual):
     y_one: longblob                    # y1 coordinate of all boxes
     additional_information="": varchar(46) # further notes
     """
+
 
 #######################
 # Retrieval Functions #
@@ -554,6 +547,27 @@ def get_dts_of_patient(patient_id, session_nr):
         os.remove(name_vec)   
     
     return dts
+
+def get_first_last_spikes(patient_id, session_nr):
+    """
+    Calculates and returns the time of the first and the last spike 
+    for a whole patient session recording. 
+    
+    Output: 
+    global_min: float, first spike time in the session
+    global_max: float, last spike time in the session 
+    """
+    list_min = []
+    list_max = []
+    for i, unit in enumerate(act):
+        list_min.append(np.min(unit))
+        list_max.append(np.max(unit))
+
+    global_min = np.min(list_min)
+    global_max = np.max(list_max)
+    
+    return global_min, global_max
+
 
 def get_info_continuous_watch_segments(patient_id, session_nr):
     """
