@@ -76,7 +76,7 @@ class MovieSession(dj.Imported):
     """
 
     def _make_tuples(self, key):
-        for folder_name in os.listdir(config.PATH_TO_DATA + "/session_data/"):
+        for folder_name in os.listdir(config.PATH_TO_PATIENT_DATA):
             if folder_name.startswith("session"):
                 patient_id, session_nr, date, time = helpers.extract_session_information(folder_name)
                 path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
@@ -108,7 +108,7 @@ class MovieSession(dj.Imported):
                 path_neural_rectime = "{}/patient_data/{}/session_{}/order_of_movie_frames/neural_rec_time.npy".format(
                     config.PATH_TO_DATA, patient_id, session_nr)
                 np.save(path_neural_rectime, rectime)
-                path_channel_names = config.PATH_TO_DATA + "/session_data/" + folder_name + "/ChannelNames.txt"
+                path_channel_names = config.PATH_TO_PATIENT_DATA + folder_name + "/ChannelNames.txt"
 
                 self.insert1({'session_nr': session_nr,
                               'patient_id': patient_id,

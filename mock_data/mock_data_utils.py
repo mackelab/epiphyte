@@ -68,17 +68,17 @@ def generate_channel_file(patient_id, session_nr, nr_unit, nr_units_per_brain_re
                 
     assert sum(nr_units_per_brain_region) == nr_unit, "Number of units per brain region doesn't match total units."
     
-    channel_save_file = "{}/mock_data/session_data/session_{}_{}_20190101_12h00m00s/ChannelNames.txt".format(config.PATH_TO_REPO, patient_id, session_nr)
+    channel_save_file = "{}/mock_data/patient_data/session_{}_{}_20190101_12h00m00s/ChannelNames.txt".format(config.PATH_TO_REPO, patient_id, session_nr)
 
     if os.path.exists(channel_save_file):
         os.remove(channel_save_file)
         
-    channel_save_dir = "{}/mock_data/session_data/session_{}_{}_20190101_12h00m00s/".format(config.PATH_TO_REPO, patient_id, session_nr)
+    channel_save_dir = "{}/mock_data/patient_data/session_{}_{}_20190101_12h00m00s/".format(config.PATH_TO_REPO, patient_id, session_nr)
 
     if not os.path.exists(channel_save_dir):
         os.makedirs(channel_save_dir)
     
-    f1 = open("{}/mock_data/session_data/session_{}_{}_20190101_12h00m00s/ChannelNames.txt".format(config.PATH_TO_REPO, patient_id, session_nr), 'w+')
+    f1 = open("{}/mock_data/patient_data/session_{}_{}_20190101_12h00m00s/ChannelNames.txt".format(config.PATH_TO_REPO, patient_id, session_nr), 'w+')
     for i in range(len(nr_units_per_brain_region)):
         for j in range(nr_units_per_brain_region[i]):
             f1.write("{}{}.ncs\n".format(brain_regions[i], j+1))

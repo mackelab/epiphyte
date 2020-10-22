@@ -31,7 +31,7 @@ movie_annotation/__pycache__/
 analysis/__pycache__/
 
 visualization/images/raster*
-
+visualization/dev.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
