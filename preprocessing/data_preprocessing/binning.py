@@ -65,12 +65,19 @@ def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses, ou
     if exclude_pauses:
         start_times_pauses, stop_times_pauses = get_start_stop_times_pauses(patient_id, session_nr)
 
+        # rescale pauses from microseconds to milliseconds
+        start_times_pauses = start_times_pauses / 1000
+        stop_times_pauses = stop_times_pauses / 1000
+
         # remove the pauses from the binning edges
         bins_no_pauses = pause_handling.rm_pauses_bins(bins, start_times_pauses, stop_times_pauses)
         unit_no_pauses, pause_spks = pause_handling.rm_pauses_spikes(spike_times, start_times_pauses, stop_times_pauses,
                                                                      return_intervals=True)
         # bin spikes
         binned_spikes, _ = np.histogram(unit_no_pauses, bins=bins_no_pauses)
+
+        # output updated to bins without pause
+        bins = bins_no_pauses
 
     else:
         # bin spikes
@@ -82,4 +89,3 @@ def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses, ou
         ret = binned_spikes
     
     return ret
-
