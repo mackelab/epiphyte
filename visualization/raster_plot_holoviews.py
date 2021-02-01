@@ -1,3 +1,5 @@
+print("Epiphyte launch-raster version loaded.")
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import holoviews as hv
@@ -188,7 +190,7 @@ class RasterPlot(param.Parameterized):
         # If decimate is not activated, the plot is clean, but very slow
         decimate_plot = True
         if decimate_plot:
-            scatter = scatter.opts(color='blue', marker='dash', size=25, alpha=1, line_width=0.6, angle=90,
+            scatter = scatter.opts(color='blue', marker='dash', size=12, alpha=1, line_width=0.6, angle=90,
                                    xlabel='Time from beginning of recording in milliseconds', ylabel='Unit ID')
             # adjust the max_samples parameter if the plot is too slow or if you think it can handle even more spikes
             raster = decimate(scatter, max_samples=40000).opts(width=1500, height=800) * boxes
