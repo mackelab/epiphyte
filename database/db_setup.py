@@ -6,6 +6,8 @@ from datetime import datetime
 
 import database.config as config
 import database.helpers as helpers
+from database.db_query_fxns import *
+
 import preprocessing.data_preprocessing.data_utils as data_utils
 import annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
@@ -76,54 +78,84 @@ class MovieSession(dj.Imported):
     """
 
     def _make_tuples(self, key):
-        for folder_name in os.listdir(config.PATH_TO_PATIENT_DATA):
-            if folder_name.startswith("session"):
-                patient_id, session_nr, date, time = helpers.extract_session_information(folder_name)
-                path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
-                                                                 config.watchlog_names[int(patient_id)])
-                path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr,
-                                                                  config.daq_names[int(patient_id)])
-                for file in os.listdir("{}/{}/session_{}/event_file/".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr)):
-                    if file.startswith("Events"):
-                        path_events = "{}/{}/session_{}/event_file/{}".format(config.PATH_TO_PATIENT_DATA, patient_id, session_nr, file)
+        for pat_dir in os.listdir(config.PATH_TO_PATIENT_DATA):
+            print(pat_dir)
+            for session_dir in os.listdir(os.path.join(config.PATH_TO_PATIENT_DATA, pat_dir)):
+                print(session_dir)
 
-                time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
-                                                            path_to_events=path_events)
-                pts, rectime, cpu_time = time_conversion.convert()
-                
-                cpu_time = cpu_time
-                # neural_recording_time = rectime
-                
-                save_dir = "{}/patient_data/{}/session_{}/order_of_movie_frames/".format(config.PATH_TO_DATA, patient_id, session_nr)
+                try:
+                    print("Checking if patient is already uploaded..")
+                    check = (MovieSession & "patient_id='{}'".format(pat_dir) & "session_nr='{}'".format(session_dir)).fetch("date")
+                    if len(check) > 0:
+                        print("Patient {}, session {} already in database. Continuing on..".format(pat_dir, session_dir))
+                        continue
+                    else:
+                        print("Adding {}, session {} to database..".format(pat_dir, session_dir))
+                        pass
+                except:
+                    print("Adding {}, session {} to database..".format(pat_dir, session_dir))
+                    pass
 
-                if not os.path.exists(save_dir):
-                    os.makedirs(save_dir)
+                for content in os.listdir(os.path.join(config.PATH_TO_PATIENT_DATA, pat_dir, session_dir)):
+                    print(content)
+                    if content.startswith("session_info"):
 
-                path_order_movie_frames = "{}/patient_data/{}/session_{}/order_of_movie_frames/pts.npy".format(
-                    config.PATH_TO_DATA, patient_id, session_nr)
-                np.save(path_order_movie_frames, pts)
-                path_cpu_time = "{}/patient_data/{}/session_{}/order_of_movie_frames/dts.npy".format(
-                    config.PATH_TO_DATA, patient_id, session_nr)
-                np.save(path_cpu_time, cpu_time)
-                path_neural_rectime = "{}/patient_data/{}/session_{}/order_of_movie_frames/neural_rec_time.npy".format(
-                    config.PATH_TO_DATA, patient_id, session_nr)
-                np.save(path_neural_rectime, rectime)
-                path_channel_names = config.PATH_TO_PATIENT_DATA + folder_name + "/ChannelNames.txt"
+                        session_info = np.load(os.path.join(config.PATH_TO_PATIENT_DATA, pat_dir, session_dir, content), allow_pickle=True)
 
-                self.insert1({'session_nr': session_nr,
-                              'patient_id': patient_id,
-                              'date': date,
-                              'time': time,
-                              'order_movie_frames': path_order_movie_frames,
-                              'cpu_time': path_cpu_time,
-                              'neural_recording_time': path_neural_rectime,
-                              'channel_names': path_channel_names
-                              }, skip_duplicates=True)
+                        patient_id = session_info.item().get("pat_id")
+                        session_nr = session_info.item().get("session_nr")
+                        date = session_info.item().get("date")
+                        time = session_info.item().get("time")
+
+                        main_patient_dir = os.path.join(config.PATH_TO_PATIENT_DATA, str(int(patient_id)), "session_{}".format(session_nr))
+                        print(main_patient_dir)
+
+                        path_wl = os.path.join(main_patient_dir, "watchlogs", config.watchlog_names[patient_id])
+                        path_daq = os.path.join(main_patient_dir, "daq_files", config.daq_names[patient_id])
+
+                        for file in os.listdir(os.path.join(main_patient_dir, "event_file")):
+                            if file.startswith("Events"):
+                                path_events = os.path.join(main_patient_dir, "event_file", file)
+
+                        time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
+                                                                    path_to_events=path_events)
+                        pts, rectime, cpu_time = time_conversion.convert()
+
+                        cpu_time = cpu_time
+
+                        save_dir = os.path.join(main_patient_dir, "order_of_movie_frames")
+
+
+                        if not os.path.exists(save_dir):
+                            os.makedirs(save_dir)
+
+                        path_order_movie_frames = os.path.join(save_dir, "pts.npy")
+
+                        np.save(path_order_movie_frames, pts)
+                        path_cpu_time = os.path.join(save_dir, "dts.npy")
+
+                        np.save(path_cpu_time, cpu_time)
+                        path_neural_rectime = os.path.join(save_dir, "neural_rec_time.npy")
+
+                        np.save(path_neural_rectime, rectime)
+                        path_channel_names = os.path.join(main_patient_dir, "ChannelNames.txt")
+
+
+                        self.insert1({'patient_id': patient_id,
+                                      'session_nr': session_nr,
+                                      'date': date,
+                                      'time': time,
+                                      'order_movie_frames': path_order_movie_frames,
+                                      'cpu_time': path_cpu_time,
+                                      'neural_recording_time': path_neural_rectime,
+                                      'channel_names': path_channel_names
+                                      }, skip_duplicates=True)
 
 @epi_schema
 class ElectrodeUnit(dj.Imported):
     definition = """
     # Contains information about the implanted electrodes of each patient
+    session_nr: int                  # session ID
     -> Patient                       # patient ID
     unit_id: int                     # unique ID for unit (for respective  patient)
     ---
@@ -136,48 +168,68 @@ class ElectrodeUnit(dj.Imported):
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+        print("Patients in database: {}".format(patient_ids))
 
-        #TODO: reformat test with multiple session data 
-        for index_session in range(0, len(patient_ids)):
-        
-            path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
-            path_channels = '{}/session_data/'.format(config.PATH_TO_DATA)
-            folder_channels = "session_{}_{}".format(patient_ids[index_session], session_nrs[index_session])
-            
-            complete_session_name = []
-            for session_folder in os.listdir(path_channels):
-                if session_folder.startswith(folder_channels):
-                    channel_names = helpers.get_channel_names(os.path.join(path_channels, "{}/ChannelNames.txt".format(session_folder)))
-                    complete_session_name.append(session_folder)
-                        
-            # iterate through all files in the binaries folder to see which units were recorded
-            folder_list = []
-            
-            dir_w_dir = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]))
-            
-            folder_spikes_nm = []
-            for folder in os.listdir(dir_w_dir):
-                if folder.startswith("spik"):
-                    # accounting for differences in file structure btw mock and real data
-                    folder_spikes_nm.append(folder)
-                
-            dir_w_spikes = os.path.join(config.PATH_TO_DATA, "patient_data", str(patient_ids[index_session]), "session_{}".format(session_nrs[index_session]), folder_spikes_nm[0])
-            
-            for filename in os.listdir(dir_w_spikes):
-                if filename.startswith("CSC"):
-                    folder_list.append(filename)
-                    
-            folder_list.sort(key=helpers.natural_keys)
+        # iterate over each patient in db
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = session_nrs[i_pat]
+            # further iterate over each patient's sessions
+            for i_sesh, sesh in enumerate([pat_sessions]):
+                print("Patient ID: {}, Session: {}".format(pat, sesh))
 
-            for index, filename in enumerate(folder_list):
-                csc_nr, unit = filename[:-4].split("_")
-                print(csc_nr, int(csc_nr[3:]) - 1)
-                print(channel_names[index])
-                unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
-                self.insert1({'unit_id': index, 'csc': csc_nr[3:], 'unit_type': unit_type, 'unit_nr': unit_nr,
-                              'patient_id': patient_ids[index_session],
-                              'brain_region': channel_names[index]},
-                             skip_duplicates=True)
+                try:
+                    check = (ElectrodeUnit & "patient_id='{}'".format(pat) & "session_nr='{}'".format(sesh) & "unit_id='{}'".format(0)).fetch("brain_region")
+                    if len(check) > 0:
+                        continue
+                    else:
+                        print("Adding {}, session {} to database..".format(pat, sesh))
+                        pass
+                except:
+                    print("Adding {}, session {} to database..".format(pat, sesh))
+                    pass
+
+                path_binaries = config.PATH_TO_PATIENT_DATA
+                path_channels = os.path.join(config.PATH_TO_PATIENT_DATA, str(pat), "session_{}".format(sesh))
+
+                channel_names = helpers.get_channel_names(os.path.join(path_channels, "ChannelNames.txt"))
+
+                # iterate through all files in the binaries folder to see which units were recorded
+                folder_list = []
+
+                dir_w_dir = os.path.join(config.PATH_TO_DATA, "patient_data", str(pat), "session_{}".format(sesh))
+
+                folder_spikes_nm = []
+                for folder in os.listdir(dir_w_dir):
+                    if folder.startswith("spik"):
+                        # accounting for differences in file structure btw mock and real data
+                        folder_spikes_nm.append(folder)
+
+                dir_w_spikes = os.path.join(config.PATH_TO_DATA, "patient_data", str(pat), "session_{}".format(sesh), folder_spikes_nm[0])
+
+                for filename in os.listdir(dir_w_spikes):
+                    if filename.startswith("CSC"):
+                        folder_list.append(filename)
+
+                folder_list.sort(key=helpers.natural_keys)
+
+                for index, filename in enumerate(folder_list):
+                    csc_nr, unit = filename[:-4].split("_")
+                    csc_index = int(csc_nr[3:]) - 1
+                    print(csc_nr, csc_index)
+
+                    # match channel to unit csc
+                    channel = channel_names[csc_index]
+                    print("Channel: ", channel)
+
+                    unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
+                    print("Unit type: {},  Unit Number: {}".format(unit_type, unit_nr))
+                    print("Unit ID: {}".format(index))
+                    print("")
+                    self.insert1({'unit_id': index, 'csc': csc_nr[3:], 'unit_type': unit_type, 'unit_nr': unit_nr,
+                                  'patient_id': pat,
+                                  'session_nr': sesh,
+                                  'brain_region': channel},
+                                 skip_duplicates=True)
 
 @epi_schema
 class SpikeTimesDuringMovie(dj.Imported):
@@ -192,12 +244,20 @@ class SpikeTimesDuringMovie(dj.Imported):
 
     def _make_tuples(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        
+
         for index_session in range(0, len(patient_ids)):
-                
-            path_binaries = '{}/patient_data/'.format(config.PATH_TO_DATA)
-            path_channels = '{}/session_data/'.format(config.PATH_TO_DATA)
-            folder_channels = "session_{}_{}".format(patient_ids[index_session], session_nrs[index_session])
+            try:
+                check = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_ids[index_session]) & "session_nr='{}'".format(1) & "unit_id='{}'".format(0)).fetch("spike_times")
+                if len(check) > 0:
+                    print("Patient {}, session {} already in database. Continuing on..".format(patient_ids[index_session], 1))
+                    continue
+                else:
+                    print("Adding {}, session {} to database..".format(patient_ids[index_session], 1))
+                    pass
+            except:
+                print("Adding {}, session {} to database..".format(patient_ids[index_session], 1))
+                pass
+
             
             # iterate through all files in the binaries folder to see which units were recorded
             folder_list = []
@@ -331,25 +391,69 @@ class PatientAlignedMovieAnnotation(dj.Computed):
     """
 
     def make(self, key):
-        entry_key_video_annot, original_label = (MovieAnnotation & key).fetch('KEY', 'indicator_function')
-        entry_key_movie_session, pts_vec = (MovieSession & key).fetch("KEY", 'order_movie_frames')
-        
-        patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label=original_label[0], patient_pts=np.load(pts_vec[0]) )
-        neural_rec_time = get_neural_rectime_of_patient(entry_key_movie_session[0]['patient_id'], entry_key_movie_session[0]['session_nr'])
-        values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rec_time, patient_aligned_label)
-        
-        self.insert1({'annotator_id': entry_key_video_annot[0]['annotator_id'],
-                      'label_name': entry_key_video_annot[0]['label_name'],
-                      'annotation_date': entry_key_video_annot[0]['annotation_date'],
-                      'patient_id': entry_key_movie_session[0]['patient_id'],
-                      'session_nr': entry_key_movie_session[0]['session_nr'],
-                      'label_in_patient_time': np.array(patient_aligned_label),
-                      'values': np.array(values),
-                      'start_times': np.array(starts),
-                      'stop_times': np.array(stops),
-                     }, skip_duplicates=True)
-            
-        print("Added patient aligned label {} to database.".format(entry_key_video_annot[0]['label_name']))
+
+        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+
+        entries_og = (MovieAnnotation).fetch('KEY')
+
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = session_nrs[i_pat]
+
+            if pat == 12:
+                continue
+
+            for i_sesh, sesh in enumerate([pat_sessions]):
+                print("Patient ID: {}, Session: {}".format(pat, sesh))
+                try:
+                    check = (PatientAlignedMovieAnnotation & "patient_id='{}'".format(pat) & "session_nr='{}'".format(sesh)).fetch(
+                        "brain_region")
+                    if len(check) > 0:
+                        continue
+                    else:
+                        print("Adding {}, session {} to database..".format(pat, sesh))
+                        pass
+                except:
+                    print("Adding {}, session {} to database..".format(pat, sesh))
+                    pass
+
+                ## Load in patient information
+                # pull patient information corresponding to the watchlog
+                patient_pts = get_pts_of_patient(pat, sesh)
+
+                # pull the timestamps corresponding to frame presentation
+                neural_rec_time = get_neural_rectime_of_patient(pat, sesh)
+
+                for i_label, label in enumerate(entries_og):
+
+                    label_name = label["label_name"]
+                    annotation_date = label["annotation_date"]
+                    annotator_id = label["annotator_id"]
+
+                    print("...aligning label {}".format(label_name))
+
+                    # pull "raw" label of the movie
+                    default_label = get_original_movie_label(label_name, annotation_date, annotator_id)
+
+                    # match the "raw" label to the patient watchlog, creating patient aligned label
+                    patient_aligned_label = helpers.match_label_to_patient_pts_time(default_label, patient_pts)
+
+                    # find the timestamps in neural rec time associated with the aligned label
+                    values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rec_time,
+                                                                                            patient_aligned_label)
+
+
+                    self.insert1({'patient_id': pat,
+                          'session_nr': sesh,
+                          'annotator_id': annotator_id,
+                          'label_name': label_name,
+                          'annotation_date': annotation_date,
+                          'label_in_patient_time': np.array(patient_aligned_label),
+                          'values': np.array(values),
+                          'start_times': np.array(starts),
+                          'stop_times': np.array(stops),
+                         }, skip_duplicates=True)
+
+                    print("...added to db!")
 
 @epi_schema
 class MovieSkips(dj.Computed):
@@ -368,32 +472,50 @@ class MovieSkips(dj.Computed):
     
     def make(self, key):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-        
-        for i in range(len(patient_ids)):
-            path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
-                                                             config.watchlog_names[int(patient_ids[i])])
-            path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
-                                                              config.daq_names[int(patient_ids[i])])
-            # bridge btw .npy and .nev file types for Events file
-            for file in os.listdir("{}/{}/session_{}/event_file/".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i])):
+        print("Patients in database: {}".format(patient_ids))
+
+        # iterate over each patient in db
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = session_nrs[i_pat]
+            # further iterate over each patient's sessions
+            for i_sesh, sesh in enumerate([pat_sessions]):
+                print("Patient ID: {}, Session: {}".format(pat, sesh))
+
+                main_patient_dir = os.path.join(config.PATH_TO_PATIENT_DATA, str(int(pat)), "session_{}".format(sesh))
+
+                ### testing -- workaround for difference in file name format
+                session_info = np.load(os.path.join(main_patient_dir, "session_info.npy"), allow_pickle=True)
+
+                patient_id = session_info.item().get("pat_id")
+                session_nr = session_info.item().get("session_nr")
+                date = session_info.item().get("date")
+                time = session_info.item().get("time")
+                ###
+
+                print("Calculating and adding movie skips for patient {} session {}..".format(pat, sesh))
+
+                path_wl = os.path.join(main_patient_dir, "watchlogs", config.watchlog_names[pat])
+                path_daq = os.path.join(main_patient_dir, "daq_files", config.daq_names[pat])
+
+                for file in os.listdir(os.path.join(main_patient_dir, "event_file")):
                     if file.startswith("Events"):
-                        path_events = "{}/{}/session_{}/event_file/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i], file)
+                        path_events = os.path.join(main_patient_dir, "event_file", file)
             
-            time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
+                time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
                                                         path_to_events=path_events)
             
-            starts, stops, values = time_conversion.convert_skips()
-            
+                starts, stops, values = time_conversion.convert_skips()
+
             ###### hacky fix for the interactive plot 
             ##### TODO: get pausing time stamps to align in magnitude 
-            
-            notes = "time points of continuous watch, extracted from watch log - {}".format(datetime.today())
+
+                notes = "time points of continuous watch, extracted from watch log - {}".format(datetime.today())
              
-            self.insert1(
-                {'patient_id': patient_ids[i], 'session_nr': session_nrs[i], "notes": notes,
-                 'start_times': np.array(starts), 'stop_times': np.array(stops), 'values': np.array(values)
-                 },
-                skip_duplicates=True)
+                self.insert1(
+                    {'patient_id': int(pat), 'session_nr': sesh, "notes": notes,
+                     'start_times': np.array(starts), 'stop_times': np.array(stops), 'values': np.array(values)
+                     },
+                    skip_duplicates=True)
             
 
 @epi_schema
@@ -414,15 +536,40 @@ class MoviePauses(dj.Computed):
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
 
         for i in range(len(patient_ids)):
-            path_wl = "{}/{}/session_{}/watchlogs/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
-                                                             config.watchlog_names[int(patient_ids[i])])
-            path_daq = "{}/{}/session_{}/daq_files/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i],
-                                                              config.daq_names[int(patient_ids[i])])
-            # bridge btw .npy and .nev file types for Events file
-            for file in os.listdir("{}/{}/session_{}/event_file/".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i])):
-                    if file.startswith("Events"):
-                        path_events = "{}/{}/session_{}/event_file/{}".format(config.PATH_TO_PATIENT_DATA, patient_ids[i], session_nrs[i], file)
-                        
+
+
+            # the following if conditions account for
+            # the fact that some patients may have only a
+            # single session, and some a multiple.
+            if isinstance(session_nrs[i], np.int64):
+                patient = patient_ids[i]
+                session = session_nrs[i]
+                print("Patient has a single session.")
+
+            if not isinstance(session_nrs[i], np.int64):
+                for j in range(len(session_nrs[i])):
+                    patient = patient_ids[i]
+                    session = j
+                    print("Patient has multiple sessions.")
+
+            main_patient_dir = os.path.join(config.PATH_TO_PATIENT_DATA, str(int(patient_ids[i])), "session_{}".format(session))
+
+            ### testing -- workaround for difference in file name format
+            session_info = np.load(os.path.join(main_patient_dir, "session_info.npy"), allow_pickle=True)
+
+            patient_id = session_info.item().get("pat_id")
+            session_nr = session_info.item().get("session_nr")
+            date = session_info.item().get("date")
+            time = session_info.item().get("time")
+            ###
+
+            path_wl = os.path.join(main_patient_dir, "watchlogs", config.watchlog_names[patient_id])
+            path_daq = os.path.join(main_patient_dir, "daq_files", config.daq_names[patient_id])
+
+            for file in os.listdir(os.path.join(main_patient_dir, "event_file")):
+                if file.startswith("Events"):
+                    path_events = os.path.join(main_patient_dir, "event_file", file)
+
             time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
                                                         path_to_events=path_events)
             start, stop = time_conversion.convert_pauses()
@@ -430,7 +577,7 @@ class MoviePauses(dj.Computed):
             description = "time points of pauses, extracted from watch log - {}".format(datetime.today())
 
             self.insert1(
-                {'patient_id': patient_ids[i], 'session_nr': session_nrs[i], "description": description,
+                {'patient_id': int(patient_id), 'session_nr': session_nr, "description": description,
                  'start_times': np.array(start), 'stop_times': np.array(stop)
                  },
                 skip_duplicates=True)
@@ -493,352 +640,3 @@ class ManualAnnotation(dj.Manual):
     y_one: longblob                    # y1 coordinate of all boxes
     additional_information="": varchar(46) # further notes
     """
-
-
-#######################
-# Retrieval Functions #
-#######################
-
-def get_brain_region(patient_id, unit_id):
-    """
-    Returns the brain region of a given unit for a given patient. 
-    
-    """
-    return (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id)).fetch('brain_region')[0]
-
-def get_cscs_for_patient(patient_id, session_nr):
-    """
-    For a given patient/session, returns a list of continuously sampling channels. 
-    """
-    vec = (ElectrodeUnit & "patient_id={}".format(patient_id) 
-                        & "session_nr={}".format(session_nr)).fetch("csc")
-    ret = np.unique(vec)
-    
-    return ret
-
-def get_date_and_time_session(patient_id, session_nr):
-    """
-    Get the data and time of an experimental session. 
-    
-    Output:
-    np.array: date object, time object
-    """
-    date, time = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("date", "time")
-     
-    date = date[0]
-    time = time[0]
-    
-    return date, time
-
-def get_dts_of_patient(patient_id, session_nr):
-    """
-    Get dts of patient (cpu time), which is the time stamp matching the local time during the experiment
-    :param patient_id: ID of patient
-    :param session_nr: number of movie watch session
-    :return: vector of cpu time that correspond to pts time stamps (extracted from watch log)
-    """
-    print("Note: Divide the patient dts vector by 1000 to get milliseconds")
-    
-    name_vec = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("cpu_time")[0]
-    
-    dts = np.load(name_vec)
-    
-    if os.path.exists(name_vec):
-        os.remove(name_vec)   
-    
-    return dts
-
-def get_first_last_spikes(patient_id, session_nr):
-    """
-    Calculates and returns the time of the first and the last spike 
-    for a whole patient session recording. 
-    
-    Output: 
-    global_min: float, first spike time in the session
-    global_max: float, last spike time in the session 
-    """
-    list_min = []
-    list_max = []
-    for i, unit in enumerate(act):
-        list_min.append(np.min(unit))
-        list_max.append(np.max(unit))
-
-    global_min = np.min(list_min)
-    global_max = np.max(list_max)
-    
-    return global_min, global_max
-
-
-def get_info_continuous_watch_segments(patient_id, session_nr):
-    """
-    This function returns the start times, stop times and values of the continuous watch segment
-    :param patient_id: ID of patient (int)
-    :param session_nr: session number of experiment (int)
-    :param annotator_id: ID of annotator (string)
-    :param annotation_date: data of annotation (date)
-    :return start times, stop times, values
-    """
-    values, starts, stops = (MovieSkips() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch('values', 'start_times', 'stop_times')
-    return values[0], starts[0], stops[0]
-
-
-def get_neural_rectime_of_patient(patient_id, session_nr):
-    """
-    Get neural recording time of patient
-    :param patient_id: ID of patient
-    :param session_nr: number of movie watch session
-    :return: vector of neural recording time that correspond to pts time stamps
-    """
-    name_vec = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("neural_recording_time")[0]
-    
-    rectime = np.load(name_vec)
-    
-    if os.path.exists(name_vec):
-        os.remove(name_vec)   
-    
-    return rectime
-
-
-def get_number_of_units_for_patient(patient_id):
-    """
-    this function returns the number of recorded units from a patient
-    :param patient_id: patient ID (int)
-    :return int value, number of recorded units
-    """
-    name_vec = ((Patient.aggr(ElectrodeUnit.proj(), number_of_units="count(*)")) & "patient_id='{}'".format(patient_id)).fetch("number_of_units")[0]
-   
-    return name_vec
-
-
-def get_original_movie_label(label_name, annotation_date, annotator_id):
-    """
-    This function returns the original movie label from the database
-    
-    TODO: does this still work with new storage method? 
-    
-    :param label_name: name of the label (string)
-    :param annotation_date: date of annotation (date)
-    :param annotator_id: ID of annotator (int)
-    :return extracted vector from database (np.array)
-    """
-    name_vec = (MovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date)).fetch("indicator_function")[0]
-       
-    return name_vec
-
-def get_patient_aligned_annotations(patient_id, label_name, annotator_id, annotation_date):
-    """
-    This function returns the values, start, and stop times.  
-    
-    :param patient_id: number of patient (int)
-    :param label_name: name of the label (string)
-    :param annotator_id: ID of annotator (int)
-    :param annotation_date: date of annotation (date)
-    
-    :return 
-     - values (np.array)
-     - starts (np.array)
-     - stops (np.array)
-    """
-    
-    values, starts, stops = (PatientAlignedMovieAnnotation() & "label_name='{}'".format(label_name) & "annotator_id='{}'".format(annotator_id) & "annotation_date='{}'".format(annotation_date) &  "patient_id='{}'".format(patient_id)).fetch("values", "start_times", "stop_times")
-    
-    values = values[0]
-    starts = starts[0] / 1000
-    stops  = stops[0] / 1000
-    
-    return values, starts, stops
-
-
-def get_pts_of_patient(patient_id, session_nr):
-    """
-    Get the order of the movie in the way the patient watched it
-    :param patient_id: ID of patient
-    :param session_nr: number of movie watch session
-    :return: vector of movie frames in the order the patient watched the movie
-    """
-    name_vec = (MovieSession & "patient_id = '" + str(patient_id) + "'" & "session_nr='{}'".format(session_nr)).fetch("order_movie_frames")[0]
-    pts = np.load(name_vec)
-    
-    if os.path.exists(name_vec):
-        os.remove(name_vec)  
-    
-    return pts
-    
-
-def get_session_info(patient_id):
-    """
-    For a specific patient, get the session information. 
-    
-    input:
-    patient_id: int, patient id number
-    returns: 
-    array or int, session info
-    """
-    sessions = (MovieSession & "patient_id={}".format(patient_id)).fetch("session_nr")
-
-    if len(sessions) == 1:
-        ret = int(sessions[0])
-    else:
-        ret = sessions
-        
-    return ret
-
-
-def get_spikes_from_brain_region(patient_id, session_nr, brain_region):
-    """
-    this function extracts all spiking vectors from a specific brain region
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param brain_region: brain region of interest in its abbreviation (str)
-    :return spike times from brain region (np.array)
-    """
-    unit_ids = get_unit_ids_in_brain_region(patient_id, brain_region)
-    spikes = []
-    for i in unit_ids:
-        spikes.append(get_spiking_activity(patient_id, session_nr, i))
-
-    return spikes
-
-def get_spikes_from_patient_session(patient_id, session_nr):
-    """
-    Returns an array of size (total_units, 1) containing all the spike trains from a given patient for a 
-    given session.  
-    """
-    
-    unit_ids = get_unit_ids_for_patient(patient_id, session_nr)
-    
-    spikes = []
-    for i in unit_ids:
-        spikes.append(get_spiking_activity(patient_id, session_nr, i))
-        
-    return spikes 
-
-def get_spiking_activity(patient_id, session_nr, unit_id):
-    """
-    Extract spiking vector from data base.
-    :param patient_id: ID of patient
-    :param session_nr: session number
-    :param unit_id: Unit ID of which spiking activity shall be extracted
-    """
-    try:
-        spikes = (SpikeTimesDuringMovie & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(
-            session_nr) & "unit_id='{}'".format(unit_id)).fetch("spike_times")[0]
-    except:
-        print("The spiking data you were looking for doesn't exist in the data base.")
-        return -1
-
-    spike_vec = np.load(spikes)
-
-    if os.path.exists(spikes):
-        os.remove(spikes)
-
-    return spike_vec
-
-def get_start_stop_times_pauses(patient_id, session_nr):
-    """
-    extract start and stop times of pauses from data base
-    :param patient_id: patient ID (int)
-    :param session_nr: session number (int)
-    :return: two vectors, start and stop time points
-    """
-    start_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("start_times")[0]
-    stop_times = (MoviePauses() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("stop_times")[0]
-    
-    return start_times, stop_times
-
-def get_stimulus_name(stim_id):
-    """
-    Get stimulus name based on the id number. 
-    """
-    patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
-    patient = patient_ids[0]
-    session = session_nrs[0]
-    
-    name = (ScreeningAnnotation & "patient_id={}".format(patient) & "session_nr={}".format(session)
-          & "position='{}'".format("pre") & "stim_id={}".format(stim_id)).fetch("stim_name")[0]
-    
-    return name 
-
-def get_unit_id(csc_nr, unit_type, unit_nr, patient_id):
-    """
-    Returns the unit_id associated with a given spike train. 
-    
-    csc_nr: int, channel number from which the unit was recorded
-    unit_type: char, type of unit (either M (multiple) or S (single))
-    unit_nr: int, refers to the ordinal set of units (MUA 1, MUA 2) -- necessary 
-                    as it is possible to sort several of the same unit type
-                    from a given channel
-    patient_id: int, patient id number
-    
-    output:
-    unit_id: int, scalar id number specific to the patient and the unit 
-    
-    """
-    unit_id = ((ElectrodeUnit & "csc = '{}'".format(csc_nr) & "patient_id = '{}'".format(patient_id)
-             & "unit_type='{}'".format(unit_type) & "unit_nr='{}'".format(unit_nr)).fetch('unit_id'))[0]
-    
-    return unit_id
-
-def get_unit_ids_in_channel(patient_id, session_nr, csc):
-    """
-    This function returns the unit IDs from within a certain brain region of a patient
-    :param patient_id: patient ID (int)
-    :param session_nr: session id number (int)
-    :param csc: csc number, aka the channel id (int)
-    :return list of unit IDs which were recorded from the csc/channel (np.array) 
-    """
-    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)
-                & "csc={}".format(csc)).fetch("unit_id")
-    
-    return name_vec
-
-def get_unit_ids_for_patient(patient_id, session_nr):
-    """
-    Returns a list of all unit ids for a given patient. 
-    
-    TODO: add session information to the ElectrodeUnit() table. Note: actually, for us, this might not exist.
-    """
-    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "session_nr={}".format(session_nr)).fetch("unit_id")
-    
-    return name_vec
-
-def get_unit_ids_in_brain_region(patient_id, brain_region):
-    """
-    This function returns the unit IDs from within a certain brain region of a patient
-    :param patient_id: patient ID (int)
-    :param brain_region: brain region of interest - abbreviation (string)
-    :return list of unit IDs (np.array)
-    """
-    name_vec = (ElectrodeUnit() & "patient_id={}".format(patient_id) & "brain_region='{}'".format(brain_region)).fetch("unit_id")
-    
-    return name_vec
-
-
-def get_unit_level_data_cleaning(patient_id, session_nr, unit_id, name):
-    """
-    This function extracts a unit level cleaning vector from the database
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param unit_id: ID of recorded unit (int)
-    :param name: name of cleaning vector (string)
-    :return extracted vector from database (np.array)
-    """
-    name_vec = ((UnitLevelDataCleaning() & "patient_id='{}'".format(patient_id) & "unit_id='{}'".format(unit_id) & "session_nr='{}'".format(session_nr) & "name='{}'".format(name)).fetch("data")[0])
-    cleaning_vec = np.load(name_vec)
-    if os.path.exists(name_vec):
-        os.remove(name_vec)
-    return cleaning_vec
-
-def get_unit_type(patient_id, session_nr, unit_id):
-    """
-    Get the cluster type of a unit (either single or multi).
-    
-    :param patient_id: patient ID (int)
-    :param session_nr: session number of experiment (int)
-    :param unit_id: ID of recorded unit (int)
- 
-    :return unit type (char)
-    """
-    name_vec = (ElectrodeUnit & "patient_id='{}'".format(patient_id) & "session_nr='{}'".format(session_nr) & "unit_id='{}'".format(unit_id)).fetch('unit_type')[0]
-    
-    return name_vec
