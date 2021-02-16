@@ -6,7 +6,7 @@ argon2-cffi=20.1.0=pypi_0
 attrs=20.1.0=pypi_0
 backcall=0.2.0=pypi_0
 bleach=3.1.5=pypi_0
-bokeh=2.1.1=pypi_0
+bokeh=3.3.0=pypi_0
 ca-certificates=2020.7.22=0
 cairo=1.14.12=h7636065_2
 certifi=2020.6.20=py38_0
