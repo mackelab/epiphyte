@@ -7,7 +7,19 @@ We present a toolbox for organizing neural activity alongside meta-data and stim
 
 #### Note: These installation instructions assume that you are familiar Python and using command line interfaces. If you would like to set this package up from scratch (no assumed experience), check out the more robust instructions [here.](https://github.com/mackelab/Epiphyte/wiki/Installation)
 
-### (1) Install the required packages by running the following command (Note: we highly recommend doing so within a virtual environment with Python==3.7):
+### (1) Clone the Epiphyte repository to your machine. 
+
+```
+git clone https://github.com/mackelab/epiphyte.git 
+```
+
+Navigate to the folder of the cloned package: 
+```
+cd epiphyte
+```
+
+
+### (2) Install the required packages by running the following command (Note: we highly recommend doing so within a virtual environment with Python==3.7):
 
 If using PyPip:
 ```
