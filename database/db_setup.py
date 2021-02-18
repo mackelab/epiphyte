@@ -15,14 +15,6 @@ import preprocessing.data_preprocessing.create_vectors_from_time_points as creat
 epi_schema = dj.schema('epiphyte_mock', locals())
 
 dj.config['stores'] = {
-    'shared': dict(
-        protocol='s3',
-        endpoint='localhost:9000',
-        access_key='datajoint',
-        secret_key='datajoint',
-        bucket='datajoint-demo',
-        location=''
-    ),
     'local': {  # store in files
         'protocol': 'file',
         'location': os.path.abspath('./dj-store')
