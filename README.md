@@ -32,12 +32,12 @@ conda create --name <env> --file requirements_conda.txt
 ```
 
 
-### (2) Go to the top-level folder of Epiphyte and install the package itself
+### (3) Go to the top-level folder of Epiphyte and install the package itself
 ```
 pip install -e .
 ```
 
-### (3) Set up a DataJoint database
+### (4) Set up a DataJoint database
 
 **Prerequesites:**
 - install [docker](https://www.docker.com/)
