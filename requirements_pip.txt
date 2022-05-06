@@ -17,7 +17,7 @@ holoviews==1.14.5
 idna==3.2
 inflect==5.3.0
 ipykernel==6.3.0
-ipython==7.27.0
+ipython==7.31.1
 ipython-genutils==0.2.0
 jedi==0.18.0
 Jinja2==3.0.1
