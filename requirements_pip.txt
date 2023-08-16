@@ -54,7 +54,7 @@ ptyprocess==0.7.0
 pycparser==2.20
 pyct==0.4.8
 pydot==1.4.2
-Pygments==2.10.0
+Pygments==2.15.0
 PyMySQL==1.0.2
 pyparsing==2.4.7
 pyrsistent==0.18.0
