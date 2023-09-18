@@ -1,3 +1,5 @@
+"""Table classes and population functions (skeleton of the database)"""
+
 import datajoint as dj
 import numpy as np
 import os

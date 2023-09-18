@@ -1,5 +1,6 @@
-import re
+"""Commonly used query and helper functions"""
 
+import re
 
 def atoi(text):
     return int(text) if text.isdigit() else text
@@ -80,10 +81,6 @@ def match_label_to_patient_pts_time(default_label, patient_pts):
     :param patient_pts: indicating the watch behaviour of the patient (np.array)
     :return indicator function aligned to patient pts (np.array)
     """
-# former code for this function:  
-#     return [default_label[int(round((patient_pts[i]/0.04), 0))] for i in range(0, len(patient_pts))]
-
-    # testing with re-indexing:
     
     return [default_label[(int(round((frame/0.04), 0)) - 1)] for i, frame in enumerate(patient_pts)]
 

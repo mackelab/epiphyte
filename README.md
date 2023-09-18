@@ -1,9 +1,11 @@
 # Epiphyte
 
+## What is Epiphyte?
+
 This project is a processing pipeline for high-dimensional single-unit neural activity colligated with meta data. 
 We present a toolbox for organizing neural activity alongside meta-data and stimulus information, as well as a processing pipeline which allows ad-hoc importing, exporting, annotating, and visualizing of data. Our toolbox is developed for large sets of continuous single-unit recordings and introduces a set of modules for algorithmically and manually annotating data, defining data irregularities, and designating new layers of meta-data for further analyses.
 
-## Installing the package
+## How to install Epiphyte? 
 
 #### Note: These installation instructions assume that you are familiar Python and using command line interfaces. If you would like to set this package up from scratch (no assumed experience), check out the more robust instructions [here.](https://github.com/mackelab/Epiphyte/wiki/Installation)
 
@@ -55,7 +57,12 @@ sudo docker-compose up -d
 - now everything should be set up and ready to go! 
 - for troubleshooting issues, check out [here](https://github.com/datajoint/mysql-docker).
 
+## Example Usage
 
-### Contact
+## How to set up the dev environment 
+
+## Change log
+
+## License and author info
 
 If you have questions/comments/suggestions, either open an issue within GitHub, or feel free to email: alana.darcher@gmail.com

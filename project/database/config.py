@@ -1,3 +1,5 @@
+"""Hard-coded variables for initializing the database"""
+
 import os
 from pathlib import Path
   
