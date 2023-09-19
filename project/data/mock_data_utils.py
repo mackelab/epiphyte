@@ -49,7 +49,15 @@ class GenerateData:
         self.signal_tile = self.generate_pings()
         self.stim_on_time = self.generate_stimulus_onsets()[0]
         self.stim_off_time = self.generate_stimulus_onsets()[1]
+    
+    def summarize(self):
+        """
+        Prints out a selection of randomized variables.
+        """
         
+        print(f"# of 'neurons': {self.nr_units}")
+        print(f"Date of recording session: {self.datetime}")
+
         
     def format_save_dir(self, subdir=None):
         """
@@ -273,117 +281,93 @@ class GenerateData:
             for i in range(nr_movie_frames):
                 file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
             file.close()
+    
+    def make_pauses_and_skips(self):
+        """
+        Generate a movie watchlog file with pauses and skips.
+        """
+        nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
+        _, seed = self.seed_and_interval()
+        pause_pool = 5 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
         
+        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
+        end_time = seed + movie_len_unix 
+        add_interval = int((end_time - seed) / nr_movie_frames)
         
-def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, stimulus_len=83.816666): 
-    """
-    Generate a movie watchlog file with pauses and skips.
-    """
-    nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
-    perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
-    
-    pause_pool = 5 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time
-    
-    wl_seed = seed + 1e9
-    # generate projected end time for the DAQ log, in unix time microseconds
-    movie_len_unix = (stimulus_len * 60 * 1000 * 1000) - pause_pool
-    end_time = seed + movie_len_unix 
-    add_interval = int((end_time - seed) / nr_movie_frames)
-    
-    print("Length of the stimulus, in usec: ", movie_len_unix)
-    print("End of stimulus, in epoch time: ", end_time)
-    print("Length of interval iteratively added : ", add_interval)
-    
-    cpu_time = []
-    
-    for i in range(nr_movie_frames):
-        wl_seed += add_interval
-        cpu_time.append(int(wl_seed))   
-    
-    ####
-    
-    ## add in pauses
-    nr_pauses = int(uniform(1,6))
-    min_pause = 0.1 * 1000 * 1000 * 60
-    
-    # randomly select indices from perfect watchlog 
-    indices_pause = random.sample(range(len(cpu_time) - 5000), nr_pauses)
-        
-    cpu_time = np.array(cpu_time)
-    
-    for i, index in enumerate(indices_pause): 
-        if (len(indices_pause) - i) > 0: 
-            pause_len = random.randint(min_pause, pause_pool)
-            #pause_len = int(random.sample(range(min_pause, pause_pool))) ## TODO: this might be causing too big a difference btw wl and daq
-            cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
-            pause_pool -= pause_len
-        else:
-            pause_len = pause_pool
-            cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len))
-
-    # randomly select indices from perfect watchlog 
-    nr_skips = int(uniform(1,4))
-    
-    indices_skip = random.sample(range(len(perfect_pts) - 5000), nr_skips)
-
-    skip_pts = np.array(copy.copy(perfect_pts))
-    
-    max_skip = 500
-
-    for i, index in enumerate(indices_skip): 
-        # note: careful about values here -- can exceed mocked movie length. 
-        # currently set so that the max possible skip is the penultimate frame
-        if len(indices_skip) > 1:
-            skip_len = int(uniform((max_skip * -1), max_skip))
-            skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
-            max_skip -= skip_len
-
-        if len(indices_skip) == 1:
-            skip_len = max_skip
-            skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
-
-    # test for rounding issue
-    skip_pts = [round(frame, 2) for frame in skip_pts]
-
-    # prevents generated frame from exceeding the mock movie length
-    skip_pts_revised = []
-    for i, frame in enumerate(skip_pts):
-        if frame > (nr_movie_frames * 0.04):
-            skip_pts_revised.append(nr_movie_frames * 0.04)
-        if frame <= (nr_movie_frames * 0.04):
-            skip_pts_revised.append(frame)
-        if frame < 0: 
-            skip_pts_revised.append(0.0)
-    
-    ####
-
-    wlsave_dir = "{}/mock_data/patient_data/{}/session_{}/watchlogs/".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if not os.path.exists(wlsave_dir):
-        os.makedirs(wlsave_dir)
-
-    wl_name_save = "{}/mock_data/patient_data/{}/session_{}/watchlogs/ffplay-watchlog-20200526-232347.log".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if os.path.exists(wl_name_save):
-        os.remove(wl_name_save)
-        
-    with open(wl_name_save, 'a') as file:
-        file.write("movie_stimulus.avi\n")
+        cpu_time = []
         for i in range(nr_movie_frames):
-            if i not in indices_pause:
-                file.write("pts\t{}\ttime\t{}\n".format(skip_pts_revised[i], cpu_time[i]))
-            if i in indices_pause: 
-                file.write("Pausing\nContinuing\tafter\tpause\n")
-    
-    file.close()
+            seed += add_interval
+            cpu_time.append(int(seed))   
 
+        nr_pauses = int(uniform(1,6))
+        min_pause = 0.1 * 1000 * 1000 * 60
+        
+        indices_pause = random.sample(range(len(cpu_time) - 5000), nr_pauses)
+        
+        cpu_time = np.array(cpu_time)
+        
+        for i, index in enumerate(indices_pause): 
+            if (len(indices_pause) - i) > 0: 
+                pause_len = random.randint(min_pause, pause_pool)
+                cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
+                pause_pool -= pause_len
+            else:
+                pause_len = pause_pool
+                cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len))
+        
+            # randomly select indices from perfect watchlog 
+            nr_skips = int(uniform(1,4))
+
+            indices_skip = random.sample(range(len(perfect_pts) - 5000), nr_skips)
+
+            skip_pts = np.array(copy.copy(perfect_pts))
+
+            max_skip = 500
+
+            for i, index in enumerate(indices_skip): 
+                # note: careful about values here -- can exceed mocked movie length. 
+                # currently set so that the max possible skip is the penultimate frame
+                if len(indices_skip) > 1:
+                    skip_len = int(uniform((max_skip * -1), max_skip))
+                    skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
+                    max_skip -= skip_len
+
+                if len(indices_skip) == 1:
+                    skip_len = max_skip
+                    skip_pts = np.concatenate((skip_pts[:index],skip_pts[index:] + skip_len)) 
+
+            # test for rounding issue
+            skip_pts = [round(frame, 2) for frame in skip_pts]
+
+            # prevents generated frame from exceeding the mock movie length
+            skip_pts_revised = []
+            for i, frame in enumerate(skip_pts):
+                if frame > (nr_movie_frames * 0.04):
+                    skip_pts_revised.append(nr_movie_frames * 0.04)
+                if frame <= (nr_movie_frames * 0.04):
+                    skip_pts_revised.append(frame)
+                if frame < 0: 
+                    skip_pts_revised.append(0.0)
+
+        
+        return nr_movie_frames, skip_pts_revised, cpu_time, indices_pause
+        
+    def save_watchlog_with_artifacts(self):
+        """
+        Save watchlog with artifacts.
+        """
+        nr_movie_frames, skip_pts_revised, cpu_time, indices_pause = self.make_pauses_and_skips()
     
-def make_events_and_daq(patient_id, session_nr, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
-    """
-    Put together events and daq code, compute all at once. 
-    """
-    len_context_files, signal_tile = generate_pings()
-    
-    generate_events(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time)
-    generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time, seed, stimulus_len)
-    
+        # save
+        save_dir = self.format_save_dir(subdir="watchlogs")
+        wl_name = f"ffplay-watchlog-{self.datetime}.log"
+        
+        with open(save_dir / wl_name, 'a') as file:
+            file.write("movie_stimulus.avi\n")
+            for i in range(nr_movie_frames):
+                if i not in indices_pause:
+                    file.write("pts\t{}\ttime\t{}\n".format(skip_pts_revised[i], cpu_time[i]))
+                if i in indices_pause: 
+                    file.write("Pausing\nContinuing\tafter\tpause\n")
+
+        file.close()
