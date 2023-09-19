@@ -2,128 +2,131 @@
 Functions related to generating mock data. 
 """
 
-import os
-import sys
-import numpy as np
+import copy
 import random
 from random import uniform
-import copy
+from pathlib import Path
+from collections import Counter
+from datetime import datetime
+
+import numpy as np
 
 # local application imports 
 import database.config as config
     
+class GenerateData:
+    """Create mock neural data (spikes, lfp) and the corresponding meta-data (channel names, anatomical location)."""
     
-def generate_spikes(patient_id, session_nr, nr_units, begin_recording_time, stop_recording_time):
-    """
-    Generates mock spike trains for a "patient."
-    
-    Writes spike trains to file as numpy binaries. 
-    
-    """
-    spikes = []
-    for i in range(nr_units):
-        nr_spikes = int(uniform(10000, 16000))
-        spike_vec = []
-        for j in range(nr_spikes):
-            spike_vec.append(uniform(begin_recording_time, stop_recording_time))
-        spike_vec = np.sort(spike_vec)
-        spikes.append(spike_vec)
-
-    # Directory set-up
-    save_dir = "{}/mock_data/patient_data/{}/session_{}/spiking_data/".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    unit_types = ['M', 'S']
-    for i in range((nr_units)):
-        ## NOTE: because of the random naming scheme, re-running this
-        ## code will cause issues later in the pipeline (too many file for 
-        ## number of expected units)
-        np.save(os.path.join(save_dir, "CSC{}_{}UA{}.npy".format(i+1, random.choice(unit_types), '1')), spikes[i])    
-    
-
-def generate_channel_file(patient_id, session_nr, nr_unit, nr_units_per_brain_region=None):
-    """
-    Generates ChannelNames.txt file. 
-    
-    If not given an array-like containing the number of units to 
-    assign to each brain region, will automatically generate. 
-    """
-    brain_regions = ["LA", "LAH", 'LEC', "LMH", "LPHC", "RA", "RAH", "REC", "RMH", "RPCH"]
-
-    # Generate number of units per brain region
-    if not nr_units_per_brain_region:
-        nr_units_per_brain_region = []
+    def __init__(self, patient_id, session_nr):
+        self.patient_id = patient_id
+        self.session_nr = session_nr
         
-        seed = nr_unit / 10
-        counter = nr_unit
-        for i in range(len(brain_regions)):
-            if i != len(brain_regions):
-                random_int = int(np.random.normal(loc=seed, scale=2.0))
-                nr_units_per_brain_region.append(random_int)
-                counter -= random_int 
-            if i == len(brain_regions):
-                nr_units_per_brain_region.append(counter)
+        self.nr_channels = 80
+        self.nr_units = random.randint(20, 100)
+        self.nr_channels_per_region = 8
+        self.unit_types = ["MU", "SU"]
+        self.brain_regions = ["LA", "LAH", "LEC", "LMH", "LPHC", 
+                              "RA", "RAH", "REC", "RMH", "RPCH"]
+
+        self.rec_length = 5400000
+        self.rectime_on = random.randint(1347982266000, 1695051066000)
+        self.rectime_off = self.rectime_on + self.rec_length + random.randint(300000, 900000)
+        
+        self.datetime = datetime.utcfromtimestamp(int(self.rectime_on)/1000).strftime('%Y-%m-%d_%Hh%Mm%Ss')
+        
+        self.spike_trains = self.generate_spike_trains()
+        self.channel_dict = self.generate_channelwise_unit_distribution()
+        
+    def generate_spike_trains(self):
+        """
+        Generates mock spike trains for a "patient."
+        """
+        
+        spike_trains = (
+            np.sort([uniform(self.rectime_on, self.rectime_off) for _ in range(int(uniform(50, 5000)))])
+            for _ in range(self.nr_units)
+        )
+        return list(spike_trains)
+    
+    def generate_channelwise_unit_distribution(self):
+        """
+        Distributes the number of units across "channels".
+        """
+        
+        channel_units = [
+            int(random.uniform(1, self.nr_channels+1)) for _ in range(self.nr_units)
+        ]
+        
+        channel_dict = {
+            csc: [random.choice(self.unit_types) for _ in range(repeats)]
+            for (csc, repeats) in Counter(channel_units).items()
+        }
+        
+        return channel_dict
+    
+    def generate_channel_list(self):
+        """
+        Creates a list of channel names to resemble that of an actual surgical output.
+        Each entry consists of "<hemisphere abbr><brain region><channel number>".
+        """
+
+        channel_list = [
+            f"{region}{i+1}" 
+            for region in self.brain_regions
+            for i in range(self.nr_channels_per_region)
+                       ]
+        
+        return channel_list
+    
+    def save_spike_trains(self, save_dir=None):
+        """
+        Calls the generate_spike_trains() method and resulting trains 
+        in the local "data" directory, unless otherwise specified.
+        """
+        
+        if not save_dir:
+            #repo_path = config.PATH_TO_REPO TODO
+            repo_path = "/home/alana/Documents/phd/code/epiphyte/project/"
+            save_dir = Path(f"{repo_path}/data/patient_data/{self.patient_id}/session_{self.session_nr}/spiking_data/")
+            save_dir.mkdir(parents=True, exist_ok=True)
+        
+        i = 0
+        for csc, unit_types in self.channel_dict.items():
+            su_ct = 1
+            mu_ct = 1
+
+            for t in unit_types:
+                if t == "SU":
+                    unit_counter = su_ct
+                    su_ct += 1
+                elif t == "MU":
+                    unit_counter = mu_ct
+                    mu_ct += 1
                 
-    assert sum(nr_units_per_brain_region) == nr_unit, "Number of units per brain region doesn't match total units."
-    
-    channel_save_file = "{}/mock_data/patient_data/session_{}_{}_20190101_12h00m00s/ChannelNames.txt".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if os.path.exists(channel_save_file):
-        os.remove(channel_save_file)
+                filename = f"CSC{csc}_{t}{unit_counter}.npy"
+                np.save(save_dir / filename, self.spike_trains[i])
+                i += 1
+                
+    def save_channel_names(self, save_dir=None):
+        """
+        Makes and saves a txt file listing the channel names
+        for each channel of the implanted "electrodes".
+        """
         
-    channel_save_dir = "{}/mock_data/patient_data/session_{}_{}_20190101_12h00m00s/".format(config.PATH_TO_REPO, patient_id, session_nr)
+        if not save_dir:
+            #repo_path = config.PATH_TO_REPO TODO
+            repo_path = "/home/alana/Documents/phd/code/epiphyte/project/"
+            save_dir = Path(f"{repo_path}/data/patient_data/{self.patient_id}/session_{self.session_nr}/")
+            save_dir.mkdir(parents=True, exist_ok=True)
+            
+        channel_names = self.generate_channel_list()
+        
+        file = save_dir / "ChannelNames.txt"
+        f1 = open(file, "w+")
+        for csc_name in channel_names:
+            f1.write(f"{csc_name}.ncs\n")
+        f1.close()
 
-    if not os.path.exists(channel_save_dir):
-        os.makedirs(channel_save_dir)
-    
-    f1 = open("{}/mock_data/patient_data/session_{}_{}_20190101_12h00m00s/ChannelNames.txt".format(config.PATH_TO_REPO, patient_id, session_nr), 'w+')
-    for i in range(len(nr_units_per_brain_region)):
-        for j in range(nr_units_per_brain_region[i]):
-            f1.write("{}{}.ncs\n".format(brain_regions[i], j+1))
-
-    f1.close()
-    
-    
-def generate_pings():
-    """
-    Recreate how Neurolynx interfaces with a local computer. 
-    """
-    len_context_files = random.randint(4000, 5400) # generate length of events.nev & DAQ file. 
-
-    # recreate pings
-    if len_context_files % 8 == 0:
-        reps = int(len_context_files / 8)
-    else:
-        reps = int(len_context_files / 8) + 1
-
-    signal_tile = np.tile([1,2,4,8,16,32,64,128], reps)
-    signal_tile = signal_tile[:len_context_files]
-    
-    return len_context_files, signal_tile
-    
-def generate_events(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time):
-    """
-    Generate mock Events.nev file. Save as Events.npy file. 
-    """
-    
-    # recreate event timestamps
-    events = np.linspace(begin_recording_time, stop_recording_time, num=len_context_files)
-
-    events_mat = np.array(list(zip(events, signal_tile)))
-
-    evsave_dir = "{}/mock_data/patient_data/{}/session_{}/event_file/".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if not os.path.exists(evsave_dir):
-        os.makedirs(evsave_dir)
-
-    evname_save = "{}/mock_data/patient_data/{}/session_{}/event_file/Events.npy".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if os.path.exists(evname_save):
-        os.remove(evname_save)
-
-    np.save(evname_save, events_mat)
     
 def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
     """
