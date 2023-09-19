@@ -1,5 +1,5 @@
 """
-Functions related to generating mock data. 
+Class object which generates and saves mock data.
 """
 
 import copy
@@ -15,11 +15,17 @@ import numpy as np
 import database.config as config
     
 class GenerateData:
-    """Create mock neural data (spikes, lfp) and the corresponding meta-data (channel names, anatomical location)."""
+    """
+    Create mock neural data (spikes, lfp) 
+    and the corresponding meta-data (channel names, anatomical location).
+    Also creates the 
+    """
     
-    def __init__(self, patient_id, session_nr):
+    def __init__(self, patient_id, session_nr, stimulus_len=83.33):
+        
         self.patient_id = patient_id
         self.session_nr = session_nr
+        self.stimulus_len = stimulus_len
         
         self.nr_channels = 80
         self.nr_units = random.randint(20, 100)
@@ -32,11 +38,33 @@ class GenerateData:
         self.rectime_on = random.randint(1347982266000, 1695051066000)
         self.rectime_off = self.rectime_on + self.rec_length + random.randint(300000, 900000)
         
-        self.datetime = datetime.utcfromtimestamp(int(self.rectime_on)/1000).strftime('%Y-%m-%d_%Hh%Mm%Ss')
-        
         self.spike_trains = self.generate_spike_trains()
         self.channel_dict = self.generate_channelwise_unit_distribution()
         
+        ## stimulus data
+        
+        self.len_context_files = random.randint(4000, 5400) # generate length of events.nev & DAQ file. 
+        self.datetime = datetime.utcfromtimestamp(int(self.rectime_on)/1000).strftime('%Y-%m-%d_%Hh%Mm%Ss')
+        
+        self.signal_tile = self.generate_pings()
+        self.stim_on_time = self.generate_stimulus_onsets()[0]
+        self.stim_off_time = self.generate_stimulus_onsets()[1]
+        
+        
+    def format_save_dir(self, subdir=None):
+        """
+        Formats the subdir in which everything will be saved.
+        """
+
+        save_dir = Path(f"/home/alana/Documents/phd/code/epiphyte/project/data/patient_data/{self.patient_id}/session_{self.session_nr}/")
+            
+        if subdir:
+            save_dir = save_dir / subdir
+            
+        save_dir.mkdir(parents=True, exist_ok=True)
+               
+        return save_dir
+            
     def generate_spike_trains(self):
         """
         Generates mock spike trains for a "patient."
@@ -83,12 +111,8 @@ class GenerateData:
         Calls the generate_spike_trains() method and resulting trains 
         in the local "data" directory, unless otherwise specified.
         """
-        
-        if not save_dir:
-            #repo_path = config.PATH_TO_REPO TODO
-            repo_path = "/home/alana/Documents/phd/code/epiphyte/project/"
-            save_dir = Path(f"{repo_path}/data/patient_data/{self.patient_id}/session_{self.session_nr}/spiking_data/")
-            save_dir.mkdir(parents=True, exist_ok=True)
+
+        save_dir = self.format_save_dir(subdir="spiking_data")
         
         i = 0
         for csc, unit_types in self.channel_dict.items():
@@ -112,12 +136,8 @@ class GenerateData:
         Makes and saves a txt file listing the channel names
         for each channel of the implanted "electrodes".
         """
-        
-        if not save_dir:
-            #repo_path = config.PATH_TO_REPO TODO
-            repo_path = "/home/alana/Documents/phd/code/epiphyte/project/"
-            save_dir = Path(f"{repo_path}/data/patient_data/{self.patient_id}/session_{self.session_nr}/")
-            save_dir.mkdir(parents=True, exist_ok=True)
+                   
+        save_dir = self.format_save_dir()
             
         channel_names = self.generate_channel_list()
         
@@ -126,96 +146,133 @@ class GenerateData:
         for csc_name in channel_names:
             f1.write(f"{csc_name}.ncs\n")
         f1.close()
+    
+    ##############
+    ## stimulus data generation
+    ##############
+    
+    def generate_pings(self):
+        """
+        Recreate how Neuralynx interfaces with a local computer. 
+        """       
+        # recreate pings
+        if self.len_context_files % 8 == 0:
+            reps = int(self.len_context_files / 8)
+        else:
+            reps = int(self.len_context_files / 8) + 1
 
-    
-def generate_daq_log(patient_id, session_nr, len_context_files, signal_tile, begin_recording_time, stop_recording_time, seed=1590528227608515, stimulus_len=83.816666):
-    """
-    Generate mock DAQ log. 
-    
-    Must use same values for signal_tile and len_context_files as the events.nev mock-up
-    
-    params:
-    stimulus_len: length of the stimulus presentation, in minutes
-    
-    """
+        signal_tile = np.tile([1,2,4,8,16,32,64,128], reps)
+        signal_tile = signal_tile[:self.len_context_files]
 
+        return signal_tile
     
-    #uses same values for signal_tile and len_context_files as the events.nev mock-up
-    values = signal_tile
-    index = np.arange(len_context_files)
-    
-    # generate projected end time for the DAQ log, in unix time microseconds
-    #movie_len_unix = (stimulus_len * 60 * 1000 * 1000)
-    rec_len_unix = (stop_recording_time - begin_recording_time) 
-    
-    end_time = seed + rec_len_unix 
-    add_interval = int((end_time - seed) / len_context_files)
-    
-    print("Recording length, in usec: ", rec_len_unix)
-    print("End time of recording, in epoch time: ",end_time)
-    print("Length of interval iteratively added: ", add_interval)
-    
-    pre = []
-    post = []
+    def generate_events(self):
+        """
+        Generate mock Events.nev file. Save as Events.npy file. 
+        """
 
-    for i in range(len_context_files):
-        interval_diff = (np.random.normal(1000, 200) / 2)
-
-        pre.append(int(seed - interval_diff))
-        post.append(int(seed + interval_diff))
-        #seed += np.random.normal(1000144, 100)
-        seed += add_interval 
+        # recreate event timestamps
+        events = np.linspace(self.rectime_on, self.rectime_off, num=self.len_context_files)
+        events_mat = np.array(list(zip(events, self.signal_tile)))
         
-    log_lines = list(zip(values, index, pre, post))
-
-
-    daqsave_dir = "{}/mock_data/patient_data/{}/session_{}/daq_files/".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if not os.path.exists(daqsave_dir):
-        os.makedirs(daqsave_dir)
-
-    logname_save = "{}/mock_data/patient_data/{}/session_{}/daq_files/timedDAQ-log-20200526-232347.log".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if os.path.exists(logname_save):
-        os.remove(logname_save)
-
-    with open(logname_save, 'a') as file:
-        file.write("Initial signature: 255	255\n255\t255\t\ndata\tStamp\tpre\tpost\n")
-        for datum in log_lines:
-            file.write("{}\t{}\t{}\t{}\n".format(datum[0], datum[1], datum[2], datum[3]))
-        file.close()
+        return events, events_mat
     
-
+    def save_events(self, save_dir=None):
+        """
+        Save the generated mock Events.npy file. 
+        """
+        
+        events, events_mat = self.generate_events()
+        
+        save_dir = self.format_save_dir(subdir="event_file")
+        
+        ev_name = save_dir / "Events.npy"
+        
+        np.save(ev_name, events_mat)
+        
+    def generate_stimulus_onsets(self):
+        """
+        Generate the onset and offset timestamps for the stimulus.
+        """
+        
+        # generate projected end time for the DAQ log, in unix time microseconds
+        # movie_len_unix = (stimulus_len * 60 * 1000 * 1000)       
+        stim_on_time = (self.rectime_on + random.randint(120000, 180000)) * 1000
+        stim_off_time = (stim_on_time + (self.stimulus_len * 60 * 1000)) * 1000
+        
+        return stim_on_time, stim_off_time
     
-def generate_perfect_watchlog(patient_id, session_nr, seed=1590528227608515):
-    """
-    Generate a movie watchlog file without pauses or skips.
-    """
+    def seed_and_interval(self):
+        
+        add_interval = int((self.stim_off_time) / self.len_context_files)
+        seed = int(self.stim_on_time + add_interval*1.25)
+        return add_interval, seed
+        
+    def generate_daq_log(self):
+        """
+        Generate the DAQ log. 
+        """
+        
+        add_interval, seed = self.seed_and_interval()
+        
+        pre = []
+        post = []
 
-    nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
-    perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)]  
+        for i in range(self.len_context_files):
+            interval_diff = (np.random.normal(1000, 200) / 2)
+
+            pre.append(int(seed - interval_diff))
+            post.append(int(seed + interval_diff))
+            seed += add_interval 
+
+        return list(zip(self.signal_tile, np.arange(self.len_context_files), pre, post))
     
-    cpu_time = []
-
-    for i in range(nr_movie_frames):
-        seed += 41000
-        cpu_time.append(seed)
-
-    wlsave_dir = "{}/mock_data/patient_data/{}/session_{}/watchlogs/".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if not os.path.exists(wlsave_dir):
-        os.makedirs(wlsave_dir)
-
-    wl_name_save = "{}/mock_data/patient_data/{}/session_{}/watchlogs/ffplay-watchlog-20200526-232347.log".format(config.PATH_TO_REPO, patient_id, session_nr)
-
-    if os.path.exists(wl_name_save):
-        os.remove(wl_name_save)
-
-    with open(wl_name_save, 'a') as file:
-        file.write("movie_stimulus.avi\n")
+    def save_daq_log(self):
+        """
+        Saves the generated DAQ log.
+        """
+        
+        log_lines = self.generate_daq_log()
+        
+        save_dir = self.format_save_dir(subdir="daq_files")
+        log_loc = save_dir / f"timedDAQ-log-{self.datetime}.log"
+        
+        with open(log_loc, 'a') as file:
+            file.write("Initial signature: 255	255\n255\t255\t\ndata\tStamp\tpre\tpost\n")
+            for datum in log_lines:
+                file.write("{}\t{}\t{}\t{}\n".format(datum[0], datum[1], datum[2], datum[3]))
+            file.close()
+            
+    def generate_perfect_watchlog(self):
+        """
+        Generate a movie watchlog file without pauses or skips.
+        """
+        
+        _, seed = self.seed_and_interval()
+        
+        nr_movie_frames = int(self.stimulus_len * 60 / 0.04)
+        perfect_pts = [round((x * 0.04), 2) for x in range(1, nr_movie_frames+1)] 
+        
+        cpu_time = []
         for i in range(nr_movie_frames):
-            file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
-        file.close()
+            seed += 41000
+            cpu_time.append(seed)
+        
+        return nr_movie_frames, perfect_pts, cpu_time
+    
+    def save_perfect_watchlog(self):
+        
+        nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
+        
+        save_dir = self.format_save_dir(subdir="watchlogs")
+        
+        wl_name = f"ffplay-watchlog-{self.datetime}.log"
+        
+        with open(save_dir / wl_name, 'a') as file:
+            file.write("movie_stimulus.avi\n")
+            for i in range(nr_movie_frames):
+                file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
+            file.close()
         
         
 def generate_playback_artifacts(patient_id, session_nr, seed=1590528227608515, stimulus_len=83.816666): 
