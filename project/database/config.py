@@ -41,9 +41,9 @@ excluded_units = [
 
 
 patients = [
-    {'patient_id': 1, 'age': 1, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
-    {'patient_id': 2, 'age': 100, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"},
-    {'patient_id': 3, 'age': 50, 'gender': 'x', 'year': 2017, 'removed_tissue': "unknown", "epilepsy_type": "unknown"}
+    {'patient_id': 1, 'age': 55, 'gender': 'x'},
+    {'patient_id': 2, 'age': 100, 'gender': 'x'},
+    {'patient_id': 3, 'age': 50, 'gender': 'x'}
 ]
 
 sessions = {
