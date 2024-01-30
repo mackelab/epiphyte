@@ -45,22 +45,6 @@ def get_unit_type_and_number(unit_string):
     return unit_type, unit_nr
 
 
-def extract_session_information(session_string):
-    """
-    This function extracts all relevant information from the name of the folder of a session
-    Each folder has the following naming:
-    patientID_sessionNr_date_time
-    e.g.: 46_1_20151212_10h10m10s
-    for session 1 of patient 46, which was recorded on 12th Nov 2015 at 10am.
-    :param session_string: string of session
-    :return: patient_id, session_nr, date, time
-    """
-    _, patient_id, session_nr, date, time = session_string.split('_')
-    date_processed = date[0:4] + "-" + date[4:6] + "-" + date[6:]
-    time_processed = time[0:2] + ":" + time[3:5] + ":" + time[6:8]
-    return patient_id, session_nr, date_processed, time_processed
-
-
 def extract_name_unit_id_from_unit_level_data_cleaning(filename):
     """
     This function splits the name of the unit level data cleaning into its parts

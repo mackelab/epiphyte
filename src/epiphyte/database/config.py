@@ -53,15 +53,4 @@ sessions = [
     {'patient_id': 3, 'session_nr': 1, 'session_type': 'full_movie'}
 ]
 
-watchlog_names = {
-                    1: "ffplay-watchlog-20200526-232347.log",
-                    2: "ffplay-watchlog-20200526-232347.log",
-                    3: "ffplay-watchlog-20200526-232347.log"
-                  }
-
-daq_names = {1: "timedDAQ-log-20200526-232347.log",
-             2: "timedDAQ-log-20200526-232347.log",
-             3: "timedDAQ-log-20200526-232347.log"
-            }
-
 label_names = zip(['character1', 'character2', 'location1'])

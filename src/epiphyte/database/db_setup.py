@@ -10,9 +10,9 @@ import numpy as np
 import config as config
 import database.helpers as helpers
 
-import preprocessing.data_preprocessing.data_utils as data_utils
-import annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
-import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+import ..preprocessing.data_preprocessing.data_utils as data_utils
+import ..annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
+import ..preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 epi_schema = dj.schema('epiphyte_mock', locals())
 
@@ -72,8 +72,8 @@ class MovieSession(dj.Imported):
     ---
     date : date                         # date of movie session
     time : time
-    order_movie_frames: longblob        # order of movie frames for patient (watch log) 
-    cpu_time: longblob                  # cpu time stamps (dts)
+    pts: longblob                       # order of movie frames for patient (pts) 
+    dts: longblob                       # cpu time stamps (dts)
     neural_recording_time: longblob     # neural recording time (rectime)
     channel_names: longblob             # channel name, indicating electrode number and brain region
     """
@@ -98,84 +98,52 @@ class MovieSession(dj.Imported):
             for _, sesh in enumerate(pat_sessions):
                 main_patient_dir = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}")
 
-                for file_path in main_patient_dir.iterdir():
+                session_info = np.load(main_patient_dir / "session_info.npy", allow_pickle=True)
+                date = session_info.item().get("date")
+                time = session_info.item().get("time")
+
+                path_wl = main_patient_dir / "watchlogs" 
+                ffplay_file = next(path_wl.glob("ffplay*"), None)
+
+                if ffplay_file:
+                    print("Found ffplay file:", ffplay_file)
+                else:
+                    print("No ffplay file found in the watchlogs directory.")
+                    break
+
+                path_daq = main_patient_dir / "daq_files" 
+                daq_file = next(path_daq.glob("timedDAQ*"), None)
+
+                if ffplay_file:
+                    print("Found DAQ file:", daq_file)
+                else:
+                    print("No DAQ file found in the daq_files directory.")
+                    break
                     
-
-
-
-    def _make_tuples(self, key):
-        for pat_dir in os.listdir(config.PATH_TO_PATIENT_DATA):
-            print(pat_dir)
-            for session_dir in os.listdir(os.path.join(config.PATH_TO_PATIENT_DATA, pat_dir)):
-                print(session_dir)
-
-                try:
-                    print("Checking if patient is already uploaded..")
-                    check = (MovieSession & "patient_id='{}'".format(pat_dir) & "session_nr='{}'".format(session_dir)).fetch("date")
-                    if len(check) > 0:
-                        print("Patient {}, session {} already in database. Continuing on..".format(pat_dir, session_dir))
-                        continue
-                    else:
-                        print("Adding {}, session {} to database..".format(pat_dir, session_dir))
-                        pass
-                except:
-                    print("Adding {}, session {} to database..".format(pat_dir, session_dir))
-                    pass
-
-                for content in os.listdir(os.path.join(config.PATH_TO_PATIENT_DATA, pat_dir, session_dir)):
-                    print(content)
-                    if content.startswith("session_info"):
-
-                        session_info = np.load(os.path.join(config.PATH_TO_PATIENT_DATA, pat_dir, session_dir, content), allow_pickle=True)
-
-                        patient_id = session_info.item().get("pat_id")
-                        session_nr = session_info.item().get("session_nr")
-                        date = session_info.item().get("date")
-                        time = session_info.item().get("time")
-
-                        main_patient_dir = os.path.join(config.PATH_TO_PATIENT_DATA, str(int(patient_id)), "session_{}".format(session_nr))
-                        print(main_patient_dir)
-
-                        path_wl = os.path.join(main_patient_dir, "watchlogs", config.watchlog_names[patient_id])
-                        path_daq = os.path.join(main_patient_dir, "daq_files", config.daq_names[patient_id])
-
-                        for file in os.listdir(os.path.join(main_patient_dir, "event_file")):
-                            if file.startswith("Events"):
-                                path_events = os.path.join(main_patient_dir, "event_file", file)
-
-                        time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
+                path_events = main_patient_dir / "event_file" / "Events.npy"
+                time_conversion = data_utils.TimeConversion(path_to_wl=path_wl, path_to_dl=path_daq,
                                                                     path_to_events=path_events)
-                        pts, rectime, cpu_time = time_conversion.convert()
+                pts, rectime, dts = time_conversion.convert()
+                
+                save_dir = main_patient_dir / "movie_info"
+                save_dir.mkdir(exist_ok=True)
+                np.save(save_dir / "pts.npy", pts)
+                np.save(save_dir / "dts.npy", dts)
+                np.save(save_dir / "neural_rec_time.npy", rectime)
 
-                        cpu_time = cpu_time
+                path_channel_names = main_patient_dir / "ChannelNames.txt"
+                channel_names = helpers.get_channel_names(path_channel_names)
 
-                        save_dir = os.path.join(main_patient_dir, "order_of_movie_frames")
+                self.insert1({'patient_id': pat,
+                            'session_nr': sesh,
+                            'date': date,
+                            'time': time,
+                            'pts': pts,
+                            'dts': dts,
+                            'neural_recording_time': rectime,
+                            'channel_names': channel_names
+                            }, skip_duplicates=True)
 
-
-                        if not os.path.exists(save_dir):
-                            os.makedirs(save_dir)
-
-                        path_order_movie_frames = os.path.join(save_dir, "pts.npy")
-
-                        np.save(path_order_movie_frames, pts)
-                        path_cpu_time = os.path.join(save_dir, "dts.npy")
-
-                        np.save(path_cpu_time, cpu_time)
-                        path_neural_rectime = os.path.join(save_dir, "neural_rec_time.npy")
-
-                        np.save(path_neural_rectime, rectime)
-                        path_channel_names = os.path.join(main_patient_dir, "ChannelNames.txt")
-
-
-                        self.insert1({'patient_id': patient_id,
-                                      'session_nr': session_nr,
-                                      'date': date,
-                                      'time': time,
-                                      'order_movie_frames': path_order_movie_frames,
-                                      'cpu_time': path_cpu_time,
-                                      'neural_recording_time': path_neural_rectime,
-                                      'channel_names': path_channel_names
-                                      }, skip_duplicates=True)
 
 @epi_schema
 class ElectrodeUnit(dj.Imported):
