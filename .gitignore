@@ -1,37 +1,6 @@
 # Project files
 
-
-dev/*
-
-data_preprocessing/__pycache__/
-data_preprocessing/data_processing.pyc
-data_preprocessing/data_utils.pyc
-data_preprocessing/data_utils_keyparse.pyc
-data_preprocessing/produce_binaries_scratch.ipynb
-
-data_preprocessing/.ipynb_checkpoints/
-data_preprocessing/Untitled.ipynb
-
-
-analysis/.ipynb_checkpoints/
-
-
-.idea/
-
-analysis/examples/.ipynb_checkpoints/
-
-epiphyte/
-
-mock_data/patient*
-mock_data/session*
-mock_data/unit*
-mock_data/movie*
-
-movie_annotation/__pycache__/
-analysis/__pycache__/
-
-visualization/images/raster*
-visualization/dev.ipynb
+src/epiphyte/data/mock_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -160,5 +129,3 @@ data_base/mysql-docker/data
 
 *.png
 *.pdf
-
-src/
