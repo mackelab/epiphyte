@@ -1,7 +1,7 @@
 import json
 import numpy as np
 
-import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+from ....data_preprocessing import create_vectors_from_time_points
 
 
 def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, default_value=0):

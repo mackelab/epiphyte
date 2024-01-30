@@ -4,9 +4,8 @@ Functions related to processing the db stored time points (start/stop/values) in
 
 import pandas as pd
 
-from database.db_setup import *
-import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
-
+from ...database import query_functions
+from ..annotation.stimulus_driven_annotation.movies import pause_handling
 
 def get_index_nearest_timestamp_in_vector(vector, timestamp):
     """

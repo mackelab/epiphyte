@@ -7,20 +7,11 @@ from datetime import datetime
 import datajoint as dj
 import numpy as np
 
-import config as config
-import database.helpers as helpers
+from . import config, helpers
 
-import ..preprocessing.data_preprocessing.data_utils as data_utils
-import ..annotation.stimulus_driven_annotation.movies.processing_labels as processing_labels
-import ..preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+from ..preprocessing.data_preprocessing import data_utils
+from ..preprocessing.annotation.stimulus_driven_annotation.movies import processing_labels
 
-epi_schema = dj.schema('epiphyte_mock', locals())
-
-dj.config['stores'] = {
-    'local': {  # store in files
-        'protocol': 'file',
-        'location': os.path.abspath('./dj-store')
-    }}
 
 ########################################################
 # Table Definitions (in order of population procedure) #
