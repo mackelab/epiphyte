@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import numpy as np
+from pathlib import Path
 
 NLX_OFFSET = 16 * 1024
 
@@ -19,11 +20,12 @@ def nev_read(filename):
     Modified to accept npy binaries for generating mock data.
     Returns an array of timestamps and nttls.
     """
+    filename = Path(filename)
 
-    if filename.lower().endswith((".nev")):
+    if filename.suffix.lower() == ".nev":
         eventmap = np.memmap(filename, dtype=nev_type, mode='r', offset=NLX_OFFSET)
         ret = np.array([eventmap['timestamp'], eventmap['nttl']]).T
-    elif filename.lower().endswith((".npy")):
+    elif filename.suffix.lower() == ".npy":
         ret = np.load(filename)
     return ret
 
