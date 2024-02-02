@@ -36,3 +36,4 @@ annotators = [
     {'annotator_id': "p1", 'first_name': 'max', 'last_name': 'mustermann'},
     {'annotator_id': "p2", 'first_name': 'susi', 'last_name': 'lastname'},
 ]
+
