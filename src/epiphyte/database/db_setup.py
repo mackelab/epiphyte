@@ -227,6 +227,61 @@ class ElectrodeUnit(dj.Imported):
                     print(" ")
 
 @epi_schema
+class MovieAnnotation(dj.Imported):
+    definition = """
+    # information about video annotations (e.g. labels of characters); 
+    # this table contains start and end time points and values of the segments of the annotations;
+    # all time points are in Neural Recording Time;
+    -> Annotator                    # creator of movie annotation
+    -> LabelName                    # name of annotation
+    annotation_date: date           # date of annotation
+    ---
+    values: longblob                # list of values that represent label
+    start_times: longblob           # list of start times of label segments in movie play time (PTS)
+    stop_times: longblob            # list of stop times of label segments in movie play time (PTS)
+    category: varchar(32)           # category of label; e.g. 'character', 'emotion', 'location'
+    indicator_function: longblob    # full indicator function, one value for each movie frame
+    """
+
+    def _make_tuples(self, key):
+        path_labels = Path(config.PATH_TO_LABELS)
+
+        for filepath in path_labels.iterdir():
+            label_id, label_name, annotator, date, category = filepath.name[:-4].split("_")
+
+            try:
+                check = (MovieAnnotation & f"label_name='{label_name}'" & f"category='{category}'").fetch("values")
+                if len(check) > 0:
+                    continue
+                else: 
+                    print(f"    Adding {label_name}, category {category} to database...")
+                    pass
+            except:
+                print(f"    Adding {label_name}, category {category} to database...")
+                pass
+
+            content = np.load(filepath)
+
+            values = np.array(content[0])
+            start_times = np.array(content[1])
+            stop_times = np.array(content[2])
+                
+            ind_func = processing_labels.make_label_from_start_stop_times(values, start_times, stop_times, config.PTS_MOVIE_new)
+                
+            print(f"    ... # of occurrences: {int(sum(values))}\n")
+
+            self.insert1({'label_name': label_name,
+                            'annotator_id': annotator,
+                            'annotation_date': datetime.strptime(date, '%Y%m%d'),
+                            'category': category,
+                            'values': values,
+                            'start_times': start_times,
+                            'stop_times': stop_times,
+                            'indicator_function': np.array(ind_func)
+                            }, skip_duplicates=True)
+                    
+
+@epi_schema
 class LFPData(dj.Manual):
     definition = """
     # local field potential data, by channel. 

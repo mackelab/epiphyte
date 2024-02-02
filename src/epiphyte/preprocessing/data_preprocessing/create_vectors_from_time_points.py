@@ -3,6 +3,7 @@ Functions related to processing the db stored time points (start/stop/values) in
 """
 
 import pandas as pd
+import numpy as np
 
 from ...database import query_functions
 from ..annotation.stimulus_driven_annotation.movies import pause_handling
