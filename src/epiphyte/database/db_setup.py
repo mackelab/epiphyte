@@ -160,3 +160,138 @@ class MovieSession(dj.Imported):
                             'neural_recording_time': rectime,
                             'channel_names': channel_names
                             }, skip_duplicates=True)
+                
+@epi_schema
+class ElectrodeUnit(dj.Imported):
+    definition = """
+    # Contains information about the implanted electrodes of each patient
+    -> Patients                      # patient ID
+    -> Sessions                      # session number
+    unit_id: int                     # unique ID for unit (for respective  patient)
+    ---
+    csc: int                         # number of CSC file
+    unit_type: enum('M', 'S', 'X')   # unit type: 'M' for Multi Unit, 'S' for Single Unit, 'X': undefined
+    unit_nr: int                     # number of unit, as there can be several multi units and single units in one CSC file
+    brain_region: varchar(8)         # brain region where unit was recorded
+    """
+
+    def _make_tuples(self, key):
+        patient_ids = Patients.fetch("patient_id")
+
+        # iterate over each patient in db
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = (Sessions & f"patient_id={pat}").fetch("session_nr")
+
+            # further iterate over each patient's sessions
+            for i_sesh, sesh in enumerate(pat_sessions):
+
+                path_binaries = config.PATH_TO_PATIENT_DATA
+                path_channels = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}")
+                channel_names = helpers.get_channel_names(path_channels / "ChannelNames.txt")
+
+                try:
+                    check = (ElectrodeUnit & f"patient_id={pat}" & f"session_nr={sesh}").fetch("csc_nr")
+                    if len(check) == len(channel_names):
+                        continue
+                    else:
+                        print(f"    Adding patient {pat} session {sesh} to database...")
+                        pass
+                except:
+                    print(f"    Adding patient {pat} session {sesh} to database...")
+                    pass
+
+                spike_dir = Path(config.PATH_TO_DATA, "patient_data", str(pat), f"session_{sesh}", "spiking_data")
+                spike_filepaths = list(spike_dir.iterdir())
+                spike_filenames = sorted([s.name for s in spike_filepaths], key=helpers.extract_sort_key)
+
+                for unit_id, filename in enumerate(spike_filenames):
+                    csc_nr, unit = filename[:-4].split("_")
+                    csc_index = int(csc_nr[3:]) - 1
+                    print(f"    ... Unit ID: {unit_id}, CSC #: {csc_nr}, Channel index: {csc_index}")
+
+                    channel = channel_names[csc_index]
+                    print(f"    ... Channel name: {channel}")
+
+                    unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
+                    print(f"    ... Unit type: {unit_type},  Within-channel unit number: {unit_nr}")
+
+                    self.insert1({'patient_id': pat,
+                                'session_nr': sesh,
+                                'unit_id': unit_id, 
+                                'csc': csc_nr[3:], 
+                                'unit_type': unit_type, 
+                                'unit_nr': unit_nr,
+                                'brain_region': channel},
+                                    skip_duplicates=True)
+                    
+                    print(" ")
+
+@epi_schema
+class LFPData(dj.Manual):
+    definition = """
+    # local field potential data, by channel. 
+    -> Patients
+    -> Sessions
+    csc_nr: int
+    ---
+    samples: longblob                # samples, in microvolts
+    timestamps: longblob             # timestamps corresponding to each sample, in ms
+    sample_rate: int                 # sample rate from the recording device
+    brain_region: varchar(8)         # brain region where unit was recorded
+    """
+
+########################################################
+# Table Population Functions (for dj.Manual tables) #
+########################################################
+
+def populate_lfp_data_table():
+    """
+    Iterates over the channel files stored in config.PATH_TO_DATA/lfp_data/
+    and adds each channel to the table. 
+
+    Ignores channels already uploaded.
+    """
+
+    patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+
+    for i_pat, pat in enumerate(patient_ids):
+        pat_sessions = session_nrs[i_pat]
+
+        for i_sesh, sesh in enumerate(pat_sessions):
+         
+            path_ds_dir = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}", "lfp_data")
+            lfp_files = list(path_ds_dir.glob("CSC*"))
+
+            try:
+                check = (LFPData & f"patient_id={pat}" & f"session_nr={sesh}").fetch("csc_nr")[0]
+                if len(check) == len(lfp_files):
+                    print(f"    Patient {pat} session {sesh} already added.")
+                    continue
+                else:
+                    print(f"    Adding patient {pat} session {sesh} to database...")
+                    pass
+            except:
+                print(f"    Adding patient {pat} session {sesh} to database...")
+                pass
+
+            path_channels = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}", "ChannelNames.txt")
+            channel_names = helpers.get_channel_names(path_channels)
+
+            for ds_file in path_ds_dir.iterdir():
+                
+                csc_nr = ds_file.name.split('_')[0][3:]
+                region = channel_names[int(csc_nr)-1]
+                print(f"  .. adding csc {csc_nr}..")
+                ds_dict = np.load(ds_file, allow_pickle=True)
+                LFPData.insert1({
+                    'patient_id': pat,
+                    'session_nr': sesh,
+                    'csc_nr': csc_nr,
+                    'samples': ds_dict.item().get("samples"),
+                    'timestamps': ds_dict.item().get("timestamps"),
+                    'sample_rate': ds_dict.item().get("sample_rate")[0],
+                    'brain_region': region
+                })
+
+
+                print(f"  .. csc {csc_nr} added.")
