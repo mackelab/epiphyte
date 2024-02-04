@@ -30,8 +30,9 @@ from collections import Counter
 from datetime import datetime
 
 import numpy as np
-    
+
 from ..database.config import *
+from .mock_data_inits import *
 
 class GenerateData:
     """
@@ -57,7 +58,7 @@ class GenerateData:
         self.rectime_on = random.randint(1347982266000, 1695051066000)
         self.rectime_off = self.rectime_on + self.rec_length + random.randint(300000, 900000)
         
-        self.spike_trains = self.generate_spike_trains()
+        self.spike_times, self.spike_amps = self.generate_spike_trains()
         self.channel_dict = self.generate_channelwise_unit_distribution()
         
         ## stimulus data
@@ -97,11 +98,18 @@ class GenerateData:
         Generates mock spike trains for a "patient."
         """
         
-        spike_trains = (
+        spike_times = [
             np.sort([uniform(self.rectime_on, self.rectime_off) for _ in range(int(uniform(50, 5000)))])
             for _ in range(self.nr_units)
-        )
-        return list(spike_trains)
+        ]
+
+        spike_amps = []
+        for s_t in spike_times:
+        
+            new_amps = np.random.normal(loc=spike_shape_u, scale=spike_shape_sd, size=(len(s_t), 64))
+            spike_amps.append(new_amps)
+
+        return spike_times, spike_amps
     
     def generate_channelwise_unit_distribution(self):
         """
@@ -135,8 +143,8 @@ class GenerateData:
     
     def save_spike_trains(self):
         """
-        Calls the generate_spike_trains() method and resulting trains 
-        in the local "data" directory, unless otherwise specified.
+        Calls the generate_spike_trains() method and saves resulting trains 
+        in the local "data" directory.
         """
 
         save_dir = self.format_save_dir(subdir="spiking_data")
@@ -154,8 +162,13 @@ class GenerateData:
                     unit_counter = mu_ct
                     mu_ct += 1
                 
+                save_dict = {
+                    "spike_times": self.spike_times[i], 
+                    "spike_amps": self.spike_amps[i]
+                }
+
                 filename = f"CSC{csc}_{t}{unit_counter}.npy"
-                np.save(save_dir / filename, self.spike_trains[i])
+                np.save(save_dir / filename, save_dict)
                 i += 1
                 
     def save_channel_names(self):

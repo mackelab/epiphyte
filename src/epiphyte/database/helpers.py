@@ -1,6 +1,7 @@
 """Commonly used query and helper functions"""
 
 import re
+import numpy as np
 
 def atoi(text):
     return int(text) if text.isdigit() else text
@@ -75,7 +76,7 @@ def match_label_to_patient_pts_time(default_label, patient_pts):
     :return indicator function aligned to patient pts (np.array)
     """
     
-    return [default_label[(int(round((frame/0.04), 0)) - 1)] for i, frame in enumerate(patient_pts)]
+    return [default_label[(int(np.round((frame/0.04), 0)) - 1)] for i, frame in enumerate(patient_pts)]
 
 
 def get_list_of_patient_ids(patient_dict):
