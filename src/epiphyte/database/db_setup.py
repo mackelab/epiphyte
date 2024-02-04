@@ -160,7 +160,21 @@ class MovieSession(dj.Imported):
                             'neural_recording_time': rectime,
                             'channel_names': channel_names
                             }, skip_duplicates=True)
-                
+
+@epi_schema
+class LFPData(dj.Manual):
+    definition = """
+    # local field potential data, by channel. 
+    -> Patients
+    -> Sessions
+    csc_nr: int
+    ---
+    samples: longblob                # samples, in microvolts
+    timestamps: longblob             # timestamps corresponding to each sample, in ms
+    sample_rate: int                 # sample rate from the recording device
+    brain_region: varchar(8)         # brain region where unit was recorded
+    """
+
 @epi_schema
 class ElectrodeUnit(dj.Imported):
     definition = """
@@ -184,8 +198,7 @@ class ElectrodeUnit(dj.Imported):
 
             # further iterate over each patient's sessions
             for i_sesh, sesh in enumerate(pat_sessions):
-
-                path_binaries = config.PATH_TO_PATIENT_DATA
+                
                 path_channels = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}")
                 channel_names = helpers.get_channel_names(path_channels / "ChannelNames.txt")
 
@@ -280,25 +293,270 @@ class MovieAnnotation(dj.Imported):
                             'indicator_function': np.array(ind_func)
                             }, skip_duplicates=True)
                     
-
 @epi_schema
-class LFPData(dj.Manual):
+class SpikeData(dj.Imported):
     definition = """
-    # local field potential data, by channel. 
-    -> Patients
+    # This table contains all spike times of all units of all patients in Neural Recording Time
+    # Each entry contains a vector of all spike times of one unit of one patient
     -> Sessions
-    csc_nr: int
+    -> ElectrodeUnit                   # unit from which data was recorded
     ---
-    samples: longblob                # samples, in microvolts
-    timestamps: longblob             # timestamps corresponding to each sample, in ms
-    sample_rate: int                 # sample rate from the recording device
-    brain_region: varchar(8)         # brain region where unit was recorded
+    spike_times: longblob              # in case bin_size is not 0: number of spikes; otherwise: times of spikes (original data)
+    spike_amps: longblob               # amplitudes for each spike in spike_times
     """
 
-########################################################
-# Table Population Functions (for dj.Manual tables) #
-########################################################
+    def _make_tuples(self, key):
+        patient_ids = Patients.fetch("patient_id")
 
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = (Sessions & f"patient_id={pat}").fetch("session_nr")
+            
+            for i_sesh, sesh in enumerate(pat_sessions):
+                spike_dir = Path(config.PATH_TO_DATA, "patient_data", str(pat), f"session_{sesh}", "spiking_data")
+                spike_files = list(spike_dir.iterdir())
+                unit_ids = (ElectrodeUnit & f"patient_id={pat}" & f"session_nr={sesh}").fetch("unit_id")
+
+                assert len(spike_files) == len(unit_ids), "Number of units in ElectrodeUnits doesn't match number of spiking files."
+
+                try:
+                    check = (SpikeData & f"patient_id={pat}" & f"session_nr={sesh}").fetch("unit_id")[0]
+                    if len(check) == len(spike_files) == len(unit_ids):
+                        continue
+                    else:
+                        print(f"    Adding patient {pat} session {sesh} to database...")
+                        pass
+                except:
+                    print(f"    Adding patient {pat} session {sesh} to database...")
+                    pass
+
+                for filepath in spike_files:
+                    filename = filepath.name
+                    csc_nr, unit = filename[:-4].split("_")
+                    csc_nr = int(csc_nr[3:])
+                    unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
+
+                    unit_id = (ElectrodeUnit & f"patient_id={pat}" & f"session_nr={sesh}" 
+                            & f"csc={csc_nr}" & f"unit_nr={unit_nr}" & f"unit_type='{unit_type}'").fetch("unit_id")[0]
+
+                    spikes_file = np.load(filepath, allow_pickle=True)
+                    spikes_file = spikes_file.item()
+                    times = spikes_file["spike_times"]
+                    amps = spikes_file["spike_amps"]
+
+                    print(f"    ... Unit ID: {unit_id}, CSC #: {csc_nr}")
+                    print(f"    ... Nm. of spikes: {len(times)}")
+                    print(f"    ... Max amp.: {np.max(amps)} microV\n")
+
+                    self.insert1({'patient_id': pat, 
+                                'session_nr': sesh, 
+                                'unit_id': unit_id,
+                                'spike_times': times, 
+                                'spike_amps': amps}, skip_duplicates=True)
+                
+@epi_schema
+class PatientAlignedMovieAnnotation(dj.Computed):
+    definition = """
+    # Movie Annotations aligned to patient time / time points are in neural recording time
+    -> MovieSession        # movie watching session ID
+    -> MovieAnnotation     # label
+    ---
+    label_in_patient_time: longblob    # label matched to patient time (pts)
+    values: longblob       # list of values that represent label
+    start_times: longblob  # list of start times of label segments in neural recording time
+    stop_times: longblob   # list of stop times of label segments in neural recording time
+    """
+
+    def make(self, key):
+        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+        entries = (MovieAnnotation).fetch('KEY')
+
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = session_nrs[i_pat]
+            for i_sesh, sesh in enumerate([pat_sessions]):
+                
+                print(f"Patient {pat} session {sesh}..")
+
+                for entry in entries:
+                    
+                    annotator_id = entry["annotator_id"]
+                    label_name = entry["label_name"]
+                    annotation_date = entry["annotation_date"]
+
+                    try:
+                        check = (PatientAlignedMovieAnnotation & f"patient_id={pat}" & f"session_nr={sesh}"
+                                    & f"label_name='{label_name}'" & f"annotator_id='{annotator_id}'").fetch("values")
+                        if check.any():
+                            print(f"    ... {label_name} already in database.")
+                            continue
+                        else:
+                            print(f"    ... Adding patient {pat} session {sesh} label {label_name} to database.")
+                            pass
+                    except:
+                        print(f"    ... Adding patient {pat} session {sesh} label {label_name} to database.")
+                        pass
+                    
+                    patient_pts = (MovieSession & f"patient_id={pat}" & f"session_nr={sesh}").fetch("pts")[0]
+                    neural_rectime = (MovieSession & f"patient_id={pat}" & f"session_nr={sesh}").fetch("neural_recording_time")[0]
+                    
+                    default_label = (MovieAnnotation & f"annotator_id='{annotator_id}'" & f"label_name='{label_name}'").fetch("indicator_function")[0]
+                    patient_aligned_label = match_label_to_patient_pts_time(default_label, patient_pts)
+                    values, starts, stops = create_vectors_from_time_points.get_start_stop_times_from_label(neural_rectime, 
+                                                                                            patient_aligned_label)
+
+                    self.insert1({'patient_id': pat,
+                                    'session_nr': sesh,
+                                    'annotator_id': annotator_id,
+                                    'label_name': label_name,
+                                    'annotation_date': annotation_date,
+                                    'label_in_patient_time': np.array(patient_aligned_label),
+                                    'values': np.array(values),
+                                    'start_times': np.array(starts),
+                                    'stop_times': np.array(stops),
+                                    }, skip_duplicates=True)
+
+
+@epi_schema
+class MovieSkips(dj.Computed):
+    definition = """
+    # This table Contains start and stop time points, where the watching behaviour of the patient changed from 
+    # continuous (watching the movie in the correct frame order) to non-continuous (e.g. jumping through the movie) or 
+    # the other way round;
+    # all time points are in Neural Recording Time
+    -> MovieSession                    # number of movie session
+    ---
+    values: longblob                   # values of continuous watch segments
+    start_times: longblob              # start time points of segments
+    stop_times: longblob               # end time points of segments
+    """
+    
+    def make(self, key):
+        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = session_nrs[i_pat]
+
+            for i_sesh, sesh in enumerate([pat_sessions]):
+
+                try:
+                    check = (MovieSkips & f"patient_id={pat}" & f"session_nr={sesh}").fetch("values")
+                    if check.any():
+                        continue
+                    else:
+                        print(f"    ... Adding patient {pat} session {sesh} to database.")
+                        pass
+                except:
+                    print(f"    ... Adding patient {pat} session {sesh} to database.")
+                    pass
+
+                main_patient_dir = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}")
+
+                session_info = np.load(main_patient_dir / "session_info.npy", allow_pickle=True)
+                date = session_info.item().get("date")
+                time = session_info.item().get("time")
+                time = datetime.strptime(time, '%H-%M-%S').strftime('%H:%M.%S')
+
+                path_wl =  main_patient_dir / "watchlogs" 
+                ffplay_file = next(path_wl.glob("ffplay*"), None)
+
+                if ffplay_file:
+                    print(" Found ffplay file:", ffplay_file)
+                else:
+                    print(" No ffplay file found in the watchlogs directory.")
+                    break
+
+                path_daq = main_patient_dir / "daq_files" 
+                daq_file = next(path_daq.glob("timedDAQ*"), None)
+                
+                if ffplay_file:
+                    print(" Found DAQ file:", daq_file)
+                else:
+                    print(" No DAQ file found in the daq_files directory.")
+                    break
+                    
+                path_events = main_patient_dir / "event_file" / "Events.npy"
+                time_conversion = data_utils.TimeConversion(path_to_wl=ffplay_file, path_to_dl=daq_file,
+                                                                    path_to_events=path_events)
+                starts, stops, values = time_conversion.convert_skips()
+
+                self.insert1({'patient_id': pat, 
+                            'session_nr': sesh,
+                            'start_times': np.array(starts), 
+                            'stop_times': np.array(stops), 
+                            'values': np.array(values)}, skip_duplicates=True)
+
+@epi_schema
+class MoviePauses(dj.Computed):
+    definition = """
+    # This table contains information about pauses in movie playback;
+    # This is directly computed from the watch log;
+    # Time points are in Neural Recording Time
+    -> MovieSession                    # movie watching session of patient
+    ---
+    start_times: longblob              # start time points of pauses
+    stop_times: longblob               # end time points of pauses
+    """
+
+    def make(self, key):
+
+        patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
+
+        for i_pat, pat in enumerate(patient_ids):
+            pat_sessions = session_nrs[i_pat]
+
+            for i_sesh, sesh in enumerate([pat_sessions]):
+
+                try:
+                    check = (MoviePauses & f"patient_id={pat}" & f"session_nr={sesh}").fetch("values")
+                    if check.any():
+                        continue
+                    else:
+                        print(f"    ... Adding patient {pat} session {sesh} to database.")
+                        pass
+                except:
+                    print(f"    ... Adding patient {pat} session {sesh} to database.")
+                    pass
+
+                main_patient_dir = Path(config.PATH_TO_PATIENT_DATA, str(pat), f"session_{sesh}")
+
+                session_info = np.load(main_patient_dir / "session_info.npy", allow_pickle=True)
+                date = session_info.item().get("date")
+                time = session_info.item().get("time")
+                time = datetime.strptime(time, '%H-%M-%S').strftime('%H:%M.%S')
+
+                path_wl =  main_patient_dir / "watchlogs" 
+                ffplay_file = next(path_wl.glob("ffplay*"), None)
+
+                if ffplay_file:
+                    print(" Found ffplay file:", ffplay_file)
+                else:
+                    print(" No ffplay file found in the watchlogs directory.")
+                    break
+
+                path_daq = main_patient_dir / "daq_files" 
+                daq_file = next(path_daq.glob("timedDAQ*"), None)
+                
+                if ffplay_file:
+                    print(" Found DAQ file:", daq_file)
+                else:
+                    print(" No DAQ file found in the daq_files directory.")
+                    break
+                    
+                path_events = main_patient_dir / "event_file" / "Events.npy"
+                time_conversion = data_utils.TimeConversion(path_to_wl=ffplay_file, path_to_dl=daq_file,
+                                                                    path_to_events=path_events)
+                
+                start, stop = time_conversion.convert_pauses()
+
+                self.insert1({'patient_id': pat, 
+                            'session_nr': sesh,
+                            'start_times': np.array(starts), 
+                            'stop_times': np.array(stops)}, skip_duplicates=True)                                                   
+
+
+########################################################
+# Manual Population Functions #
+########################################################
+    
 def populate_lfp_data_table():
     """
     Iterates over the channel files stored in config.PATH_TO_DATA/lfp_data/
