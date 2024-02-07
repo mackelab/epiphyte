@@ -4,15 +4,11 @@ version: '3.7'
 services:
   db:
     image: datajoint/mysql:5.7
-    # image: datajoint/mysql:8.0
     env_file: datajoint.env
     ports:
       - "3306:3306"
     volumes:
-      ## persist data across docker-compose up/down
       - ./data:/var/lib/mysql
-      ## modify MySQL config
-      # - ./config/my.cnf:/etc/mysql/my.cnf
 
   minio1:
    image: quay.io/minio/minio:RELEASE.2021-10-23T03-28-24Z
