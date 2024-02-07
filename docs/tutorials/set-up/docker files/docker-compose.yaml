@@ -1,0 +1,36 @@
+# Copy and rename the files "datajoint.env.example" and "minio.env.example" as "datajoint.env" and "minio.env" and set your custom usernames and passwords
+
+version: '3.7'
+services:
+  db:
+    image: datajoint/mysql:5.7
+    # image: datajoint/mysql:8.0
+    env_file: datajoint.env
+    ports:
+      - "3306:3306"
+    volumes:
+      ## persist data across docker-compose up/down
+      - ./data:/var/lib/mysql
+      ## modify MySQL config
+      # - ./config/my.cnf:/etc/mysql/my.cnf
+
+  minio1:
+   image: quay.io/minio/minio:RELEASE.2021-10-23T03-28-24Z
+   env_file: minio.env
+   ports:
+    - "9000:9000"
+    - "9001:9001"
+   volumes:
+    - ./minio:/data
+   healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+   command: server /data -console-address ":9001"
+
+  minio1_client:
+   image: minio/mc
+   volumes:
+    - ./minio:/data
+   entrypoint: /bin/sh
