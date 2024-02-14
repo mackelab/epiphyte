@@ -25,7 +25,7 @@ Use cases:
 * You want to test out the database infrastructure before deploying to a remote server.
 * You will be the only user and do not work with large data files. 
 
-[Follow the installation instructions here:]()
+[Follow the installation instructions here:](https://github.com/mackelab/epiphyte/wiki/Local-Machine-Installation)
 
 [and continue to *Tutorial 4: Configure and connect to the database*.](docs/tutorials/set-up/3.%20Configure%20and%20connect%20to%20database.ipynb)
 
