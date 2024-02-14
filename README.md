@@ -13,8 +13,6 @@ Going through the tutorials will yield a fully functional database, populated wi
 1. to motivate a specific database structure for complex datasets, and
 2. to provide a worked example for building and embedding such a database into an ecosystem that facilitates analysis and remote collaboration.
 
-With these goals in mind, we recommend working through the tutorials located in `docs/tutorials/set-up/` in the prescribed order. 
-
 ## How to install Epiphyte? 
 
 #### *Note: These installation instructions assume that you are familiar Python and using command line interfaces. If you would like to set this package up from scratch (no assumed experience), check out the more robust instructions [here.](https://github.com/mackelab/Epiphyte/wiki/Installation)*
