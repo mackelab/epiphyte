@@ -19,7 +19,7 @@ Going through the tutorials will yield a fully functional database, populated wi
 
 Epiphyte can be configured and deployed for three main use cases, as found in the above flowchart. 
 
-#### Option A: Install a local instance of Epiphyte. 
+### Option A: Install a local instance of Epiphyte. 
 
 Use cases: 
 * You want to test out the database infrastructure before deploying to a remote server.
@@ -29,7 +29,7 @@ Use cases:
 
 [and continue to *Tutorial 4: Configure and connect to the database*.](docs/tutorials/set-up/3.%20Configure%20and%20connect%20to%20database.ipynb)
 
-#### Option B: Install a remote instance of Epiphyte, without MinIO.
+### Option B: Install a remote instance of Epiphyte, without MinIO.
 
 Use cases:
 * Multiple people, accessing from separate locations, will use the database. 
@@ -39,7 +39,7 @@ Use cases:
 
 [and skip to *Tutorial 3: Install and set up Epiphyte*.](docs/tutorials/set-up/3.%20Install%20and%20set%20up%20Epiphyte.ipynb)
 
-#### Option C: Install a remote instance of Epiphyte, with MinIO.
+### Option C: Install a remote instance of Epiphyte, with MinIO.
 
 Use cases:
 * Multiple people, accessing from separate locations, will use the database. 
