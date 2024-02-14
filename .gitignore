@@ -127,5 +127,4 @@ ign/
 
 data_base/mysql-docker/data
 
-*.png
 *.pdf

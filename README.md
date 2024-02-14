@@ -15,111 +15,34 @@ Going through the tutorials will yield a fully functional database, populated wi
 
 ## How to install Epiphyte? 
 
-#### *Note: These installation instructions assume that you are familiar Python and using command line interfaces. If you would like to set this package up from scratch (no assumed experience), check out the more robust instructions [here.](https://github.com/mackelab/Epiphyte/wiki/Installation)*
+![Installation Flowchart](docs/reference/installation-flowchart.png)
 
-### Requirements:
-* OS: Linux or Mac/OSx
-* Python 3.5 or higher (either system-level, or in an IDE)
-* 400 MB free disk space
-* Permission to perform sudo-level commands
+Epiphyte can be configured and deployed for three main use cases, as found in the above flowchart. 
 
-### Installation: 
+#### Option A: Install a local instance of Epiphyte. 
 
-Installing `epiphyte` involves three broad steps: 1) installing and setting up a DataJoint docker container on the system-level, 2) download and launch the DataJoint MySQL server via docker-compose, and 3), installing the code package  either on the system-level, or within a virtual environment (recommended). More information about the packages and software used by `epiphyte` can be found in the [wiki](https://github.com/mackelab/Epiphyte/wiki/Installation).
+Use cases: 
+* You want to test out the database infrastructure before deploying to a remote server.
+* You will be the only user and do not work with large data files. 
 
-### 1. Install and set-up the DataJoint docker container. 
+[Follow the installation instructions here:]()
 
-* Install the correct [Docker](https://docs.docker.com/get-docker/) for your OS.
-* Verify the Docker installation: 
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-docker --version
-docker run hello-world
-</pre>
-* Install [Docker Compose](https://docs.docker.com/compose/install/).
-* Verify the Docker Compose installation:
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-docker-compose --version
-</pre>
+[and continue to *Tutorial 4: Configure and connect to the database*.](docs/tutorials/set-up/3.%20Configure%20and%20connect%20to%20database.ipynb)
 
-### 2. Download and launch the DataJoint MySQL server via docker-compose.
+#### Option B: Install a remote instance of Epiphyte, without MinIO.
 
-(Following is taken from [DataJoint documentation](https://github.com/datajoint/mysql-docker).)
+Use cases:
+* Multiple people, accessing from separate locations, will use the database. 
+* You do not need to support large data files. 
 
-* Create a directory to store the docker-compose YAML file:
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-mkdir mysql-docker
-cd mysql-docker
-wget https://raw.githubusercontent.com/datajoint/mysql-docker/master/docker-compose.yaml
-docker-compose up -d
-</pre>
-* Download a package that enables access to your locally running MySQL server:
+[Complete *Tutorial 1: Launch the MySQL Database*](docs/tutorials/set-up/1.%20Launch%20the%20MySQL%20database.ipynb)
 
-> Linux: 
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo apt-get install mysql-client
-</pre>
+[and skip to *Tutorial 3: Install and set up Epiphyte*.](docs/tutorials/set-up/3.%20Install%20and%20set%20up%20Epiphyte.ipynb)
 
-> Mac (via [Homebrew](https://brew.sh/)): 
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-brew install mysql@5.7
-brew tap homebrew/services
-brew services start mysql@5.7
-brew services list
-brew link --force mysql@5.7
-mysql -V # verify the installation
-</pre>
-* Test the server access. If there are issues, refer [here](https://github.com/mackelab/Epiphyte/wiki/Troubleshooting).
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-mysql -h 127.0.0.1 -u root -p
-Enter password: [type in your password here: default is "simple"]
-</pre>
+#### Option C: Install a remote instance of Epiphyte, with MinIO.
 
-### 3. Install `Epiphyte`:
+Use cases:
+* Multiple people, accessing from separate locations, will use the database. 
+* You use large data files (e.g., LFP, movie data, multi-hour calcium imaging).
 
-There are two ways to install `epiphyte` -- via `pip` or cloning this repo. 
-
-Note: certain features of the DataJoint python package have not been updated for more recent releases of Python. Therefore, DataJoint and epiphyte require an older version of Python (<=3.9). For this reason, we recommend using a conda environment to install all needed packages and to develop from. 
-
-#### Install via `git`
-
-* Clone the repository:
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-git clone git@github.com:mackelab/epiphyte.git
-cd epiphyte
-</pre>
-
-* Create a new conda environment suitable for the `epiphyte` requirements: 
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda create --name epiphyte python=3.9.18 ipython
-</pre>
-
-* Activate the conda environment: 
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda activate epiphyte
-</pre>
-
-* Install the needed dependencies using `setup.py`:
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-pip install .
-</pre>
-
-* Verify the installation:
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda list
-</pre>
-
-#### Or, install via `pip` in a `conda` environment 
-
-* Create a new conda environment suitable for the `epiphyte` requirements: 
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda create --name epiphyte python=3.9.18 ipython
-</pre>
-* Activate the conda environment and install `epiphyte`:
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda activate epiphyte
-pip install epiphyte
-</pre>
-
-
-
-
+[Start at *Tutorial 1: Launch the MySQL database* and continue through the remaining tutorials.](docs/tutorials/set-up/1.%20Launch%20the%20MySQL%20database.ipynb)
