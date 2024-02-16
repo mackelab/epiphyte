@@ -11,7 +11,7 @@ setup(
         'numpy>=1.26.3',
         'pandas>=2.2.0'
     ],
-    python_requires='>=3.7, <3.9',
+    python_requires='>=3.7, <3.10',
     author='Alana Darcher, Tamara Mueller, Rachel Rapp, Franziska Gerken',
     author_email='alana.darcher@gmail.com',
     description='',

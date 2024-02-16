@@ -31,7 +31,7 @@ from datetime import datetime
 
 import numpy as np
 
-from ..database.config import *
+from epiphyte.database.config import *
 from .mock_data_inits import *
 
 class GenerateData:
@@ -337,7 +337,7 @@ class GenerateData:
         """
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         _, seed = self.seed_and_interval()
-        pause_pool = 5 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
+        pause_pool = 1 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
         
         movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
         end_time = seed + movie_len_unix 
@@ -420,3 +420,59 @@ class GenerateData:
                     file.write("Pausing\nContinuing\tafter\tpause\n")
 
         file.close()
+
+def run_data_generation():
+    patients = [1,2,3]
+    sessions = [[1], [1, 2], [1]]
+
+    print(f"Generating patient data for {len(patients)} 'patients'..")
+    for patient_id, patient_sessions in zip(patients, sessions):
+
+        for session_nr in patient_sessions:
+
+            print(f"patient {patient_id}, session {session_nr}")
+
+            pat1_neural_data = GenerateData(patient_id, session_nr)
+            pat1_neural_data.summarize()
+            pat1_neural_data.save_session_info()
+
+            pat1_neural_data.save_spike_trains()
+            
+            pat1_neural_data.save_channel_names()
+            pat1_neural_data.save_events()
+            pat1_neural_data.save_daq_log()
+            pat1_neural_data.save_watchlog_with_artifacts()
+
+    print("Generating movie annotations..")
+
+    nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
+
+    annotator_ids = []
+    for i in range(len(annotators)):
+        annotator_ids.append(annotators[i]['annotator_id'])
+
+    path = Path(PATH_TO_LABELS)
+    path.mkdir(parents=True, exist_ok=True)
+
+    start_times_1 = [0, 5000.04, 7000.04, 12000.04]
+    stop_times_1 = [5000,7000,12000,12575]
+    values_1 = [1,0,1,0]
+    character1 = np.array([values_1, start_times_1, stop_times_1]) 
+    np.save(path / f"1_character1_{random.choice(annotator_ids)}_{datetime.now().strftime('%Y%m%d')}_character.npy", character1)
+
+    start_times_2 = [0, 400.04, 4000.04, 10000.04, 10500.04]
+    stop_times_2 = [400,4000,10000,10500,12575]
+    values_2 = [0,1,0,1,0]
+    character2 = np.array([values_2, start_times_2, stop_times_2]) 
+    np.save(path / f"2_character2_{random.choice(annotator_ids)}_{datetime.now().strftime('%Y%m%d')}_character.npy", character2)
+
+    start_times_3 = [0, 100.04, 500.04]
+    stop_times_3 = [100, 500, 12575]
+    values_3 = [0,1,0]
+    location1 = np.array([values_3, start_times_3, stop_times_3]) 
+    np.save(path / f"3_location1_{random.choice(annotator_ids)}_{datetime.now().strftime('%Y%m%d')}_character.npy", location1)
+
+
+if __name__ == "__main__":
+    
+    run_data_generation()
