@@ -61,6 +61,7 @@ class GenerateData:
         self.spike_times, self.spike_amps = self.generate_spike_trains()
         self.channel_dict = self.generate_channelwise_unit_distribution()
         
+        self.sampling_rate = 1000
         ## stimulus data
         
         self.len_context_files = random.randint(4000, 5400) # generate length of events.nev & DAQ file. 
@@ -127,6 +128,18 @@ class GenerateData:
         
         return channel_dict
     
+    def generate_lfp_channel(self):
+        """
+        Generates a single "LFP" channel -- consists of two arrays:
+        timestamps: array of sample times 
+        samples: array of samples
+        """
+        ts = np.arange(self.rectime_on, self.rectime_off,1)
+        frequency = 8  # in Hz
+        amplitude = 100  # arbitrary unit
+        samples = amplitude * np.sin(2 * np.pi * frequency * ts)
+        return ts, samples
+
     def generate_channel_list(self):
         """
         Creates a list of channel names to resemble that of an actual surgical output.
@@ -170,7 +183,18 @@ class GenerateData:
                 filename = f"CSC{csc}_{t}{unit_counter}.npy"
                 np.save(save_dir / filename, save_dict)
                 i += 1
-                
+
+    def save_lfp_data(self):
+        """
+        Makes and saves the LFP channel. Optional step.
+        """
+        save_dir = self.format_save_dir(subdir="lfp_data")
+
+        ts, samples = self.generate_lfp_channel()
+
+        filename = f"CSC1_lfp.npy"
+        np.save(save_dir / filename, {"ts": ts, "samples": samples})
+    
     def save_channel_names(self):
         """
         Makes and saves a txt file listing the channel names
@@ -432,16 +456,17 @@ def run_data_generation():
 
             print(f"patient {patient_id}, session {session_nr}")
 
-            pat1_neural_data = GenerateData(patient_id, session_nr)
-            pat1_neural_data.summarize()
-            pat1_neural_data.save_session_info()
+            pat_neural_data = GenerateData(patient_id, session_nr)
+            pat_neural_data.summarize()
+            pat_neural_data.save_session_info()
 
-            pat1_neural_data.save_spike_trains()
+            pat_neural_data.save_spike_trains()
+            pat_neural_data.save_lfp_data()
             
-            pat1_neural_data.save_channel_names()
-            pat1_neural_data.save_events()
-            pat1_neural_data.save_daq_log()
-            pat1_neural_data.save_watchlog_with_artifacts()
+            pat_neural_data.save_channel_names()
+            pat_neural_data.save_events()
+            pat_neural_data.save_daq_log()
+            pat_neural_data.save_watchlog_with_artifacts()
 
     print("Generating movie annotations..")
 
