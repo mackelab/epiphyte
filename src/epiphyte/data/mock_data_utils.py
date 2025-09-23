@@ -1,25 +1,23 @@
-"""
-Module: GenerateData
+"""Mock data generation utilities.
 
-Description:
-This module defines the GenerateData class, which is responsible for generating and saving mock neural data.
-It includes methods for creating mock spike trains, meta-data, stimulus data, and various log files.
-
-Usage:
-- Note: takes hard-coded variables from database/config.py
-- Instantiate the GenerateData class with patient information and session details.
-- Call methods to generate and save mock data, spike trains, channel names, events, DAQ logs, and watchlogs.
-- Save generated mock data to the location specificed in database/config.py 
+This module defines the ``GenerateData`` class that creates and saves mock neural
+data, including spike trains, LFP-like signals, channel names, events, DAQ logs,
+and watchlogs. It uses parameters from ``epiphyte.database.config`` to determine
+output directories.
 
 Example:
-generator = GenerateData(patient_id=1, session_nr=1)
-generator.save_spike_trains()
-generator.save_channel_names()
-generator.save_events()
-generator.save_daq_log()
-generator.save_perfect_watchlog()
-generator.save_watchlog_with_artifacts()
-generator.save_session_info()
+    ```python
+    from epiphyte.data.mock_data_utils import GenerateData
+
+    gen = GenerateData(patient_id=1, session_nr=1)
+    gen.save_session_info()
+    gen.save_spike_trains()
+    gen.save_lfp_data()
+    gen.save_channel_names()
+    gen.save_events()
+    gen.save_daq_log()
+    gen.save_watchlog_with_artifacts()
+    ```
 """
 
 import copy
@@ -31,17 +29,41 @@ from datetime import datetime
 
 import numpy as np
 
-from epiphyte.database.config import *
-from .mock_data_inits import *
+from __future__ import annotations
+
+from typing import List, Tuple
+
+from epiphyte.database.config import *  # noqa: F401,F403 (imports constants)
+from .mock_data_inits import *  # noqa: F401,F403 (imports spike shape params)
 
 class GenerateData:
-    """
-    Create mock neural data (spikes, lfp) 
-    and the corresponding meta-data (channel names, anatomical location).
-    Also creates the 
+    """Generate mock neural data and related metadata.
+
+    :Attributes:
+        patient_id: Integer identifier for the mock patient.
+        session_nr: Session number for this recording.
+        stimulus_len: Stimulus length in minutes.
+        nr_channels: Number of channels simulated.
+        nr_units: Number of units across all channels.
+        nr_channels_per_region: Channels per brain region label.
+        unit_types: Allowed unit type codes (e.g., ``"MU"``, ``"SU"``).
+        brain_regions: Region codes used to synthesize channel names.
+        rec_length: Recording length in milliseconds.
+        rectime_on: Start time (unix epoch ms) for recording.
+        rectime_off: End time (unix epoch ms) for recording.
+        spike_times: Generated spike time arrays per unit.
+        spike_amps: Generated spike amplitude arrays per unit.
+        channel_dict: Mapping of channel index to list of unit types.
+        sampling_rate: LFP sampling rate (Hz) used in mock signal.
+        len_context_files: Number of entries for events/DAQ logs.
+        datetime: ISO-like timestamp used in filenames.
+        signal_tile: Bit-pattern tile used to synthesize event codes.
+        stim_on_time: Estimated stimulus onset (microseconds).
+        stim_off_time: Estimated stimulus offset (microseconds).
     """
     
-    def __init__(self, patient_id, session_nr, stimulus_len=83.33):
+    def __init__(self, patient_id: int, session_nr: int,
+                 stimulus_len: float = 83.33) -> None:
         
         self.patient_id = patient_id
         self.session_nr = session_nr
@@ -71,18 +93,18 @@ class GenerateData:
         self.stim_on_time = self.generate_stimulus_onsets()[0]
         self.stim_off_time = self.generate_stimulus_onsets()[1]
     
-    def summarize(self):
-        """
-        Prints out a selection of randomized variables.
-        """
+    def summarize(self) -> None:
+        """Print key randomized parameters for quick inspection."""
         
         print(f"# of 'neurons': {self.nr_units}")
         print(f"Date of recording session: {self.datetime}")
 
         
-    def format_save_dir(self, subdir=None):
-        """
-        Formats the subdir in which everything will be saved.
+    def format_save_dir(self, subdir: str | None = None) -> Path:
+        """Build and ensure the output directory exists.
+
+        :param subdir: Optional subdirectory under the session path.
+        :returns: Absolute path to the created directory.
         """
 
         save_dir = Path(f"{PATH_TO_DATA}/patient_data/{self.patient_id}/session_{self.session_nr}/")
@@ -94,9 +116,12 @@ class GenerateData:
                
         return save_dir
             
-    def generate_spike_trains(self):
-        """
-        Generates mock spike trains for a "patient."
+    def generate_spike_trains(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        """Generate mock spike trains and amplitudes for all units.
+
+        :returns: Tuple of two lists ``(spike_times, spike_amps)`` where
+                  ``spike_times`` are sorted times (unix ms) per unit and
+                  ``spike_amps`` are waveform-like amplitude arrays per spike.
         """
         
         spike_times = [
@@ -112,9 +137,10 @@ class GenerateData:
 
         return spike_times, spike_amps
     
-    def generate_channelwise_unit_distribution(self):
-        """
-        Distributes the number of units across "channels".
+    def generate_channelwise_unit_distribution(self) -> dict[int, List[str]]:
+        """Distribute the number of units across channels.
+
+        :returns: Mapping from channel index to unit type codes.
         """
         
         channel_units = [
@@ -128,11 +154,10 @@ class GenerateData:
         
         return channel_dict
     
-    def generate_lfp_channel(self):
-        """
-        Generates a single "LFP" channel -- consists of two arrays:
-        timestamps: array of sample times 
-        samples: array of samples
+    def generate_lfp_channel(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate a simple sine-wave LFP-like channel.
+
+        :returns: Tuple ``(timestamps, samples)`` arrays.
         """
         ts = np.arange(self.rectime_on, self.rectime_off,1)
         frequency = 8  # in Hz
@@ -140,10 +165,10 @@ class GenerateData:
         samples = amplitude * np.sin(2 * np.pi * frequency * ts)
         return ts, samples
 
-    def generate_channel_list(self):
-        """
-        Creates a list of channel names to resemble that of an actual surgical output.
-        Each entry consists of "<hemisphere abbr><brain region><channel number>".
+    def generate_channel_list(self) -> List[str]:
+        """Create names like ``LA1``, ``LA2``, ..., ``RPCH8``.
+
+        :returns: List of channel name strings.
         """
 
         channel_list = [
@@ -154,11 +179,8 @@ class GenerateData:
         
         return channel_list
     
-    def save_spike_trains(self):
-        """
-        Calls the generate_spike_trains() method and saves resulting trains 
-        in the local "data" directory.
-        """
+    def save_spike_trains(self) -> None:
+        """Save generated spike trains and amplitudes as ``.npy`` files."""
 
         save_dir = self.format_save_dir(subdir="spiking_data")
         
@@ -184,10 +206,8 @@ class GenerateData:
                 np.save(save_dir / filename, save_dict)
                 i += 1
 
-    def save_lfp_data(self):
-        """
-        Makes and saves the LFP channel. Optional step.
-        """
+    def save_lfp_data(self) -> None:
+        """Generate and save the LFP channel as ``CSC1_lfp.npy``."""
         save_dir = self.format_save_dir(subdir="lfp_data")
 
         ts, samples = self.generate_lfp_channel()
@@ -195,11 +215,8 @@ class GenerateData:
         filename = f"CSC1_lfp.npy"
         np.save(save_dir / filename, {"ts": ts, "samples": samples})
     
-    def save_channel_names(self):
-        """
-        Makes and saves a txt file listing the channel names
-        for each channel of the implanted "electrodes".
-        """
+    def save_channel_names(self) -> None:
+        """Save ``ChannelNames.txt`` listing channel names one per line."""
                    
         save_dir = self.format_save_dir()
             
@@ -211,11 +228,8 @@ class GenerateData:
             f1.write(f"{csc_name}.ncs\n")
         f1.close()
 
-    def save_session_info(self):
-        """
-        Makes and saves a npy binary file with session meta-data.
-        Contains a dictionary with patid, sessionnr, date, and time. 
-        """
+    def save_session_info(self) -> None:
+        """Save a ``session_info.npy`` dictionary (patient, session, date, time)."""
 
         save_dir = self.format_save_dir()
 
@@ -232,10 +246,11 @@ class GenerateData:
     ## stimulus data generation
     ##############
     
-    def generate_pings(self):
+    def generate_pings(self) -> np.ndarray:
+        """Recreate a repeating event code tile used by downstream logs.
+
+        :returns: Numpy array of event codes.
         """
-        Recreate how Neuralynx interfaces with a local computer. 
-        """       
         # recreate pings
         if self.len_context_files % 8 == 0:
             reps = int(self.len_context_files / 8)
@@ -247,9 +262,10 @@ class GenerateData:
 
         return signal_tile
     
-    def generate_events(self):
-        """
-        Generate mock Events.nev file. Save as Events.npy file. 
+    def generate_events(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate mock ``Events.npy`` content (timestamps, codes).
+
+        :returns: Tuple ``(timestamps, event_matrix)``.
         """
 
         # recreate event timestamps
@@ -258,10 +274,8 @@ class GenerateData:
         
         return events, events_mat
     
-    def save_events(self):
-        """
-        Save the generated mock Events.npy file. 
-        """
+    def save_events(self) -> None:
+        """Save generated events to ``event_file/Events.npy``."""
         
         events, events_mat = self.generate_events()
         
@@ -271,9 +285,10 @@ class GenerateData:
         
         np.save(ev_name, events_mat)
         
-    def generate_stimulus_onsets(self):
-        """
-        Generate the onset and offset timestamps for the stimulus.
+    def generate_stimulus_onsets(self) -> Tuple[int, int]:
+        """Generate approximate onset and offset timestamps for the stimulus.
+
+        :returns: Tuple ``(stim_on_time, stim_off_time)`` in microseconds.
         """
         
         # generate projected end time for the DAQ log, in unix time microseconds
@@ -283,15 +298,20 @@ class GenerateData:
         
         return stim_on_time, stim_off_time
     
-    def seed_and_interval(self):
-        
+    def seed_and_interval(self) -> Tuple[int, int]:
+        """Compute DAQ interval and initial seed time for log synthesis.
+
+        :returns: Tuple ``(interval_us, seed_time_us)``.
+        """
+
         add_interval = int((self.stim_off_time) / self.len_context_files)
-        seed = int(self.stim_on_time + add_interval*1.25)
+        seed = int(self.stim_on_time + add_interval * 1.25)
         return add_interval, seed
         
-    def generate_daq_log(self):
-        """
-        Generate the DAQ log. 
+    def generate_daq_log(self) -> List[Tuple[int, int, int, int]]:
+        """Generate DAQ log tuples of ``(code, idx, pre, post)``.
+
+        :returns: List of DAQ log entries.
         """
         
         add_interval, seed = self.seed_and_interval()
@@ -308,10 +328,8 @@ class GenerateData:
 
         return list(zip(self.signal_tile, np.arange(self.len_context_files), pre, post))
     
-    def save_daq_log(self):
-        """
-        Saves the generated DAQ log.
-        """
+    def save_daq_log(self) -> None:
+        """Save the generated DAQ log as a text file in ``daq_files``."""
         
         log_lines = self.generate_daq_log()
         
@@ -324,9 +342,10 @@ class GenerateData:
                 file.write("{}\t{}\t{}\t{}\n".format(datum[0], datum[1], datum[2], datum[3]))
             file.close()
             
-    def generate_perfect_watchlog(self):
-        """
-        Generate a movie watchlog file without pauses or skips.
+    def generate_perfect_watchlog(self) -> Tuple[int, List[float], List[int]]:
+        """Generate watchlog without pauses or skips (PTS and CPU time).
+
+        :returns: Tuple ``(nr_frames, pts_list, cpu_times)``.
         """
         
         _, seed = self.seed_and_interval()
@@ -341,7 +360,7 @@ class GenerateData:
         
         return nr_movie_frames, perfect_pts, cpu_time
     
-    def save_perfect_watchlog(self):
+    def save_perfect_watchlog(self) -> None:
         
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         
@@ -355,9 +374,10 @@ class GenerateData:
                 file.write("pts\t{}\ttime\t{}\n".format(perfect_pts[i], cpu_time[i]))
             file.close()
     
-    def make_pauses_and_skips(self):
-        """
-        Generate a movie watchlog file with pauses and skips.
+    def make_pauses_and_skips(self) -> Tuple[int, List[float], List[int], List[int]]:
+        """Generate watchlog with pauses and skips (PTS, CPU time, pause idx).
+
+        :returns: Tuple ``(nr_frames, pts_list, cpu_times, pause_indices)``.
         """
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         _, seed = self.seed_and_interval()
@@ -425,10 +445,8 @@ class GenerateData:
         
         return nr_movie_frames, skip_pts_revised, cpu_time, indices_pause
         
-    def save_watchlog_with_artifacts(self):
-        """
-        Save watchlog with artifacts.
-        """
+    def save_watchlog_with_artifacts(self) -> None:
+        """Save a watchlog including pauses and skips to ``watchlogs`` dir."""
         nr_movie_frames, skip_pts_revised, cpu_time, indices_pause = self.make_pauses_and_skips()
     
         # save
@@ -445,7 +463,7 @@ class GenerateData:
 
         file.close()
 
-def run_data_generation():
+def run_data_generation() -> None:
     patients = [1,2,3]
     sessions = [[1], [1, 2], [1]]
 

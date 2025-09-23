@@ -1,6 +1,14 @@
+"""Interactive and static raster plots for Epiphyte analysis.
+
+Provides utilities to render spike rasters for a selected patient/session using
+Holoviews/Bokeh and Panel widgets, and to save static raster images. Also
+supports highlighting pause/skip segments derived from the database.
+"""
+
 print("Epiphyte launch-raster version loaded.")
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import holoviews as hv
 from holoviews import opts
@@ -63,6 +71,10 @@ boxes.opts(tools=[hover])
 #################################
 
 def get_patient_session_info():
+    """Return available patient IDs and session numbers for plotting.
+
+    :returns: Tuple ``(patient_ids, session_numbers)``.
+    """
     
     # set parameters for patient IDs and session numbers of experiment sessions
     patients = config.patients
@@ -75,13 +87,15 @@ def get_patient_session_info():
     
     return patient_ids, session_nrs
  
-def make_static_raster(reset_timescale=False):
+def make_static_raster(reset_timescale: bool = False):
     # TODO modify to allow for multiple sessions for a single patient  
     """
-    Creates the static rasterplots for each patient and saves in the directory ../visualization/images/.
-    
-    This function first checks if the static images have already been generated and saved locally. If not, 
-    will generate ones for any patients that have been added since last run. 
+    Create static raster plots for each patient and save PNGs under
+    ``../visualization/images/``.
+
+    The function checks if images already exist and only generates missing
+    ones. When ``reset_timescale`` is ``True``, a rescaled filename suffix is
+    used.
     """
     
     patient_ids, session_ids = get_patient_session_info()
@@ -157,15 +171,14 @@ def make_static_raster(reset_timescale=False):
 ###############################
 
 class RasterPlot(param.Parameterized):
-    """
-    This class creates the raster plot and the corresponding menu to select the patient ID and the session number
-    """
+    """Interactive raster plot with controls for patient, session, and overlays."""
     patient_id = param.ObjectSelector(default=default_patient_id, objects=patient_ids)
     session_nr = param.ObjectSelector(default=default_session_nr, objects=session_nrs)
     highlight = param.ObjectSelector(default="None", objects=highlights)
 
     @param.depends('patient_id', 'session_nr', 'highlight')
     def load_raster(self):
+        """Render the raster for the selected patient/session with optional overlays."""
         nr_units = get_number_of_units_for_patient(self.patient_id)
         neural_rec_time = get_neural_rectime_of_patient(self.patient_id, self.session_nr) / 1000
         data_array = []
@@ -240,21 +253,21 @@ class StaticRasterPlot(param.Parameterized):
 
     @param.depends('patient_id', 'session_nr')
     def load_raster(self):
+        """Return a Panel component showing the saved raster image."""
         name_plot = "{}/visualization/images/raster_plot_{}".format(config.PATH_TO_REPO, self.patient_id)
 
         return pn.panel("{}.png".format(name_plot))
 
 
 class ShowCoords(param.Parameterized):
-    """
-    This class displays the coordinates of selected boxes.
-    """
+    """Display coordinates for user-selected regions (boxes) on the raster."""
 
     # instantiating the action button, which will then trigger updating the output
     action = param.Action(lambda x: x.param.trigger('action'), label='Show Selected Data Ranges')
 
     @param.depends('action')
     def display_all_data(self):
+        """Return a table of box indices and coordinate ranges for selections."""
         if not box_stream.data is None:
             nr_boxes = len(box_stream.data['x0'])
             list_boxes = ["Box {}".format(i) for i in range(nr_boxes)]
@@ -269,15 +282,14 @@ class ShowCoords(param.Parameterized):
 
 
 class AddingToDB(param.Parameterized):
-    """
-    Adding data to the database by clicking the action button.
-    """
+    """Add selected ranges as annotations to the database via an action button."""
 
     # instantiating the action button which will trigger uploading the data to the database
     add_to_db = param.Action(lambda x: x.param.trigger('add_to_db'), label='Add Selected Ranges to Data Base')
 
     @param.depends('add_to_db')
     def add_data_to_database(self):
+        """Insert selected box ranges into the ``ManualAnnotation`` table."""
         if not input_name.value == '' and not input_annotator_id.value == '':
 
             now = datetime.now()

@@ -1,4 +1,10 @@
-"""Table classes and population functions (skeleton of the database)"""
+"""DataJoint tables and population helpers for the mock database.
+
+This module defines DataJoint schemas and tables used to represent patients,
+sessions, events, annotations, spikes, and derived entities used throughout
+the tutorials. Population code reads from mock data under
+``epiphyte.database.config`` paths.
+"""
 
 import os
 from pathlib import Path
@@ -20,6 +26,7 @@ from ..preprocessing.annotation.stimulus_driven_annotation.movies import process
 
 @epi_schema
 class Patients(dj.Lookup):
+    """Patient demographics imported from configuration constants."""
     definition = """
     # general patient data, imported from config file
     patient_id: int                                    # patient ID
@@ -33,6 +40,7 @@ class Patients(dj.Lookup):
 
 @epi_schema
 class Sessions(dj.Lookup):
+    """Recording session metadata per patient."""
     definition = """
     # general session data, imported from config file
     patient_id: int                                    # patient ID
@@ -45,6 +53,7 @@ class Sessions(dj.Lookup):
 
 @epi_schema
 class Annotator(dj.Lookup):
+    """Annotators who labeled movie content and events."""
     definition = """
     # annatotors of the video, imported from config file
     annotator_id: varchar(5)                    # unique ID for each annotator
@@ -57,6 +66,7 @@ class Annotator(dj.Lookup):
 
 @epi_schema
 class LabelName(dj.Lookup):
+    """Declared label names available for annotations."""
     definition = """
     # names of existing labels, imported from config file
     label_name: varchar(32)   # label name
@@ -66,6 +76,11 @@ class LabelName(dj.Lookup):
 
 @epi_schema
 class MovieSession(dj.Imported):
+    """Per-session movie timing and channel metadata.
+
+    Populates from watchlogs, DAQ logs, and event files under the session
+    directory. Stores PTS, DTS, neural recording time, and channel names.
+    """
     definition = """
     # data of individual movie watching sessions
     -> Patients                          # patient ID
@@ -80,6 +95,7 @@ class MovieSession(dj.Imported):
     """
     
     def _make_tuples(self, key):
+        """Populate this table from session files for each patient."""
         patient_ids = Patients.fetch("patient_id")       
 
         for _, pat in enumerate(patient_ids):
@@ -163,6 +179,7 @@ class MovieSession(dj.Imported):
 
 @epi_schema
 class LFPData(dj.Manual):
+    """Local field potential-like signals stored per channel."""
     definition = """
     # local field potential data, by channel. 
     -> Patients
@@ -177,6 +194,7 @@ class LFPData(dj.Manual):
 
 @epi_schema
 class ElectrodeUnit(dj.Imported):
+    """Units detected per channel with type and within-channel number."""
     definition = """
     # Contains information about the implanted electrodes of each patient
     -> Patients                      # patient ID
@@ -190,6 +208,7 @@ class ElectrodeUnit(dj.Imported):
     """
 
     def _make_tuples(self, key):
+        """Populate by parsing spike filenames and channel names."""
         patient_ids = Patients.fetch("patient_id")
 
         # iterate over each patient in db
@@ -241,6 +260,7 @@ class ElectrodeUnit(dj.Imported):
 
 @epi_schema
 class MovieAnnotation(dj.Imported):
+    """Raw movie annotations (values and segments) per label and annotator."""
     definition = """
     # information about video annotations (e.g. labels of characters); 
     # this table contains start and end time points and values of the segments of the annotations;
@@ -257,6 +277,7 @@ class MovieAnnotation(dj.Imported):
     """
 
     def _make_tuples(self, key):
+        """Populate by reading ``.npy`` annotation files from labels directory."""
         path_labels = Path(config.PATH_TO_LABELS)
 
         for filepath in path_labels.iterdir():
@@ -295,6 +316,7 @@ class MovieAnnotation(dj.Imported):
                     
 @epi_schema
 class SpikeData(dj.Imported):
+    """Spike times and amplitudes per unit in neural recording time."""
     definition = """
     # This table contains all spike times of all units of all patients in Neural Recording Time
     # Each entry contains a vector of all spike times of one unit of one patient
@@ -306,6 +328,7 @@ class SpikeData(dj.Imported):
     """
 
     def _make_tuples(self, key):
+        """Populate by loading unit spike files and matching to units."""
         patient_ids = Patients.fetch("patient_id")
 
         for i_pat, pat in enumerate(patient_ids):
@@ -355,6 +378,7 @@ class SpikeData(dj.Imported):
                 
 @epi_schema
 class PatientAlignedMovieAnnotation(dj.Computed):
+    """Annotations aligned to individual patient PTS and neural time."""
     definition = """
     # Movie Annotations aligned to patient time / time points are in neural recording time
     -> MovieSession        # movie watching session ID
@@ -367,6 +391,7 @@ class PatientAlignedMovieAnnotation(dj.Computed):
     """
 
     def make(self, key):
+        """Align indicator to PTS and derive start/stop in neural time."""
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
         entries = (MovieAnnotation).fetch('KEY')
 
@@ -417,6 +442,7 @@ class PatientAlignedMovieAnnotation(dj.Computed):
 
 @epi_schema
 class MovieSkips(dj.Computed):
+    """Segments of continuous vs. non-continuous movie watching."""
     definition = """
     # This table Contains start and stop time points, where the watching behaviour of the patient changed from 
     # continuous (watching the movie in the correct frame order) to non-continuous (e.g. jumping through the movie) or 
@@ -430,6 +456,7 @@ class MovieSkips(dj.Computed):
     """
     
     def make(self, key):
+        """Detect non-continuous segments (skips) from watchlogs and DAQ logs."""
         patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")
 
         for i_pat, pat in enumerate(patient_ids):
@@ -486,6 +513,7 @@ class MovieSkips(dj.Computed):
 
 @epi_schema
 class MoviePauses(dj.Computed):
+    """Pauses in movie playback detected from watchlogs and DAQ logs."""
     definition = """
     # This table contains information about pauses in movie playback;
     # This is directly computed from the watch log;
@@ -545,24 +573,22 @@ class MoviePauses(dj.Computed):
                 time_conversion = data_utils.TimeConversion(path_to_wl=ffplay_file, path_to_dl=daq_file,
                                                                     path_to_events=path_events)
                 
-                start, stop = time_conversion.convert_pauses()
+                starts, stops = time_conversion.convert_pauses()
 
-                self.insert1({'patient_id': pat, 
+                self.insert1({'patient_id': pat,
                             'session_nr': sesh,
-                            'start_times': np.array(starts), 
-                            'stop_times': np.array(stops)}, skip_duplicates=True)                                                   
+                            'start_times': np.array(starts),
+                            'stop_times': np.array(stops)}, skip_duplicates=True)
 
 
 ########################################################
 # Manual Population Functions #
 ########################################################
     
-def populate_lfp_data_table():
-    """
-    Iterates over the channel files stored in config.PATH_TO_DATA/lfp_data/
-    and adds each channel to the table. 
+def populate_lfp_data_table() -> None:
+    """Populate ``LFPData`` from ``lfp_data`` files under each session directory.
 
-    Ignores channels already uploaded.
+    Skips already-inserted channel entries.
     """
 
     patient_ids, session_nrs = MovieSession.fetch("patient_id", "session_nr")

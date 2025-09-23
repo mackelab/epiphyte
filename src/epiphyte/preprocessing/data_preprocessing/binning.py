@@ -1,23 +1,32 @@
 import os.path
+from typing import List, Tuple, Union
+
+import numpy as np
 
 from database.db_setup import *
 import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
 import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
-def bin_label(patient_id, session_nr, values, start_times, stop_times, bin_size, exclude_pauses):
-    """
-    :param patient_id: int
-        ID of patient of vector
-    :param session_nr: int
-        session number of movie watching of patient
-    :param values: vector of values of the label
-    :param start_times: vector of start times of the label
-    :param stop_times: vector of stop times of the label
-    :param bin_size: size of one bin in miliseconds
-    :param exclude_pauses: bool value whether times of movie play back pausing should be excluded. If exclude_pauses == True: the pauses will be excluded from the binning
+def bin_label(
+    patient_id: int,
+    session_nr: int,
+    values: np.ndarray,
+    start_times: np.ndarray,
+    stop_times: np.ndarray,
+    bin_size: int,
+    exclude_pauses: bool,
+) -> np.ndarray:
+    """Bin a label timeline against fixed-size bins.
 
-    :return: vector that functions as an indicator function. One value for each bin that indicates the label
+    :param patient_id: ID of patient.
+    :param session_nr: Session number for the movie watching.
+    :param values: Values of the label per segment.
+    :param start_times: Start times (ms) per segment.
+    :param stop_times: Stop times (ms) per segment.
+    :param bin_size: Size of one bin in milliseconds.
+    :param exclude_pauses: If ``True``, exclude paused playback intervals.
+    :returns: Indicator vector (one value per bin).
     """
     neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
 
@@ -43,16 +52,23 @@ def bin_label(patient_id, session_nr, values, start_times, stop_times, bin_size,
                                                                                          np.array(stop_times))
 
 
-def bin_spikes(patient_id, session_nr, spike_times, bin_size, exclude_pauses, output_edges=False):
-    """
-    This function bins spikes, which are represented as a list of time points
-    :param patient_id: the ID of a patient (int)
-    :param session_nr: the session number of the experiment (int)
-    :param spike_times: a vector (np.array) of time points of spikes
-    :param bin_size: the bin size of the binning in milliseconds (int)
-    :param exclude_pauses: defining whether pauses in movie play back should be excluded (boolean)
-    :param output_edges: defining whether the edges used to bin the spikes should be outputted (necessary for tracking timepoints that are annotated during binning) (boolean, default = False)
-    :return array with binned spikes
+def bin_spikes(
+    patient_id: int,
+    session_nr: int,
+    spike_times: np.ndarray,
+    bin_size: int,
+    exclude_pauses: bool,
+    output_edges: bool = False,
+) -> Union[np.ndarray, List[np.ndarray]]:
+    """Bin spike times into fixed-size bins.
+
+    :param patient_id: ID of the patient.
+    :param session_nr: Session number of the experiment.
+    :param spike_times: Spike timestamps (ms) as a vector.
+    :param bin_size: Bin size in milliseconds.
+    :param exclude_pauses: If ``True``, exclude paused playback intervals.
+    :param output_edges: If ``True``, also return the bin edges used.
+    :returns: Binned spikes or ``[binned_spikes, bin_edges]`` if requested.
     """
     rectime = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
     rec_on = rectime[0]

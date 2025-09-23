@@ -1,38 +1,38 @@
-"""
-Functions related to processing the db stored time points (start/stop/values) into vectors for use in analysis. 
-"""
+"""Utilities to convert start/stop/value time points into vectors for analysis."""
 
 import pandas as pd
 import numpy as np
 
+import numpy as np
 from ...database import query_functions
 from ..annotation.stimulus_driven_annotation.movies import pause_handling
 
-def get_index_nearest_timestamp_in_vector(vector, timestamp):
-    """
-    This function returns the index of the value closest to 'timestamp' in 'vector'
-    :param vector: array
-        vector which shall be searched for 'timestamp'
-    :param timestamp: float
-        timestamp, which shall be searched
-    :return int index
+def get_index_nearest_timestamp_in_vector(vector: np.ndarray, timestamp: float) -> int:
+    """Index of the value nearest to ``timestamp`` in ``vector``.
+
+    :param vector: Array to search.
+    :param timestamp: Target timestamp.
+    :returns: Index of nearest value.
     """
     return (np.abs(np.array(vector) - int(timestamp))).argmin()
 
 
-def get_nearest_value_from_vector(vector, timestamp):
-    """
-    This function returns the value in vector 'vector' which is closest to the value 'timestamp'
-    :param vector: array
-        vector with shall be searched
-    :param timestamp: float
-        value for which to search
-    :return float
+def get_nearest_value_from_vector(vector: np.ndarray, timestamp: float) -> float:
+    """Value in ``vector`` closest to ``timestamp``.
+
+    :param vector: Array to search.
+    :param timestamp: Target timestamp.
+    :returns: Nearest value.
     """
     return vector[(np.abs(np.array(vector) - (timestamp))).argmin()]  # row number with matching pts
 
 
-def create_vector_from_start_stop_times_reference_cont_watch(reference_vector, values, starts, stops):
+def create_vector_from_start_stop_times_reference_cont_watch(
+    reference_vector: np.ndarray,
+    values: np.ndarray,
+    starts: np.ndarray,
+    stops: np.ndarray,
+) -> np.ndarray:
     """
     This function creates a vector from given start and stop times and values.
     The new vector will be aligned to the reference vector, where the reference vector indicates the edges of the bins.
@@ -46,8 +46,7 @@ def create_vector_from_start_stop_times_reference_cont_watch(reference_vector, v
     :param stops: array
         all stop times of all segments as a vector in the right order
 
-    :return array
-        indicator function aligned to reference vector
+    :returns: Indicator function aligned to reference vector.
     """
     # check if input has the correct format
     if not (len(values) == len(starts) == len(stops)):
@@ -68,7 +67,13 @@ def create_vector_from_start_stop_times_reference_cont_watch(reference_vector, v
     return ret
 
 
-def create_vector_from_start_stop_times(patient_id, session_nr, values, starts, stops):
+def create_vector_from_start_stop_times(
+    patient_id: int,
+    session_nr: int,
+    values: np.ndarray,
+    starts: np.ndarray,
+    stops: np.ndarray,
+) -> np.ndarray:
     """
     Less powerful version of the function create_vector_from_start_stop_times_reference_cont_watch
 
@@ -83,8 +88,7 @@ def create_vector_from_start_stop_times(patient_id, session_nr, values, starts, 
     :param stops: array
         all stop times of all segments as a vector in the right order
 
-    :return array
-        indicator function aligned to reference vector
+    :returns: Indicator function aligned to reference vector.
 
     """
     neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr)
@@ -105,7 +109,9 @@ def create_vector_from_start_stop_times(patient_id, session_nr, values, starts, 
     return ret
 
 
-def get_start_stop_times_from_label(neural_rec_time, patient_aligned_label):
+def get_start_stop_times_from_label(
+    neural_rec_time: np.ndarray, patient_aligned_label: np.ndarray
+) -> tuple[list, list, list]:
     """
     This function extracts the start and stop times from a label.
     'patient_aligned_label' has to have the same length as 'neural_rec_time'
@@ -116,7 +122,7 @@ def get_start_stop_times_from_label(neural_rec_time, patient_aligned_label):
     :param patient_aligned_label: array
         label aligned to patient time
 
-    :return values, start_times, stop_times: arrays
+    :returns: ``(values, start_times, stop_times)`` arrays.
     """
     tmp = patient_aligned_label[0]
     values = [tmp]
@@ -133,7 +139,9 @@ def get_start_stop_times_from_label(neural_rec_time, patient_aligned_label):
     return values, start_times, stop_times
 
 
-def get_bins_excl_pauses(patient_id, session_nr, neural_rec_time, bin_size):
+def get_bins_excl_pauses(
+    patient_id: int, session_nr: int, neural_rec_time: np.ndarray, bin_size: int
+) -> np.ndarray:
     """
     This function returns edges of bins for a given patient with the right bin size, while excluding bins
     where the movie was paused.
@@ -147,7 +155,7 @@ def get_bins_excl_pauses(patient_id, session_nr, neural_rec_time, bin_size):
     :param bin_size: int
         size of bin in milliseconds
 
-    :return edges of bins, excluding pauses
+    :returns: Edges of bins, excluding paused intervals.
     """
     start_times_pauses, stop_times_pauses = get_start_stop_times_pauses(patient_id, session_nr)
     rec_on = neural_rec_time[0]
@@ -160,7 +168,12 @@ def get_bins_excl_pauses(patient_id, session_nr, neural_rec_time, bin_size):
     return bins_no_pauses
 
 
-def create_vector_from_start_stop_times_reference(reference_vector, values, starts, stops):
+def create_vector_from_start_stop_times_reference(
+    reference_vector: np.ndarray,
+    values: np.ndarray,
+    starts: np.ndarray,
+    stops: np.ndarray,
+) -> np.ndarray:
     """
     This function takes values, start and stop times of segments and creates an indicator function from that
 
@@ -173,8 +186,7 @@ def create_vector_from_start_stop_times_reference(reference_vector, values, star
     :pram stops: array
         all stop times of all segments
 
-    :return array
-        indicator function created from the given input
+    :returns: Indicator function vector.
     """
     # check if input has the correct format
     if not (len(values) == len(starts) == len(stops)):
@@ -191,7 +203,9 @@ def create_vector_from_start_stop_times_reference(reference_vector, values, star
     return ret
 
 
-def get_value_matching_start_point(time_point, values, start_times, end_times):
+def get_value_matching_start_point(
+    time_point: float, values: np.ndarray, start_times: np.ndarray, end_times: np.ndarray
+) -> float:
     """
     This function returns the value from the 'values' vector, which is the closest to the given time point 'time_point'
     The 'time_point' hereby refers to a start time
@@ -205,8 +219,7 @@ def get_value_matching_start_point(time_point, values, start_times, end_times):
     :param end_times: array
         vector with all stop timesthe
 
-    :return float
-        value that corresponds to the given time point
+    :returns: Value corresponding to the time point.
 
     """
     index = get_index_nearest_timestamp_in_vector(start_times, time_point)
@@ -217,7 +230,9 @@ def get_value_matching_start_point(time_point, values, start_times, end_times):
     return values[index]
 
 
-def get_value_matching_stop_point(time_point, values, start_times, end_times):
+def get_value_matching_stop_point(
+    time_point: float, values: np.ndarray, start_times: np.ndarray, end_times: np.ndarray
+) -> float:
     """
     This function returns the value from the 'values' vector, which is the closest to the given time point 'time_point'
     The 'time_point' hereby refers to a stop time
@@ -231,8 +246,7 @@ def get_value_matching_stop_point(time_point, values, start_times, end_times):
     :param end_times: array
         vector with all stop times
 
-    :return float
-        value that corresponds to the given time point
+    :returns: Value corresponding to the time point.
 
     """
 
@@ -244,7 +258,9 @@ def get_value_matching_stop_point(time_point, values, start_times, end_times):
     return values[index]
 
 
-def get_index_matching_start_point(time_point, values, start_times, end_times):
+def get_index_matching_start_point(
+    time_point: float, values: np.ndarray, start_times: np.ndarray, end_times: np.ndarray
+) -> int:
     """
     This function returns the index of the corresponding start point that is the closest start point smaller than
     'time_point'
@@ -258,7 +274,7 @@ def get_index_matching_start_point(time_point, values, start_times, end_times):
     :param end_times: array
         vector with all stop times
 
-    :return array
+    :returns: Index of matching start point.
     """
     index = get_index_nearest_timestamp_in_vector(start_times, time_point)
     if time_point < start_times[index]:
@@ -268,7 +284,9 @@ def get_index_matching_start_point(time_point, values, start_times, end_times):
     return index
 
 
-def get_index_matching_stop_point(time_point, values, start_times, end_times):
+def get_index_matching_stop_point(
+    time_point: float, values: np.ndarray, start_times: np.ndarray, end_times: np.ndarray
+) -> int:
     """
     This function returns the index of the corresponding stop point that is the closest stop point greater than
     'time_point'
@@ -282,7 +300,7 @@ def get_index_matching_stop_point(time_point, values, start_times, end_times):
     :param end_times: array
         vector with all stop times
 
-    :return array
+    :returns: Index of matching stop point.
     """
     index = get_index_nearest_timestamp_in_vector(end_times, time_point)
     if time_point >= end_times[index]:
@@ -292,7 +310,13 @@ def get_index_matching_stop_point(time_point, values, start_times, end_times):
     return index
 
 
-def get_value_in_time_frame(time_point1, time_point2, values, start_times, end_times):
+def get_value_in_time_frame(
+    time_point1: float,
+    time_point2: float,
+    values: np.ndarray,
+    start_times: np.ndarray,
+    end_times: np.ndarray,
+) -> float:
     """
     This function returns the value that is most represented between the two time points 'time_point1' and 'time_point2'
 
@@ -307,7 +331,7 @@ def get_value_in_time_frame(time_point1, time_point2, values, start_times, end_t
     :param end_times: array
         vector with all stop time points
 
-    :return int
+    :returns: Value most represented within the time frame.
     """
     index_1 = get_index_matching_start_point(time_point1, values, start_times, end_times)
     index_2 = get_index_matching_stop_point(time_point2, values, start_times, end_times)
