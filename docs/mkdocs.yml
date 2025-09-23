@@ -16,6 +16,25 @@ nav:
     - Data utilities: reference/data.md
     - Preprocessing: reference/preprocessing.md
     - Analysis & Visualization: reference/analysis.md
+    - Source Notebooks:
+      - Preprocessing:
+        - Data Preprocessing:
+          - Bin Spikes: reference/src_nbs/epiphyte/preprocessing/data_preprocessing/bin_spikes.md
+        - Annotation (Data-driven):
+          - Adding New Annotation: reference/src_nbs/epiphyte/preprocessing/annotation/data_driven_annotation/adding_new_annotation.md
+        - Stimulus Preprocessing:
+          - Adding New Label: reference/src_nbs/epiphyte/preprocessing/stimulus_preprocessing/adding_new_label_to_database.md
+          - Bin Annotation: reference/src_nbs/epiphyte/preprocessing/stimulus_preprocessing/bin_annotation.md
+          - Import/Export Movie Annotations: reference/src_nbs/epiphyte/preprocessing/stimulus_preprocessing/importing_exporting_movie_annotations.md
+      - Analysis:
+        - Overview: reference/src_nbs/epiphyte/analysis/example_analysis.md
+        - Visualization:
+          - Dev: reference/src_nbs/epiphyte/analysis/visualization/dev.md
+          - Gallery: reference/src_nbs/epiphyte/analysis/visualization/gallery.md
+          - Interactive Raster: reference/src_nbs/epiphyte/analysis/visualization/interactive_raster.md
+          - Visualise Neural Rec Time: reference/src_nbs/epiphyte/analysis/visualization/visualise_neural_rec_time.md
+          - Visualise PTS Neural Rec Time: reference/src_nbs/epiphyte/analysis/visualization/visualise_pts_neural_rec_time.md
+          - Visualise PTS: reference/src_nbs/epiphyte/analysis/visualization/visualise_pts.md
   - Community:
     - Contributing: contribute.md
     - FAQ: faq.md
