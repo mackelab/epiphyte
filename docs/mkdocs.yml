@@ -1,0 +1,70 @@
+site_name: Epiphyte Documentation
+
+nav:
+  - Home: index.md
+  - Installation: install.md
+  - Tutorials:
+    - Launch the MySQL database: tutorials/1. Launch the MySQL database.md
+    - Add MinIO to an existing VM (optional): tutorials/2. Add MinIO to an existing VM (optional).md
+    - Install Epiphyte: tutorials/3. Install Epiphyte.md
+    - Configure and connect to the database: tutorials/4. Configure and connect to the database.md
+    - Design and implement the database: tutorials/5. Design and implement the database.md
+    - Compile the codebase: tutorials/6. Compile the codebase.md
+    - Run regular backups (optional): tutorials/8. Run regular backups (optional).md
+  - API Reference:
+    - Database: reference/database.md
+    - Data utilities: reference/data.md
+    - Preprocessing: reference/preprocessing.md
+    - Analysis & Visualization: reference/analysis.md
+    - Diagrams: reference/diagrams.md
+  - Contributing: contribute.md
+  - FAQ: faq.md
+  - Acknowledgements: acknowledgements.md
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+
+markdown_extensions:
+  - extra
+  - admonition
+  - attr_list
+  - md_in_html
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+      toc_depth: 4
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - ../src
+          options:
+            show_source: true
+            heading_level: 3
+            members_order: source
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_symbol_type_toc: true
+            separate_signature: true
+
+watch:
+  - ../src/epiphyte
+
+extra_css: []
+extra_javascript: []
