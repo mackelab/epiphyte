@@ -16,10 +16,10 @@ nav:
     - Data utilities: reference/data.md
     - Preprocessing: reference/preprocessing.md
     - Analysis & Visualization: reference/analysis.md
-    - Diagrams: reference/diagrams.md
-  - Contributing: contribute.md
-  - FAQ: faq.md
-  - Acknowledgements: acknowledgements.md
+  - Community:
+    - Contributing: contribute.md
+    - FAQ: faq.md
+    - Acknowledgements: acknowledgements.md
 
 theme:
   name: material
