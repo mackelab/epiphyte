@@ -6,6 +6,6 @@ Epiphyte is a Python package with optional MySQL and MinIO backends.
 - See Tutorials for database and object storage setup
 - Configure connection details in `src/epiphyte/database/access_info.py`
 
-![Installation Flowchart](./installation-flowchart.png)
+![Installation Flowchart](./reference/installation-flowchart.png)
 
-![Infrastructure Diagram](./infrastructure_diagram.png)
+![Infrastructure Diagram](./reference/infrastructure_diagram.png)
