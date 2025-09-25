@@ -86,7 +86,7 @@ convert_src_nbs() {
 
 serve_docs() {
     echo -e "\n🔄 Starting local docs server on port $PORT..."
-    (cd docs && mkdocs serve -a localhost:$PORT)
+    (mkdocs serve -a localhost:$PORT)
 }
 
 for cmd in "${COMMANDS[@]}"; do
