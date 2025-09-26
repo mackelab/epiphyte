@@ -1,4 +1,24 @@
-"""Hard-coded variables for initializing the database"""
+"""Hard-coded variables for initializing the database.
+
+This modules defines the paths and variables used to initialize the mock database.
+
+Paths: 
+
+- `PATH_TO_REPO`: Path to the root of the repository.
+- `PATH_TO_DATA`: Path to the folder containing the mock data.
+- `PATH_TO_LABELS`: Path to the folder containing the movie annotations.
+- `PATH_PATIENT_ALIGNED_LABELS`: Path to the folder containing the patient-aligned annotations.
+- `PATH_TO_PATIENT_DATA`: Path to the folder containing the refractored mock patient data.
+- `PATH_TO_SESSION_DATA`: Path to the folder containing the refractored mock session data.
+
+Variables:
+
+- `PTS_MOVIE_new`: List of time points for the movie, sampled at 25 Hz (0.04s intervals).
+- `patients`: List of dictionaries, each containing information about a patient (id, age, gender, year).    
+- `sessions`: List of dictionaries, each containing information about a session (patient_id, session_nr, session_type).
+- `annotators`: List of dictionaries, each containing information about an annotator (id, first_name, last_name).
+- `label_names`: List of label names used in the annotations.
+"""
 
 import os
 from pathlib import Path

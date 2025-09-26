@@ -175,9 +175,9 @@ class GenerateData:
             Tuple[List[np.ndarray], List[np.ndarray]]: ``(spike_times, spike_amps)``
 
             - ``spike_times``: list of length ``nr_units``; each element is a
-              sorted ``float`` array of spike times in Unix epoch **ms**.
+            sorted ``float`` array of spike times in Unix epoch **ms**.
             - ``spike_amps``: list of length ``nr_units``; each element is a
-              ``(n_spikes, 64)`` array of waveform-like amplitudes.
+            ``(n_spikes, 64)`` array of waveform-like amplitudes.
 
         Notes:
             The number of spikes per unit is randomized per unit.

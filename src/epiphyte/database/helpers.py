@@ -1,4 +1,4 @@
-"""Helper utilities used across the database layer.
+"""Helper functions used in the `database` module.
 
 This module provides small utilities for parsing filenames, sorting keys
 in a human-friendly way, and extracting metadata encoded in strings.
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
+from typing import Any, Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -16,8 +16,11 @@ import numpy as np
 def atoi(text: str) -> Union[int, str]:
     """Convert a numeric substring to ``int`` or return the original string.
 
-    :param text: Substring that may contain only digits.
-    :returns: Integer value (if all digits) or the original string.
+    Args:
+        text (str): Substring that may contain only digits.
+
+    Returns:
+        Union[int, str]: Integer value (if all digits) or the original string.
     """
 
     return int(text) if text.isdigit() else text
@@ -29,10 +32,14 @@ def natural_keys(text: str) -> List[Union[int, str]]:
     Use as ``alist.sort(key=natural_keys)`` to sort filenames such as
     ``CSC2_SU1.npy`` before ``CSC10_SU1.npy``.
 
-    .. note:: Based on Ned Batchelder's human sorting recipe.
+    Notes:
+        Based on Ned Batchelder's human sorting recipe.
 
-    :param text: Input string to split into text and integer chunks.
-    :returns: Alternating text and integer parts suitable as a sort key.
+    Args:
+        text (str): Input string to split into text and integer chunks.
+    
+    Returns:
+        List[Union[int, str]]: Alternating text and integer parts suitable as a sort key.
     """
 
     return [atoi(chunk) for chunk in re.split(r"(\d+)", text)]
@@ -45,8 +52,11 @@ def extract_sort_key(filename: str) -> Union[Tuple[int, str, int], str]:
     pattern matches, returns a tuple ``(csc_number, unit_type, unit_nr)``.
     Otherwise, returns the original filename for fallback sorting.
 
-    :param filename: Filename to parse.
-    :returns: Tuple for sorting or the original filename.
+    Args:
+        filename (str): Filename to parse.
+
+    Returns:
+        Union[Tuple[int, str, int], str]: Tuple for sorting or the original filename.
     """
 
     match = re.match(r"CSC(\d+)_(\w+)(\d*)\.npy", filename)
@@ -64,8 +74,11 @@ def get_channel_names(path_channel_names: Union[str, Path]) -> List[str]:
     The file is expected to contain lines like ``<name>.ncs``. The suffix is
     stripped to yield bare channel identifiers.
 
-    :param path_channel_names: Path to the channel names file.
-    :returns: List of channel name strings.
+    Args:
+        path_channel_names (Union[str, Path]): Path to the channel names file.
+
+    Returns:
+        List[str]: List of channel name strings.
     """
 
     channel_names: List[str] = []
@@ -81,8 +94,11 @@ def get_unit_type_and_number(unit_string: str) -> Tuple[str, str]:
 
     Example: ``CSC_MUA1`` -> ("M", "1").
 
-    :param unit_string: Original unit string (e.g., ``"MUA1"`` or ``"SU3"``).
-    :returns: Tuple ``(unit_type, unit_nr)`` where type is ``"M"``, ``"S"``, or ``"X"``.
+    Args:
+        unit_string (str): Original unit string (e.g., ``"MUA1"`` or ``"SU3"``).
+
+    Returns:
+        Tuple[str, str]: Tuple ``(unit_type, unit_nr)`` where type is ``"M"``, ``"S"``, or ``"X"``.
     """
 
     if "MU" in unit_string:
@@ -102,8 +118,11 @@ def extract_name_unit_id_from_unit_level_data_cleaning(
 
     Filenames are expected as ``"<name>_unit<id>_<annotator>.npy"``.
 
-    :param filename: Filename to parse.
-    :returns: Tuple ``(name, unit_id, annotator)``.
+    Args:
+        filename (str): Filename to parse.
+
+    Returns:
+        Tuple[str, str, str]: Tuple ``(name, unit_id, annotator)``.
     """
 
     name, unit_id, annotator = filename.split("_")
@@ -117,9 +136,12 @@ def match_label_to_patient_pts_time(
 ) -> List[int]:
     """Align a default label indicator function to patient PTS frames.
 
-    :param default_label: Indicator vector (per canonical frame) of shape ``(N,)``.
-    :param patient_pts: Watched frame times in seconds, rounded to 2 decimals.
-    :returns: Indicator value for each patient frame.
+    Args:
+        default_label (np.ndarray): Indicator vector (per canonical frame) of shape ``(N,)``.
+        patient_pts (np.ndarray): Watched frame times in seconds, rounded to 2 decimals.
+
+    Returns:
+        List[int]: Indicator value for each patient frame.
     """
 
     return [
@@ -131,8 +153,11 @@ def match_label_to_patient_pts_time(
 def get_list_of_patient_ids(patient_dict: Sequence[Dict[str, Any]]) -> List[int]:
     """Collect all patient IDs from an indexable sequence of dicts.
 
-    :param patient_dict: Sequence where each item has a ``"patient_id"`` key.
-    :returns: List of integer patient identifiers.
+    Args:
+        patient_dict (Sequence[Dict[str, Any]]): Sequence where each item has a `patient_id` key.
+
+    Returns:
+        List[int]: List of integer patient identifiers.
     """
 
     return [patient_dict[i]["patient_id"] for i in range(0, len(patient_dict))]
