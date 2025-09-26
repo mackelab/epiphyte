@@ -1,3 +1,12 @@
+"""Seed spike shapes for randomized mock data generation.
+These are used in `epiphyte.data.mock_data_utils` to generate mock spike timeseries data.
+
+Notes:
+
+- `spike_shape_u` is the mean spike shape (in microvolts) for a spike with 64 samples.
+- `spike_shape_sd` is the standard deviation of the spike shape (in microvolts) for a spike with 64 samples.
+"""
+
 import numpy as np
 
 spike_shape_u = np.array([-1.0727845 , -0.9731209 , -0.85101134, -0.68844616, -0.50547343,
