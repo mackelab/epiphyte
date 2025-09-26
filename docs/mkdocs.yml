@@ -4,7 +4,8 @@ nav:
   - Home: index.md
   - Installation: install.md
   - Tutorials:
-    - Launch the MySQL database: tutorials/1. Launch the MySQL database on a virtual machine.md
+    - Launch the MySQL database locally: tutorials/Launch the MySQL database locally.md
+    - Launch the MySQL database on a virtual machine: tutorials/1. Launch the MySQL database on a virtual machine.md
     - Add MinIO to an existing VM (optional): tutorials/2. (Optional) Add MinIO to an existing virtual machine.md
     - Install Epiphyte: tutorials/3. Install Epiphyte.md
     - Configure and connect to the database: tutorials/4. Configure and connect to the database.md
@@ -85,5 +86,7 @@ plugins:
 watch:
   - ../src/epiphyte
 
-extra_css: []
+extra_css:
+  - stylesheets/extra.css
+
 extra_javascript: []
