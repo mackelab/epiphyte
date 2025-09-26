@@ -109,5 +109,4 @@ pip install epiphyte
 </pre>
 
 
-
-[Continue to *Tutorial 4: Configure and connect to the database*.](4.%20Configure%20and%20connect%20to%20database.ipynb)
+[Continue to *Configure and connect to the database*.](<4. Configure and connect to the database.md>)
