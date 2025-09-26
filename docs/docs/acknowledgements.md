@@ -6,4 +6,3 @@ We thank Fabian Sinz, Edgar Walker, and Christoph-Benjamin Blessing for their Da
 ### Funding
 
 This research was funded by German Ministry of Education and Research (BMBF), grant number 031L01978 and the German Research Foundation (DFG) through Germany’s Excellence Strategy (EXC-Number 2064/1, Project number 390727645).
-

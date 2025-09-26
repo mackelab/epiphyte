@@ -2,9 +2,7 @@
 
 Epiphyte can be configured and deployed for three main use cases: 
 
-<div style="text-align: center;">
-  <img src="../../reference/installation_flowchart.png" width="600"/>
-</div>
+![Installation flowchart](reference/installation_flowchart.png){ .img-center .w-600 }
 
 ### Option A: Install a local instance of Epiphyte. 
 
