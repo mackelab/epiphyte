@@ -1,4 +1,4 @@
-site_name: Epiphyte Documentation
+site_name: Epiphyte
 
 nav:
   - Home: index.md
@@ -29,13 +29,13 @@ nav:
           - Import/Export Movie Annotations: reference/src_nbs/epiphyte/preprocessing/stimulus_preprocessing/importing_exporting_movie_annotations.md
       - Analysis:
         - Overview: reference/src_nbs/epiphyte/analysis/example_analysis.md
-        - Visualization:
-          - Dev: reference/src_nbs/epiphyte/analysis/visualization/dev.md
-          - Gallery: reference/src_nbs/epiphyte/analysis/visualization/gallery.md
-          - Interactive Raster: reference/src_nbs/epiphyte/analysis/visualization/interactive_raster.md
-          - Visualise Neural Rec Time: reference/src_nbs/epiphyte/analysis/visualization/visualise_neural_rec_time.md
-          - Visualise PTS Neural Rec Time: reference/src_nbs/epiphyte/analysis/visualization/visualise_pts_neural_rec_time.md
-          - Visualise PTS: reference/src_nbs/epiphyte/analysis/visualization/visualise_pts.md
+        # - Visualization:
+        #   - Dev: reference/src_nbs/epiphyte/analysis/visualization/dev.md
+        #   - Gallery: reference/src_nbs/epiphyte/analysis/visualization/gallery.md
+        #   - Interactive Raster: reference/src_nbs/epiphyte/analysis/visualization/interactive_raster.md
+        #   - Visualise Neural Rec Time: reference/src_nbs/epiphyte/analysis/visualization/visualise_neural_rec_time.md
+        #   - Visualise PTS Neural Rec Time: reference/src_nbs/epiphyte/analysis/visualization/visualise_pts_neural_rec_time.md
+        #   - Visualise PTS: reference/src_nbs/epiphyte/analysis/visualization/visualise_pts.md
   - Community:
     - Contributing: contribute.md
     - FAQ: faq.md

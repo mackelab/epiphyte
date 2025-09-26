@@ -1,15 +1,18 @@
-"""Mock data generation utilities.
+"""Mock neural-data generator and file writer.
 
-This module defines the ``GenerateData`` class that creates and saves mock neural
-data, including spike trains, LFP-like signals, channel names, events, DAQ logs,
-and watchlogs. It uses parameters from ``epiphyte.database.config`` to determine
-output directories.
+This module contains GenerateData, which synthesizes spike trains,
+LFP-like signals, channel metadata, event streams, DAQ logs, and watchlogs, and
+for saves them to the on-disk layout expected by Epiphyte. Constants such as
+output roots (e.g., PATH_TO_DATA, PATH_TO_LABELS), annotation metadata
+(e.g., annotators), and spike-shape parameters are read from
+epiphyte.database.config and .mock_data_inits.
 
 Example:
     ```python
     from epiphyte.data.mock_data_utils import GenerateData
 
-    gen = GenerateData(patient_id=1, session_nr=1)
+    gen = GenerateData(patient_id=1, session_nr=1, stimulus_len=83.33)
+    gen.summarize()
     gen.save_session_info()
     gen.save_spike_trains()
     gen.save_lfp_data()
@@ -18,7 +21,54 @@ Example:
     gen.save_daq_log()
     gen.save_watchlog_with_artifacts()
     ```
+
+Running the module as a script executes run_data_generation(), which creates a
+small demo dataset for a few patients/sessions.
+
+Outputs & directory layout:
+
+    Created under:
+        {PATH_TO_DATA}/patient_data/{patient_id}/session_{session_nr}/
+
+    - session_info.npy
+        Dict with keys: patient_id, session_nr, date, time
+    - ChannelNames.txt
+        One ".ncs" channel name per line
+    - spiking_data/CSC{channel}_{MU|SU}{idx}.npy
+        Dict with "spike_times" (ms, Unix epoch) and "spike_amps" (waveform arrays)
+    - lfp_data/CSC1_lfp.npy
+        Dict with "ts" (ms, Unix epoch) and "samples" (1 kHz sine)
+    - event_file/Events.npy
+        Rows of (timestamp, code); codes tile over [1, 2, 4, 8, 16, 32, 64, 128]
+    - daq_files/timedDAQ-log-<YYYY-mm-dd_HH-MM-SS>.log
+        Tabular DAQ log
+    - watchlogs/ffplay-watchlog-<YYYY-mm-dd_HH-MM-SS>.log
+        PTS/CPU-time log with pauses/skips
+
+    Annotation stubs are written to:
+        {PATH_TO_LABELS}/
+    as simple *.npy arrays with on/off segments.
+
+Conventions:
+    - Time bases:
+        * Spike times / LFP timestamps: milliseconds since Unix epoch
+        * stim_on_time / stim_off_time: microseconds since Unix epoch
+        * Watchlog PTS increments: ~0.04 s per frame
+    - Sampling: LFP synthesized at 1 kHz
+    - Randomness: Data are randomized per run (no fixed seed by default)
+
+Public API:
+    - GenerateData: main generator with save_* methods for each artifact
+    - run_data_generation(): convenience entry point to populate a demo dataset
+
+Notes:
+    - Relies on configuration constants from epiphyte.database.config and
+      waveform shape parameters from .mock_data_inits.
+    - Use GenerateData.summarize() to quickly inspect randomized session settings.
+    - For reproducible outputs, set seeds in both random and numpy.random
+      before instantiation.
 """
+from __future__ import annotations
 
 import copy
 import random
@@ -29,8 +79,6 @@ from datetime import datetime
 
 import numpy as np
 
-from __future__ import annotations
-
 from typing import List, Tuple
 
 from epiphyte.database.config import *  # noqa: F401,F403 (imports constants)
@@ -39,27 +87,27 @@ from .mock_data_inits import *  # noqa: F401,F403 (imports spike shape params)
 class GenerateData:
     """Generate mock neural data and related metadata.
 
-    :Attributes:
-        patient_id: Integer identifier for the mock patient.
-        session_nr: Session number for this recording.
-        stimulus_len: Stimulus length in minutes.
-        nr_channels: Number of channels simulated.
-        nr_units: Number of units across all channels.
-        nr_channels_per_region: Channels per brain region label.
-        unit_types: Allowed unit type codes (e.g., ``"MU"``, ``"SU"``).
-        brain_regions: Region codes used to synthesize channel names.
-        rec_length: Recording length in milliseconds.
-        rectime_on: Start time (unix epoch ms) for recording.
-        rectime_off: End time (unix epoch ms) for recording.
-        spike_times: Generated spike time arrays per unit.
-        spike_amps: Generated spike amplitude arrays per unit.
-        channel_dict: Mapping of channel index to list of unit types.
-        sampling_rate: LFP sampling rate (Hz) used in mock signal.
-        len_context_files: Number of entries for events/DAQ logs.
-        datetime: ISO-like timestamp used in filenames.
-        signal_tile: Bit-pattern tile used to synthesize event codes.
-        stim_on_time: Estimated stimulus onset (microseconds).
-        stim_off_time: Estimated stimulus offset (microseconds).
+    Attributes:
+        patient_id (int): Integer identifier for the mock patient.
+        session_nr (int): Session number for this recording.
+        stimulus_len (float): Stimulus length in minutes.
+        nr_channels (int): Number of channels simulated.
+        nr_units (int): Number of units across all channels.
+        nr_channels_per_region (int): Channels per brain region label.
+        unit_types (enum): Allowed unit type codes (e.g., ``"MU"``, ``"SU"``).
+        brain_regions (List[str]): Region codes used to synthesize channel names.
+        rec_length (int): Recording length in milliseconds.
+        rectime_on (int): Start time (unix epoch ms) for recording.
+        rectime_off (int): End time (unix epoch ms) for recording.
+        spike_times (List[np.ndarray]): Generated spike time arrays per unit.
+        spike_amps (List[np.ndarray]): Generated spike amplitude arrays per unit.
+        channel_dict (dict): Mapping of channel index to list of unit types.
+        sampling_rate (int): LFP sampling rate (Hz) used in mock signal.
+        len_context_files (int): Number of entries for events/DAQ logs.
+        datetime (str): ISO-like timestamp used in filenames.
+        signal_tile (np.ndarray): Bit-pattern tile used to synthesize event codes.
+        stim_on_time (int): Estimated stimulus onset (microseconds).
+        stim_off_time (int): Estimated stimulus offset (microseconds).
     """
     
     def __init__(self, patient_id: int, session_nr: int,
@@ -103,8 +151,12 @@ class GenerateData:
     def format_save_dir(self, subdir: str | None = None) -> Path:
         """Build and ensure the output directory exists.
 
-        :param subdir: Optional subdirectory under the session path.
-        :returns: Absolute path to the created directory.
+        Args:
+            subdir: Optional subdirectory under the session path.
+
+        Returns:
+            Path: Absolute path to the created directory:
+                ``{PATH_TO_DATA}/patient_data/{patient_id}/session_{session_nr}/[subdir]``.
         """
 
         save_dir = Path(f"{PATH_TO_DATA}/patient_data/{self.patient_id}/session_{self.session_nr}/")
@@ -119,9 +171,16 @@ class GenerateData:
     def generate_spike_trains(self) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         """Generate mock spike trains and amplitudes for all units.
 
-        :returns: Tuple of two lists ``(spike_times, spike_amps)`` where
-                  ``spike_times`` are sorted times (unix ms) per unit and
-                  ``spike_amps`` are waveform-like amplitude arrays per spike.
+        Returns:
+            Tuple[List[np.ndarray], List[np.ndarray]]: ``(spike_times, spike_amps)``
+
+            - ``spike_times``: list of length ``nr_units``; each element is a
+              sorted ``float`` array of spike times in Unix epoch **ms**.
+            - ``spike_amps``: list of length ``nr_units``; each element is a
+              ``(n_spikes, 64)`` array of waveform-like amplitudes.
+
+        Notes:
+            The number of spikes per unit is randomized per unit.
         """
         
         spike_times = [
@@ -138,9 +197,11 @@ class GenerateData:
         return spike_times, spike_amps
     
     def generate_channelwise_unit_distribution(self) -> dict[int, List[str]]:
-        """Distribute the number of units across channels.
+        """Distribute units across channels and assign unit types.
 
-        :returns: Mapping from channel index to unit type codes.
+        Returns:
+            dict[int, List[str]]: Mapping from channel index (1-based) to a list
+            of unit-type codes (e.g., ``["MU", "SU", ...]``).
         """
         
         channel_units = [
@@ -157,7 +218,10 @@ class GenerateData:
     def generate_lfp_channel(self) -> Tuple[np.ndarray, np.ndarray]:
         """Generate a simple sine-wave LFP-like channel.
 
-        :returns: Tuple ``(timestamps, samples)`` arrays.
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: ``(timestamps_ms, samples)`` where
+            ``timestamps_ms`` are Unix epoch **ms** and ``samples`` is a float
+            array representing an 8 Hz sine wave at 1 kHz.
         """
         ts = np.arange(self.rectime_on, self.rectime_off,1)
         frequency = 8  # in Hz
@@ -166,9 +230,10 @@ class GenerateData:
         return ts, samples
 
     def generate_channel_list(self) -> List[str]:
-        """Create names like ``LA1``, ``LA2``, ..., ``RPCH8``.
+        """Create channel names like ``LA1``, ``LA2``, ..., ``RPCH8``.
 
-        :returns: List of channel name strings.
+        Returns:
+            List[str]: List of channel name strings.
         """
 
         channel_list = [
@@ -180,8 +245,15 @@ class GenerateData:
         return channel_list
     
     def save_spike_trains(self) -> None:
-        """Save generated spike trains and amplitudes as ``.npy`` files."""
+        """Save generated spike trains and amplitudes as ``.npy`` files.
 
+        Writes:
+            ``spiking_data/CSC{channel}_{TYPE}{idx}.npy`` under the session
+            directory. Each file contains a dict with keys:
+
+            - ``"spike_times"``: Unix epoch **ms** (1D array)
+            - ``"spike_amps"``: waveform amplitudes, shape ``(n_spikes, 64)``
+        """
         save_dir = self.format_save_dir(subdir="spiking_data")
         
         i = 0
@@ -207,7 +279,19 @@ class GenerateData:
                 i += 1
 
     def save_lfp_data(self) -> None:
-        """Generate and save the LFP channel as ``CSC1_lfp.npy``."""
+        """Generate and save the LFP channel as ``CSC1_lfp.npy``.
+
+        Writes:
+            ``lfp_data/CSC1_lfp.npy`` containing a dict with:
+
+            - ``"ts"``: timestamps (Unix epoch **ms**)
+            - ``"samples"``: LFP-like samples at 1 kHz
+
+        Notes: 
+            Only one LFP channel is generated due to the size of each channel. 
+            A single channel suffices for demonstration purposes.
+            If you include field potential data, consider using a large-storage backend.
+        """
         save_dir = self.format_save_dir(subdir="lfp_data")
 
         ts, samples = self.generate_lfp_channel()
@@ -216,8 +300,12 @@ class GenerateData:
         np.save(save_dir / filename, {"ts": ts, "samples": samples})
     
     def save_channel_names(self) -> None:
-        """Save ``ChannelNames.txt`` listing channel names one per line."""
-                   
+        """Save ``ChannelNames.txt`` listing channel names one per line.
+
+        Writes:
+            ``ChannelNames.txt`` in the session root. Each line ends with
+            ``.ncs`` (e.g., ``LA1.ncs``).
+        """        
         save_dir = self.format_save_dir()
             
         channel_names = self.generate_channel_list()
@@ -229,8 +317,12 @@ class GenerateData:
         f1.close()
 
     def save_session_info(self) -> None:
-        """Save a ``session_info.npy`` dictionary (patient, session, date, time)."""
+        """Save a ``session_info.npy`` dictionary.
 
+        Writes:
+            ``session_info.npy`` containing a dict with
+            ``patient_id``, ``session_nr``, ``date``, and ``time`` (UTC).
+        """
         save_dir = self.format_save_dir()
 
         date, time = self.datetime.split("_")
@@ -242,14 +334,14 @@ class GenerateData:
         }
         np.save(save_dir / "session_info.npy", session_info)
         
-    ##############
     ## stimulus data generation
-    ##############
     
     def generate_pings(self) -> np.ndarray:
-        """Recreate a repeating event code tile used by downstream logs.
+        """Create a repeating event-code tile.
 
-        :returns: Numpy array of event codes.
+        Returns:
+            np.ndarray: 1D integer array of length ``len_context_files`` with
+            elements tiled from ``[1, 2, 4, 8, 16, 32, 64, 128]``.
         """
         # recreate pings
         if self.len_context_files % 8 == 0:
@@ -263,9 +355,12 @@ class GenerateData:
         return signal_tile
     
     def generate_events(self) -> Tuple[np.ndarray, np.ndarray]:
-        """Generate mock ``Events.npy`` content (timestamps, codes).
+        """Generate mock event timestamps and (timestamp, code) matrix.
 
-        :returns: Tuple ``(timestamps, event_matrix)``.
+        Returns:
+            Tuple[np.ndarray, np.ndarray]:
+                - ``events``: 1D float array of Unix epoch **ms** timestamps.
+                - ``events_mat``: 2D array with rows ``(timestamp_ms, code)``.
         """
 
         # recreate event timestamps
@@ -288,7 +383,8 @@ class GenerateData:
     def generate_stimulus_onsets(self) -> Tuple[int, int]:
         """Generate approximate onset and offset timestamps for the stimulus.
 
-        :returns: Tuple ``(stim_on_time, stim_off_time)`` in microseconds.
+        Returns:
+            Tuple[int, int]: ``(stim_on_time, stim_off_time)`` in Unix epoch **µs**.
         """
         
         # generate projected end time for the DAQ log, in unix time microseconds
@@ -301,7 +397,8 @@ class GenerateData:
     def seed_and_interval(self) -> Tuple[int, int]:
         """Compute DAQ interval and initial seed time for log synthesis.
 
-        :returns: Tuple ``(interval_us, seed_time_us)``.
+        Returns:
+            Tuple[int, int]: ``(interval_us, seed_time_us)`` in **microseconds**.
         """
 
         add_interval = int((self.stim_off_time) / self.len_context_files)
@@ -309,11 +406,13 @@ class GenerateData:
         return add_interval, seed
         
     def generate_daq_log(self) -> List[Tuple[int, int, int, int]]:
-        """Generate DAQ log tuples of ``(code, idx, pre, post)``.
+        """Generate DAQ log entries.
 
-        :returns: List of DAQ log entries.
+        Each entry is a tuple ``(code, idx, pre_us, post_us)``.
+
+        Returns:
+            List[Tuple[int, int, int, int]]: DAQ log with one row per event.
         """
-        
         add_interval, seed = self.seed_and_interval()
         
         pre = []
@@ -343,9 +442,13 @@ class GenerateData:
             file.close()
             
     def generate_perfect_watchlog(self) -> Tuple[int, List[float], List[int]]:
-        """Generate watchlog without pauses or skips (PTS and CPU time).
+        """Generate watchlog without pauses or skips.
 
-        :returns: Tuple ``(nr_frames, pts_list, cpu_times)``.
+        Returns:
+            Tuple[int, List[float], List[int]]:
+                - ``nr_movie_frames``: Number of frames (≈ stimulus_len / 0.04s).
+                - ``perfect_pts``: PTS values (seconds), 0.04 s increments.
+                - ``cpu_time``: Corresponding Unix epoch **µs** timestamps.
         """
         
         _, seed = self.seed_and_interval()
@@ -361,7 +464,7 @@ class GenerateData:
         return nr_movie_frames, perfect_pts, cpu_time
     
     def save_perfect_watchlog(self) -> None:
-        
+        """Write a perfect (no pauses/skips) watchlog to ``watchlogs``."""
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         
         save_dir = self.format_save_dir(subdir="watchlogs")
@@ -375,9 +478,18 @@ class GenerateData:
             file.close()
     
     def make_pauses_and_skips(self) -> Tuple[int, List[float], List[int], List[int]]:
-        """Generate watchlog with pauses and skips (PTS, CPU time, pause idx).
+        """Generate a watchlog with pauses and skips.
 
-        :returns: Tuple ``(nr_frames, pts_list, cpu_times, pause_indices)``.
+        Returns:
+            Tuple[int, List[float], List[int], List[int]]:
+                - ``nr_movie_frames``: Number of frames.
+                - ``pts``: PTS values (seconds) after inserting skips.
+                - ``cpu_time``: Unix epoch **µs** timestamps per frame.
+                - ``indices_pause``: Frame indices at which a pause occurred.
+
+        Notes:
+            Pause lengths and skip magnitudes are randomized. PTS values are
+            clamped to the movie duration and non-negative.
         """
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         _, seed = self.seed_and_interval()
@@ -464,6 +576,56 @@ class GenerateData:
         file.close()
 
 def run_data_generation() -> None:
+    """Populate a small mock dataset and minimal annotation arrays.
+
+    Iterates through hard-coded ``patients`` and ``sessions`` and, for each
+    (patient, session) pair, uses :class:`GenerateData` to synthesize and write:
+    session info, spike trains, an LFP-like channel, channel-name list, events,
+    a DAQ log, and a watchlog with artifacts. After data generation, it also
+    writes a few toy annotation arrays into ``PATH_TO_LABELS``.
+
+    Steps:
+        1. For each patient/session:
+        - Print a short summary (:meth:`GenerateData.summarize`).
+        - Save ``session_info.npy``.
+        - Save spike trains (``spiking_data/*.npy``).
+        - Save LFP data (``lfp_data/CSC1_lfp.npy``).
+        - Save channel names (``ChannelNames.txt``).
+        - Save events (``event_file/Events.npy``).
+        - Save DAQ log (``daq_files/timedDAQ-log-<timestamp>.log``).
+        - Save watchlog with pauses/skips (``watchlogs/ffplay-watchlog-<timestamp>.log``).
+        2. Create three example ``*.npy`` annotation files under ``PATH_TO_LABELS``,
+        with filenames including a random ``annotator_id`` and the current date.
+
+    Writes:
+        - Under ``{PATH_TO_DATA}/patient_data/{patient_id}/session_{session_nr}/``:
+            * ``session_info.npy``
+            * ``ChannelNames.txt``
+            * ``spiking_data/CSC{channel}_{MU|SU}{idx}.npy``
+            * ``lfp_data/CSC1_lfp.npy``
+            * ``event_file/Events.npy``
+            * ``daq_files/timedDAQ-log-<YYYY-mm-dd_HH-MM-SS>.log``
+            * ``watchlogs/ffplay-watchlog-<YYYY-mm-dd_HH-MM-SS>.log``
+        - Under ``{PATH_TO_LABELS}/``:
+            * ``1_character1_<annotator_id>_<YYYYMMDD>_character.npy``
+            * ``2_character2_<annotator_id>_<YYYYMMDD>_character.npy``
+            * ``3_location1_<annotator_id>_<YYYYMMDD>_character.npy``
+
+    Notes:
+        - Relies on configuration/constants imported elsewhere:
+        ``PATH_TO_DATA``, ``PATH_TO_LABELS``, and ``annotators``.
+        - Data are randomized on each run; for reproducibility, set seeds in both
+        ``random`` and ``numpy.random`` before calling.
+        - Time bases follow the conventions used in :class:`GenerateData`
+        (e.g., spike/event timestamps in ms, some logs in µs).
+
+    Returns:
+        None
+
+    Example:
+        run_data_generation()
+    """
+
     patients = [1,2,3]
     sessions = [[1], [1, 2], [1]]
 
@@ -487,8 +649,6 @@ def run_data_generation() -> None:
             pat_neural_data.save_watchlog_with_artifacts()
 
     print("Generating movie annotations..")
-
-    nr_movie_frames = 125725      # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
 
     annotator_ids = []
     for i in range(len(annotators)):
