@@ -19,7 +19,6 @@ Example:
     # 0  0.00      1234
     # 1  0.04      1270
 """
-
 import numpy as np
 import pandas as pd
 
@@ -53,7 +52,7 @@ class WatchLog:
         - CPU timestamps are divided by 1000 and cast to `int`, so any sub-second
           resolution is truncated rather than rounded.
     """
-    def __init__(self, path_watch_log):
+    def __init__(self, path_watch_log: str):
         """
         Initialize the WatchLog and populate derived fields.
 
@@ -74,7 +73,7 @@ class WatchLog:
 
         self.df_pts_cpu.sort_values(['cpu_time'])
 
-    def get_start_time(self):
+    def get_start_time(self) -> int:
         """
         Return the start CPU time (in seconds).
 
@@ -83,7 +82,7 @@ class WatchLog:
         """
         return self.start_time
 
-    def get_end_time(self):
+    def get_end_time(self) -> int:
         """
         Return the end CPU time (in seconds).
 
@@ -92,7 +91,7 @@ class WatchLog:
         """
         return self.end_time
 
-    def _set_start_time(self, new_start_time):
+    def _set_start_time(self, new_start_time: int):
         """
         Set a new start time (in seconds).
 
@@ -101,7 +100,7 @@ class WatchLog:
         """
         self.start_time = new_start_time
 
-    def _set_end_time(self, new_end_time):
+    def _set_end_time(self, new_end_time: int):
         """
         Set a new end time (in seconds).
 
@@ -110,7 +109,7 @@ class WatchLog:
         """
         self.end_time = new_end_time
 
-    def extract_start_and_end_time(self):
+    def extract_start_and_end_time(self) -> tuple[int, int]:
         """
         Extract the start and end CPU timestamps from the watch log.
 
@@ -138,7 +137,7 @@ class WatchLog:
         # divide by 1000 to get seconds
         return int(int(first_line.split()[-1]) / 1000), int(int(last_line.split()[-1]) / 1000)
 
-    def get_times_from_watch_log(self, path_watch_log):
+    def get_times_from_watch_log(self, path_watch_log: str) -> tuple[np.ndarray, np.ndarray, list[int]]:
         """
         Extract PTS and CPU (real) times from the watch log.
 
@@ -180,7 +179,7 @@ class WatchLog:
         return self.cut_time_to_movie_pts(pts, time)
 
     @staticmethod
-    def cut_time_to_movie_pts(pts_time_stamps, cpu_time_stamps):
+    def cut_time_to_movie_pts(pts_time_stamps: np.ndarray, cpu_time_stamps: np.ndarray) -> tuple[np.ndarray, np.ndarray, list[int]]:
         """
         Trim PTS and CPU arrays to the maximum movie length.
 
@@ -218,7 +217,7 @@ class WatchLog:
         return np.array(cut_down_pts), np.array(cut_down_dts), excluded_indices
 
     @staticmethod
-    def getlines(filename):
+    def getlines(filename: str) -> list[bytes]:
         """
         Read a file in binary mode and return its lines.
 

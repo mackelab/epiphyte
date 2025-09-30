@@ -1,10 +1,15 @@
 import json
 import numpy as np
-
+from collections.abc import Sequence
 from ....data_preprocessing import create_vectors_from_time_points
 
 
-def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, default_value=0):
+def make_label_from_start_stop_times(values: Sequence[int],
+    start_times: Sequence[float],
+    stop_times: Sequence[float],
+    ref_vec: Sequence[float] | np.ndarray,
+    default_value: int = 0,
+) -> list[int]:
     """
     This function takes a vector with tuples with start and stop times and converts it to the default label
 
@@ -15,7 +20,7 @@ def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, d
         start_times (list): vector with all start_times of segments
         stop_times (list): vector with all stop times of segments
     Returns:
-        list: label (0 and 1 for the length of the movie)
+        list[int] | int: Label vector, or ``-1`` on error.
     """
     if not (len(values) == len(start_times) == len(stop_times)):
         print("vectors values, starts and stops have to be the same length")
@@ -33,7 +38,7 @@ def make_label_from_start_stop_times(values, start_times, stop_times, ref_vec, d
     return default_label
 
 
-def create_xml_for_advene(id_name, start_end_times_vector, label_name):
+def create_xml_for_advene(id_name: str, start_end_times_vector: list[tuple[float, float]], label_name: str) -> str:
     """
     This function creates an XML string, which can be imported to the movie annotation tool Advene
 
@@ -43,7 +48,7 @@ def create_xml_for_advene(id_name, start_end_times_vector, label_name):
         label_name (str): the name of the label how it shall be displayed in the GUI of Advene
 
     Returns:
-        str: an XML string, that has to be copied to the content.xml file and loaded to Advene
+        str: an XML string that can be copied to the content.xml file and loaded to Advene
     """
     new_annotations = ""
     id_ = 0
@@ -58,7 +63,7 @@ def create_xml_for_advene(id_name, start_end_times_vector, label_name):
     return new_annotations
 
 
-def start_stop_values_from_json(path_to_file, label_name):
+def start_stop_values_from_json(path_to_file: str, label_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     This function extracts start times, stop times and values of all segments of a label from a json file
     
@@ -85,7 +90,7 @@ def start_stop_values_from_json(path_to_file, label_name):
     return np.array(values), np.array(start_times)/1000, np.array(stop_times)/1000
 
 
-def export_labels_from_json_file(path_to_file, label_name, bool_save_start_end_times):
+def export_labels_from_json_file(path_to_file: str, label_name: str, bool_save_start_end_times: bool) -> list[int] | int:
     """
     Process a json file from Advene and create a new label.
 
@@ -114,7 +119,7 @@ def export_labels_from_json_file(path_to_file, label_name, bool_save_start_end_t
     return label_start_end_times, values
 
 
-def get_start_stop_times_from_label(neural_rec_time, patient_aligned_label):
+def get_start_stop_times_from_label(neural_rec_time: np.ndarray, patient_aligned_label: np.ndarray) -> tuple[list, list, list]:
     """
     This function takes the patient aligned label and extracts the start and stop times from that.
 

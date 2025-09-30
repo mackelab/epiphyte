@@ -83,9 +83,6 @@ def plot_changepoint(data, taustar, ttest, save=None, filename=None, comparison_
         comparison_tau (int, optional): 
             Another change point index to compare with `taustar`.
 
-    Returns:
-        None
-
     Saves:
         - `{filename}_cpt.png` in the `save` directory if `save` is provided.
         - `{filename}_cpt.svg` in the `save` directory if `save` is provided.

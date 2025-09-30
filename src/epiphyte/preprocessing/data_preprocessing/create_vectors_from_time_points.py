@@ -73,7 +73,7 @@ def create_vector_from_start_stop_times_reference_cont_watch(
         np.ndarray: 
             Indicator vector aligned to the reference vector, with values assigned according to the specified intervals.
 
-    Raises:
+    Notes:
         Prints an error and returns -1 if the lengths of `values`, `starts`, and `stops` do not match.
     """
     # check if input has the correct format
