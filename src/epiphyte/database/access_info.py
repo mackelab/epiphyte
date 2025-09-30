@@ -1,3 +1,10 @@
+"""
+Database connection and storage configuration for Epiphyte.
+
+This module sets up the DataJoint connection parameters and storage settings.
+The module is imported by the `db_setup.py` script to connect to the local or remote database.
+"""
+
 import os
 import datajoint as dj
 

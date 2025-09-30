@@ -1,13 +1,18 @@
+"""Helpers to handle pause intervals while binning labels and spikes."""
+
+from typing import List, Tuple
+
 import numpy as np 
 
 
-def pause_start_bin(bins, start):
-    """
-    Make sure that the bin labelled as the start of a pause point 
-    includes the actual start time, and is not just the nearest point 
-    in the bin edges. 
-    
-    Note: the greater the bin size, the more conservative this makes an estimate. 
+def pause_start_bin(bins: np.ndarray, start: float) -> int:
+    """Find start bin index inclusive of the pause start.
+
+    Args:
+        bins (np.ndarray or list-like): bin edges (ms).
+        start (float): Pause start time (ms).
+    Returns:
+        int: index of the start bin.
     """
     ind_start = (np.abs(bins - start)).argmin()  
     if bins[ind_start] > start: 
@@ -17,13 +22,14 @@ def pause_start_bin(bins, start):
     return start_bin 
 
 
-def pause_stop_bin(bins, stop): 
-    """
-    Make sure that the bin labelled as the stop of a pause point 
-    includes the actual stop time, and is not just the nearest point 
-    in the bin edges. 
-    
-    Note: the greater the bin size, the more conservative this makes an estimate. 
+def pause_stop_bin(bins: np.ndarray, stop: float) -> int: 
+    """Find stop bin index inclusive of the pause stop.
+
+    Args:
+        bins: Bin edges (ms).
+        stop: Pause stop time (ms).
+    Returns:
+        int: Index of the stop bin.
     """
     ind_stop = (np.abs(bins - stop)).argmin()
     if bins[ind_stop] < stop:
@@ -33,20 +39,34 @@ def pause_stop_bin(bins, stop):
     return stop_bin
 
 
-def make_pause_interval(bin_start, bin_stop):
-    """
-    Lists out the range of (indices) in the pause between the start and the stop of it. 
+def make_pause_interval(bin_start: int, bin_stop: int) -> List[int]:
+    """Make a list of indices spanning the pause interval (inclusive).
+    
+    Args:
+        bin_start (int): Start bin index.
+        bin_stop (int): Stop bin index.
+    Returns:
+        List[int]: List of indices spanning the pause interval (inclusive).
     """
     pause = list(range(bin_start, (bin_stop + 1), 1))
     return pause 
 
 
-def rm_pauses_bins(bins, start, stop, return_intervals=False):
-    """
-    Remove portions of the binning edges vector which occur during pauses. 
-    
-    If return_intervals is True, then output contains both the cleaned bins, and the 
-    indices corresponding the the pause points. 
+def rm_pauses_bins(
+    bins: np.ndarray,
+    start: np.ndarray,
+    stop: np.ndarray,
+    return_intervals: bool = False,
+) -> np.ndarray | Tuple[np.ndarray, List[int]]:
+    """Remove bin edges that occur during paused playback.
+
+    Args:
+        bins (np.ndarray or list-like): Bin edges (ms).
+        start (np.ndarray or list-like): Pause starts (ms).
+        stop (np.ndarray or list-like): Pause stops (ms).
+        return_intervals (bool): If ``True``, also return indices removed.
+    Returns: 
+        Tuple[np.ndarray, List[int]]: Cleaned bins or ``(bins_no_pauses, removed_indices)``.
     """
     pauses = []
     
@@ -69,9 +89,21 @@ def rm_pauses_bins(bins, start, stop, return_intervals=False):
     return output
 
 
-def rm_pauses_spikes(unit, start, stop, return_intervals=False):
-    """
-    Remove spikes in a unit vector which occur during a pause. 
+def rm_pauses_spikes(
+    unit: np.ndarray,
+    start: np.ndarray,
+    stop: np.ndarray,
+    return_intervals: bool = False,
+) -> np.ndarray | Tuple[np.ndarray, List[int]]:
+    """Remove spikes that occur during paused playback.
+
+    Args:
+        unit (np.ndarray): Spike times (ms).
+        start (np.ndarray): Pause starts (ms).
+        stop (np.ndarray): Pause stops (ms).
+        return_intervals (bool): If ``True``, also return removed indices.
+    Returns: 
+        Tuple[np.ndarray, List[int]]: Cleaned spikes or ``(unit_no_pauses, removed_indices)``.
     """
     paused_spikes = []
 
