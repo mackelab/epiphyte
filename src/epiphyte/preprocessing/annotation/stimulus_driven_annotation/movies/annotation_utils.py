@@ -1,4 +1,4 @@
-"""Helpers for handling stimulus-driven annotations in analysis workflows.
+"""Helpers for handling stimulus-driven annotations in an analysis workflows.
 
 Provides utilities to split neural activity by label values for downstream
 analysis and visualization.
@@ -32,10 +32,13 @@ def split_activity_by_value(
         where the label is off/on, respectively. For multi-valued labels,
         activity is split per unique value.
 
-    :param binned_activity: Binned neural activity (shape ``(N, ...)``).
-    :param binned_label: Binned label aligned to the activity (length ``N``).
-    :param specific_values: If provided, only these label values are used.
-    :returns: Mapping ``{value_name: activity_subset}``.
+    Args:
+        binned_activity (np.ndarray): Binned neural activity (shape ``(N, ...)``).
+        binned_label (np.ndarray): Binned label aligned to the activity (length ``N``).
+        specific_values (Optional[Iterable[int]]): If provided, only these label values are used.
+        
+    Returns:
+        Dict[str, np.ndarray]: Mapping ``{value_name: activity_subset}``.
     """
     # Set up for number --> word converstion 
     alph = inflect.engine()
