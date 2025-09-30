@@ -1,13 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 """I/O and time-alignment utilities for Neuralynx-like event logs.
 
 Provides helpers to read ``.nev`` (and mock ``.npy``) event files, parse
 watchlogs/DAQ logs, and linearly align between local computer time and neural
 recording system time.
 """
-
 from pathlib import Path
 from typing import List, Tuple
 
@@ -26,8 +22,11 @@ nev_type = np.dtype([('', 'V6'),
 def nev_read(filename: str | Path) -> np.ndarray:
     """Read event timestamps and codes from ``.nev`` or mock ``.npy`` file.
 
-    :param filename: Path to ``.nev`` or mock ``.npy`` array.
-    :returns: ``(timestamp, nttl)`` array of shape ``(N, 2)``.
+    Args:
+        filename (str | Path): Path to ``.nev`` or mock ``.npy`` array.
+
+    Returns:
+        np.ndarray: ``(timestamp, nttl)`` array of shape ``(N, 2)``.
     """
     filename = Path(filename)
 
@@ -42,8 +41,11 @@ def nev_read(filename: str | Path) -> np.ndarray:
 def nev_string_read(filename: str | Path) -> np.ndarray:
     """Read event timestamps and strings from a ``.nev`` file.
 
-    :param filename: Path to ``.nev`` file.
-    :returns: ``(timestamp, ev_string)`` array of shape ``(N, 2)``.
+    Args:
+        filename (str | Path): Path to ``.nev`` file.
+    
+    Returns:
+        np.ndarray: ``(timestamp, ev_string)`` array of shape ``(N, 2)``.
     """
     eventmap = np.memmap(filename, dtype=nev_type, mode='r', offset=NLX_OFFSET)
     return np.array([eventmap['timestamp'], eventmap['ev_string']]).T
@@ -52,8 +54,10 @@ def nev_string_read(filename: str | Path) -> np.ndarray:
 def process_movie_events(ev_array: np.ndarray) -> np.ndarray:
     """Filter raw event rows to the movie-event sequence.
 
-    :param ev_array: ``(timestamp, code)`` array.
-    :returns: Filtered movie event rows.
+    Args:
+        ev_array (np.ndarray): ``(timestamp, code)`` array.
+    Returns:
+        np.ndarray: Filtered movie event rows.
     """
 
     wait_for = [1]
@@ -85,8 +89,10 @@ def process_movie_events(ev_array: np.ndarray) -> np.ndarray:
 def process_events(ev_array: np.ndarray) -> np.ndarray:
     """Extract movie-event rows from a full event array.
 
-    :param ev_array: ``(timestamp, code)`` array.
-    :returns: Movie-event subset.
+    Args:
+        ev_array (np.ndarray): Full event array.
+    Returns:
+        np.ndarray: Movie-event subset.
     """
 
     if float(101) in ev_array[:, 1]:
@@ -114,8 +120,11 @@ def process_events(ev_array: np.ndarray) -> np.ndarray:
 def getlines(filename: str | Path) -> list[bytes]:
     """Read a text file and return the raw lines as bytes.
 
-    :param filename: Path to file.
-    :returns: List of lines (bytes).
+    Args:
+        filename (str | Path): Path to file.
+
+    Returns:
+        list[bytes]: List of lines (bytes).
     """
 
     with open(filename, 'rb') as logfile:
@@ -127,8 +136,11 @@ def getlines(filename: str | Path) -> list[bytes]:
 def read_watchlog(watchlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray]:
     """Extract PTS (s) and CPU times (µs) from a watchlog.
 
-    :param watchlogfile: Path to watchlog created by ffmpeg wrapper.
-    :returns: Tuple ``(pts_seconds, cpu_time_us)``.
+    Args:
+        watchlogfile (str | Path): Path to watchlog created by ffmpeg wrapper.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: Tuple ``(pts_seconds, cpu_time_us)``.
     """
     lines = getlines(watchlogfile)
     pts = []
@@ -148,8 +160,10 @@ def read_watchlog(watchlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray]:
 def read_watchlog_pauses(watchlogfile: str | Path) -> Tuple[List[int], List[int]]:
     """Find pause segments in the watchlog.
 
-    :param watchlogfile: Path to pts/CPU watchlog.
-    :returns: ``(start_times_us, stop_times_us)`` lists.
+    Args:
+        watchlogfile (str | Path): Path to pts/CPU watchlog.
+    Returns:
+        Tuple[List[int], List[int]]: ``(start_times_us, stop_times_us)`` lists.
     """
     lines = getlines(watchlogfile)
     start_time = []
@@ -187,8 +201,11 @@ def read_watchlog_pauses(watchlogfile: str | Path) -> Tuple[List[int], List[int]
 def read_daqlog(daqlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Extract DAQ values and pre/post times.
 
-    :param daqlogfile: Path to DAQ log file.
-    :returns: ``(values, pretime_us, posttime_us)`` arrays.
+    Args:
+        daqlogfile (str | Path): Path to DAQ log file.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: ``(values, pretime_us, posttime_us)`` arrays.
     """
     lines = getlines(daqlogfile)
     values = []
@@ -213,10 +230,12 @@ def get_coeff(event_mat: np.ndarray, daqlogfile: str | Path) -> np.ndarray:
     """Fit a linear mapping from DAQ post times to event timestamps.
 
     Loads logs, validates events, and returns slope/intercept.
-
-    :param event_mat: ``(timestamp, code)`` event array.
-    :param daqlogfile: Path to DAQ log file.
-    :returns: ``[m, b]`` array such that ``timestamp = m*post + b``.
+    
+    Args:
+        event_mat (np.ndarray): ``(timestamp, code)`` event array.
+        daqlogfile (str | Path): Path to DAQ log file.
+    Returns:
+        np.ndarray: ``[m, b]`` array such that ``timestamp = m*post + b``.
     """
     eventTimes, eventValues = event_mat[:,0],event_mat[:,1]
     daqValues, daqPretimes, daqPosttimes = read_daqlog(daqlogfile)
@@ -245,8 +264,10 @@ def get_coeff(event_mat: np.ndarray, daqlogfile: str | Path) -> np.ndarray:
 def make_msec(list_usec: list[int]) -> list[float]:
     """Convert a list from microseconds to milliseconds.
 
-    :param list_usec: Times in microseconds.
-    :returns: Times in milliseconds.
+    Args:
+        list_usec (list[int]): Times in microseconds.
+    Returns:
+        list[float]: Times in milliseconds.
     """
 
     list_msec = [time / 1000 for i, time in enumerate(list_usec)]
@@ -269,7 +290,8 @@ class TimeConversion(object):
     def convert(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute mapping and convert watchlog times to DAQ times.
 
-        :returns: ``(pts_seconds, dts_ms, cpu_time_us)`` arrays.
+        Returns:
+            Tuple[np.ndarray, np.ndarray, np.ndarray]: ``(pts_seconds, dts_ms, cpu_time_us)`` arrays.
         """
     
         event_mat = process_events(nev_read(self.path_evts))
@@ -284,7 +306,8 @@ class TimeConversion(object):
     def convert_pauses(self) -> Tuple[List[float], List[float]]:
         """Convert pause CPU timestamps to neural recording time.
 
-        :returns: ``(starts_ms, stops_ms)`` lists in neural recording time.
+        Returns:
+            Tuple[List[float], List[float]]: ``(starts_ms, stops_ms)`` lists in neural recording time.
         """
         start, stop = read_watchlog_pauses(self.path_watchlog)
         event_mat = process_events(nev_read(self.path_evts))
@@ -306,7 +329,8 @@ class TimeConversion(object):
     def convert_skips(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Detect skips and return start/stop/value segments in DAQ time.
 
-        :returns: ``(start_values_ms, stop_values_ms, values_idx)`` arrays.
+        Returns:
+            Tuple[np.ndarray, np.ndarray, np.ndarray]: ``(start_values_ms, stop_values_ms, values_idx)`` arrays.
         """
         pts, daq_time, cpu_time = self.convert()
         
