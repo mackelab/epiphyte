@@ -1,4 +1,5 @@
 site_name: Epiphyte
+site_url: https://mackelab.github.io/Epiphyte/
 
 nav:
   - Home: index.md
