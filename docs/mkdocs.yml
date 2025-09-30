@@ -41,6 +41,10 @@ theme:
     - navigation.expand
     - navigation.indexes
     - navigation.top
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
 
 markdown_extensions:
   - extra
