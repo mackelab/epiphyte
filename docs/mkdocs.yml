@@ -5,15 +5,16 @@ nav:
   - Home: index.md
   - Installation: install.md
   - Tutorials:
-    - Launch the MySQL database locally: tutorials/Launch the MySQL database locally.md
-    - Launch the MySQL database on a virtual machine: tutorials/1. Launch the MySQL database on a virtual machine.md
-    - Add MinIO to an existing VM (optional): tutorials/2. (Optional) Add MinIO to an existing virtual machine.md
-    - Install Epiphyte: tutorials/3. Install Epiphyte.md
-    - Configure and connect to the database: tutorials/4. Configure and connect to the database.md
-    - Design and implement the database: tutorials/5. Design and implement the database.md
-    - Compile the codebase: tutorials/6. Compile the codebase.md
-    - Run regular backups (optional): tutorials/7. (Optional) Run regular backups.md
-    - Add a table to an existing database: tutorials/8_Add_new_table.md   
+    - Launch a MySQL database locally: tutorials/1a. Launch a MySQL database locally.md
+    - Launch a MySQL database on a virtual machine: tutorials/1b. Launch the MySQL database on a virtual machine.md
+    - Attach a storage back-end to an existing database (optional): tutorials/2. (Optional) Attach a storage back-end to an existing database.md
+    - Install Epiphyte: tutorials/3. Install Epiphyte locally or remotely.md
+    - Configure and connect to a database: tutorials/4. Configure and connect to a database.md
+    - Design and implement a database: tutorials/5. Design and implement a database.md
+    - Develop an analysis workflow: tutorials/6. Develop an analysis workflow.md
+    - Enable access for other users: tutorials/7. Enable access for other users.md
+    - Run regular backups (optional): tutorials/8. Run regular backups (optional).md
+    - Modify an existing database and workflow: tutorials/9. Modify an existing database and workflow.md
   - API Reference:
     - Database: reference/database.md
     - Data utilities: reference/data.md

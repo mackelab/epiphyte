@@ -202,7 +202,7 @@ class LFPData(dj.Manual):
     """
 
 @epi_schema
-class ElectrodeUnit(dj.Imported):
+class ElectrodeData(dj.Imported):
     """Table containing information on the units detected per channel with type and within-channel number."""
     definition = """
     # Contains information about the implanted electrodes of each patient
@@ -231,7 +231,7 @@ class ElectrodeUnit(dj.Imported):
                 channel_names = helpers.get_channel_names(path_channels / "ChannelNames.txt")
 
                 try:
-                    check = (ElectrodeUnit & f"patient_id={pat}" & f"session_nr={sesh}").fetch("csc_nr")
+                    check = (ElectrodeData & f"patient_id={pat}" & f"session_nr={sesh}").fetch("csc_nr")
                     if len(check) == len(channel_names):
                         continue
                     else:
@@ -330,7 +330,7 @@ class SpikeData(dj.Imported):
     # This table contains all spike times of all units of all patients in Neural Recording Time
     # Each entry contains a vector of all spike times of one unit of one patient
     -> Sessions
-    -> ElectrodeUnit                   # unit from which data was recorded
+    -> ElectrodeData                   # unit from which data was recorded
     ---
     spike_times: longblob              # in case bin_size is not 0: number of spikes; otherwise: times of spikes (original data)
     spike_amps: longblob               # amplitudes for each spike in spike_times
@@ -346,9 +346,9 @@ class SpikeData(dj.Imported):
             for i_sesh, sesh in enumerate(pat_sessions):
                 spike_dir = Path(config.PATH_TO_DATA, "patient_data", str(pat), f"session_{sesh}", "spiking_data")
                 spike_files = list(spike_dir.iterdir())
-                unit_ids = (ElectrodeUnit & f"patient_id={pat}" & f"session_nr={sesh}").fetch("unit_id")
+                unit_ids = (ElectrodeData & f"patient_id={pat}" & f"session_nr={sesh}").fetch("unit_id")
 
-                assert len(spike_files) == len(unit_ids), "Number of units in ElectrodeUnits doesn't match number of spiking files."
+                assert len(spike_files) == len(unit_ids), "Number of units in ElectrodeDatas doesn't match number of spiking files."
 
                 try:
                     check = (SpikeData & f"patient_id={pat}" & f"session_nr={sesh}").fetch("unit_id")[0]
@@ -367,7 +367,7 @@ class SpikeData(dj.Imported):
                     csc_nr = int(csc_nr[3:])
                     unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
 
-                    unit_id = (ElectrodeUnit & f"patient_id={pat}" & f"session_nr={sesh}" 
+                    unit_id = (ElectrodeData & f"patient_id={pat}" & f"session_nr={sesh}" 
                             & f"csc={csc_nr}" & f"unit_nr={unit_nr}" & f"unit_type='{unit_type}'").fetch("unit_id")[0]
 
                     spikes_file = np.load(filepath, allow_pickle=True)

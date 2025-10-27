@@ -15,8 +15,23 @@ dj.config['database.password'] = 'simple'           # default password, change b
 
 epi_schema = dj.schema('epiphyte_mock')
 
+"""
+Database storage parameters, no backend. Uncomment if using MinIO
+"""
 dj.config['stores'] = {
     'local': {  # store in files
         'protocol': 'file',
         'location': os.path.abspath('./dj-store')
     }}
+
+"""
+MinIO connection parameters - uncomment if using and comment/remove above 
+"""
+# dj.config["stores"]["minio"] = {  
+#         "protocol": "s3",
+#         "endpoint": "127.0.0.1:9000",  # address of backend
+#         "bucket": "<bucket>",          # backend bucket ID
+#         "location": "data",
+#         "access_key": "root", 
+#         "secret_key": "simple" 
+#     }
