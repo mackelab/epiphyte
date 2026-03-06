@@ -122,7 +122,7 @@ class GenerateData:
         self.nr_channels_per_region = 8
         self.unit_types = ["MU", "SU"]
         self.brain_regions = ["LA", "LAH", "LEC", "LMH", "LPHC", 
-                              "RA", "RAH", "REC", "RMH", "RPCH"]
+                              "RA", "RAH", "REC", "RMH", "RPHC"]
 
         self.rec_length = 5400000
         self.rectime_on = random.randint(1347982266000, 1695051066000)
@@ -493,7 +493,7 @@ class GenerateData:
         """
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         _, seed = self.seed_and_interval()
-        pause_pool = 1 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
+        pause_pool = 1 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time  
         
         movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
         end_time = seed + movie_len_unix 
@@ -513,9 +513,12 @@ class GenerateData:
         
         for i, index in enumerate(indices_pause): 
             if (len(indices_pause) - i) > 0: 
-                pause_len = random.randint(int(min_pause), pause_pool)
-                cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
-                pause_pool -= pause_len
+                if pause_pool < int(min_pause):
+                    pause_len = pause_pool
+                else:
+                    pause_len = random.randint(int(min_pause), pause_pool)
+                    cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len)) 
+                    pause_pool -= pause_len
             else:
                 pause_len = pause_pool
                 cpu_time = np.concatenate((cpu_time[:index],cpu_time[index:] + pause_len))

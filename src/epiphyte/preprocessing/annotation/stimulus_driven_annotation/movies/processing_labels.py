@@ -1,15 +1,17 @@
 import json
+from typing import Sequence, Union, List
 import numpy as np
 from collections.abc import Sequence
 from ....data_preprocessing import create_vectors_from_time_points
 
 
-def make_label_from_start_stop_times(values: Sequence[int],
+def make_label_from_start_stop_times(
+    values: Sequence[int],
     start_times: Sequence[float],
     stop_times: Sequence[float],
-    ref_vec: Sequence[float] | np.ndarray,
+    ref_vec: Union[Sequence[float], np.ndarray],
     default_value: int = 0,
-) -> list[int]:
+) -> List[int]:
     """
     This function takes a vector with tuples with start and stop times and converts it to the default label
 
@@ -90,7 +92,11 @@ def start_stop_values_from_json(path_to_file: str, label_name: str) -> tuple[np.
     return np.array(values), np.array(start_times)/1000, np.array(stop_times)/1000
 
 
-def export_labels_from_json_file(path_to_file: str, label_name: str, bool_save_start_end_times: bool) -> list[int] | int:
+def export_labels_from_json_file(
+    path_to_file: str,
+    label_name: str,
+    bool_save_start_end_times: bool
+) -> Union[List[int], int]:
     """
     Process a json file from Advene and create a new label.
 

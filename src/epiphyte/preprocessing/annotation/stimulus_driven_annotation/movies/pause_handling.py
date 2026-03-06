@@ -1,6 +1,6 @@
 """Helpers to handle pause intervals while binning labels and spikes."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np 
 
@@ -51,13 +51,12 @@ def make_pause_interval(bin_start: int, bin_stop: int) -> List[int]:
     pause = list(range(bin_start, (bin_stop + 1), 1))
     return pause 
 
-
 def rm_pauses_bins(
     bins: np.ndarray,
     start: np.ndarray,
     stop: np.ndarray,
     return_intervals: bool = False,
-) -> np.ndarray | Tuple[np.ndarray, List[int]]:
+) -> Union[np.ndarray, Tuple[np.ndarray, List[int]]]:
     """Remove bin edges that occur during paused playback.
 
     Args:
@@ -94,7 +93,7 @@ def rm_pauses_spikes(
     start: np.ndarray,
     stop: np.ndarray,
     return_intervals: bool = False,
-) -> np.ndarray | Tuple[np.ndarray, List[int]]:
+) -> Union[np.ndarray, Tuple[np.ndarray, List[int]]]:
     """Remove spikes that occur during paused playback.
 
     Args:

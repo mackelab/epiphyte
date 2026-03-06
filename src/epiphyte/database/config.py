@@ -54,3 +54,5 @@ annotators = [
 ]
 
 label_names = zip(['character1', 'character2', 'location1'])
+
+sample_rate = 32000

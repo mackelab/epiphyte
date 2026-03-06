@@ -5,8 +5,8 @@ Functions related to processing the db stored time points (start/stop/values) in
 import pandas as pd
 import numpy as np
 
-from database.query_functions import *
-import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
+from epiphyte.database.query_functions import *
+import epiphyte.preprocessing.annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
 
 def get_index_nearest_timestamp_in_vector(vector: np.ndarray, timestamp: float) -> int:
     """Finds the index of the value in a vector that is nearest to a given timestamp.

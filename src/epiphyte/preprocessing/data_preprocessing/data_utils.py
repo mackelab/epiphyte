@@ -5,7 +5,7 @@ watchlogs/DAQ logs, and linearly align between local computer time and neural
 recording system time.
 """
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -19,11 +19,11 @@ nev_type = np.dtype([('', 'V6'),
                      ('ev_string', 'S128')])
 
 
-def nev_read(filename: str | Path) -> np.ndarray:
+def nev_read(filename: Union[str, Path]) -> np.ndarray:
     """Read event timestamps and codes from ``.nev`` or mock ``.npy`` file.
 
     Args:
-        filename (str | Path): Path to ``.nev`` or mock ``.npy`` array.
+        filename (Union[str, Path]): Path to ``.nev`` or mock ``.npy`` array.
 
     Returns:
         np.ndarray: ``(timestamp, nttl)`` array of shape ``(N, 2)``.
@@ -38,11 +38,11 @@ def nev_read(filename: str | Path) -> np.ndarray:
     return ret
 
 
-def nev_string_read(filename: str | Path) -> np.ndarray:
+def nev_string_read(filename: Union[str, Path]) -> np.ndarray:
     """Read event timestamps and strings from a ``.nev`` file.
 
     Args:
-        filename (str | Path): Path to ``.nev`` file.
+        filename (Union[str, Path]): Path to ``.nev`` file.
     
     Returns:
         np.ndarray: ``(timestamp, ev_string)`` array of shape ``(N, 2)``.
@@ -117,11 +117,11 @@ def process_events(ev_array: np.ndarray) -> np.ndarray:
     return ret
 
 
-def getlines(filename: str | Path) -> list[bytes]:
+def getlines(filename: Union[str, Path]) -> list[bytes]:
     """Read a text file and return the raw lines as bytes.
 
     Args:
-        filename (str | Path): Path to file.
+        filename (Union[str, Path]): Path to file.
 
     Returns:
         list[bytes]: List of lines (bytes).
@@ -133,11 +133,11 @@ def getlines(filename: str | Path) -> list[bytes]:
     return lines
 
 
-def read_watchlog(watchlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray]:
+def read_watchlog(watchlogfile: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray]:
     """Extract PTS (s) and CPU times (µs) from a watchlog.
 
     Args:
-        watchlogfile (str | Path): Path to watchlog created by ffmpeg wrapper.
+        watchlogfile (Union[str, Path]): Path to watchlog created by ffmpeg wrapper.
 
     Returns:
         Tuple[np.ndarray, np.ndarray]: Tuple ``(pts_seconds, cpu_time_us)``.
@@ -157,11 +157,11 @@ def read_watchlog(watchlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray]:
     return pts, time
 
 
-def read_watchlog_pauses(watchlogfile: str | Path) -> Tuple[List[int], List[int]]:
+def read_watchlog_pauses(watchlogfile: Union[str, Path]) -> Tuple[List[int], List[int]]:
     """Find pause segments in the watchlog.
 
     Args:
-        watchlogfile (str | Path): Path to pts/CPU watchlog.
+        watchlogfile (Union[str, Path]): Path to pts/CPU watchlog.
     Returns:
         Tuple[List[int], List[int]]: ``(start_times_us, stop_times_us)`` lists.
     """
@@ -198,11 +198,11 @@ def read_watchlog_pauses(watchlogfile: str | Path) -> Tuple[List[int], List[int]
     return start_time, stop_time
 
 
-def read_daqlog(daqlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_daqlog(daqlogfile: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Extract DAQ values and pre/post times.
 
     Args:
-        daqlogfile (str | Path): Path to DAQ log file.
+        daqlogfile (Union[str, Path]): Path to DAQ log file.
 
     Returns:
         Tuple[np.ndarray, np.ndarray, np.ndarray]: ``(values, pretime_us, posttime_us)`` arrays.
@@ -226,14 +226,14 @@ def read_daqlog(daqlogfile: str | Path) -> Tuple[np.ndarray, np.ndarray, np.ndar
     return values, pretime, posttime
 
 
-def get_coeff(event_mat: np.ndarray, daqlogfile: str | Path) -> np.ndarray:
+def get_coeff(event_mat: np.ndarray, daqlogfile: Union[str, Path]) -> np.ndarray:
     """Fit a linear mapping from DAQ post times to event timestamps.
 
     Loads logs, validates events, and returns slope/intercept.
     
     Args:
         event_mat (np.ndarray): ``(timestamp, code)`` event array.
-        daqlogfile (str | Path): Path to DAQ log file.
+        daqlogfile (Union[str, Path]): Path to DAQ log file.
     Returns:
         np.ndarray: ``[m, b]`` array such that ``timestamp = m*post + b``.
     """
@@ -281,8 +281,8 @@ class TimeConversion(object):
     time scale.
     """
     
-    def __init__(self, path_to_wl: str | Path, path_to_dl: str | Path,
-                 path_to_events: str | Path) -> None:
+    def __init__(self, path_to_wl: Union[str, Path], path_to_dl: Union[str, Path],
+                 path_to_events: Union[str, Path]) -> None:
         self.path_watchlog = path_to_wl
         self.path_daqlog = path_to_dl
         self.path_evts = path_to_events

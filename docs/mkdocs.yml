@@ -14,7 +14,6 @@ nav:
     - Develop an analysis workflow: tutorials/6. Develop an analysis workflow.md
     - Enable access for other users: tutorials/7. Enable access for other users.md
     - Run regular backups (optional): tutorials/8. Run regular backups (optional).md
-    - Modify an existing database and workflow: tutorials/9. Modify an existing database and workflow.md
   - API Reference:
     - Database: reference/database.md
     - Data utilities: reference/data.md

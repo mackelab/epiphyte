@@ -213,6 +213,7 @@ class ElectrodeData(dj.Imported):
     csc: int                         # number of CSC file
     unit_type: enum('M', 'S', 'X')   # unit type: 'M' for Multi Unit, 'S' for Single Unit, 'X': undefined
     unit_nr: int                     # number of unit, as there can be several multi units and single units in one CSC file
+    hemisphere: enum('L', 'R')       # hemisphere where unit was recorded
     brain_region: varchar(8)         # brain region where unit was recorded
     """
 
@@ -253,6 +254,9 @@ class ElectrodeData(dj.Imported):
                     channel = channel_names[csc_index]
                     print(f"    ... Channel name: {channel}")
 
+                    hemisphere = channel[0]
+                    brain_region = channel[1:]
+
                     unit_type, unit_nr = helpers.get_unit_type_and_number(unit)
                     print(f"    ... Unit type: {unit_type},  Within-channel unit number: {unit_nr}")
 
@@ -262,7 +266,8 @@ class ElectrodeData(dj.Imported):
                                 'csc': csc_nr[3:], 
                                 'unit_type': unit_type, 
                                 'unit_nr': unit_nr,
-                                'brain_region': channel},
+                                'hemisphere': hemisphere,
+                                'brain_region': brain_region},
                                     skip_duplicates=True)
                     
                     print(" ")
