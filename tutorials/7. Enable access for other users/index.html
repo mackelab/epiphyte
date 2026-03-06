@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/2.%20%28Optional%29%20Add%20MinIO%20to%20an%20existing%20virtual%20machine/">
+        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/7.%20Enable%20access%20for%20other%20users/">
       
       
-        <link rel="prev" href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/">
+        <link rel="prev" href="../6.%20Develop%20an%20analysis%20workflow/">
       
       
-        <link rel="next" href="../3.%20Install%20Epiphyte/">
+        <link rel="next" href="../8.%20Run%20regular%20backups%20%28optional%29/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Add MinIO to an existing VM (optional) - Epiphyte</title>
+        <title>Enable access for other users - Epiphyte</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-add-minio-to-an-existing-vm-optional" class="md-skip">
+        <a href="#enable-access-for-other-users" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add MinIO to an existing VM (optional)
+              Enable access for other users
             
           </span>
         </div>
@@ -331,12 +331,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../Launch%20the%20MySQL%20database%20locally/" class="md-nav__link">
+      <a href="../1a.%20Launch%20a%20MySQL%20database%20locally/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database locally
+    Launch a MySQL database locally
     
   </span>
   
@@ -354,12 +354,127 @@
   
   
     <li class="md-nav__item">
-      <a href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+      <a href="../1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database on a virtual machine
+    Launch a MySQL database on a virtual machine
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Attach a storage back-end to an existing database (optional)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3.%20Install%20Epiphyte%20locally%20or%20remotely/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Install Epiphyte
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Configure%20and%20connect%20to%20a%20database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure and connect to a database
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5.%20Design%20and%20implement%20a%20database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design and implement a database
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6.%20Develop%20an%20analysis%20workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Develop an analysis workflow
     
   </span>
   
@@ -386,94 +501,17 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
+    Enable access for other users
     
   </span>
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Requirements:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-create-the-minio-directory" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Create the minio directory
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-mount-your-external-volume" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Mount your external volume
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-launch-the-minio-server" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Launch the MinIO server
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-launch-the-minio-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Launch the MinIO client
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -487,127 +525,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../3.%20Install%20Epiphyte/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Install Epiphyte
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../4.%20Configure%20and%20connect%20to%20the%20database/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Configure and connect to the database
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../5.%20Design%20and%20implement%20the%20database/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Design and implement the database
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../6.%20Compile%20the%20codebase/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Compile the codebase
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../7.%20%28Optional%29%20Run%20regular%20backups/" class="md-nav__link">
+      <a href="../8.%20Run%20regular%20backups%20%28optional%29/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     Run regular backups (optional)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../8_Add_new_table/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Add a table to an existing database
     
   </span>
   
@@ -903,59 +826,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Requirements:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-create-the-minio-directory" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Create the minio directory
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-mount-your-external-volume" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Mount your external volume
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-launch-the-minio-server" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Launch the MinIO server
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-launch-the-minio-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Launch the MinIO client
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -970,67 +840,15 @@
 
 
 
-<h1 id="tutorial-add-minio-to-an-existing-vm-optional">Tutorial: Add MinIO to an existing VM (optional)<a class="headerlink" href="#tutorial-add-minio-to-an-existing-vm-optional" title="Permanent link">&para;</a></h1>
-<h3 id="requirements"><strong>Requirements:</strong><a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
-<ul>
-<li>a VM running your MySQL database (tutorial 1 complete).</li>
-</ul>
-<p>In this tutorial we'll cover how to launch MinIO from an existing VM (which was configured in the previous tutorial). </p>
-<p>MinIO is an object storage server useful for storing large files. If all of your data files are small (roughly &lt;10 MB), you can store everything directly in the MySQL database and skip this part. If you need to access larger files (and have the storage for them), then this tutorial is for you.</p>
-<hr />
-<h2 id="1-create-the-minio-directory">1. Create the <code>minio</code> directory<a class="headerlink" href="#1-create-the-minio-directory" title="Permanent link">&para;</a></h2>
-<p>First, create a directory on your VM where you'll store your bulky data (we'll assume that the folder is called <code>minio</code>). </p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo mkdir minio
-</pre>
-
-<p>You might have to update permissions to use this folder:</p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo chown ubuntu: minio
-</pre>
-
-<h2 id="2-mount-your-external-volume">2. Mount your external volume<a class="headerlink" href="#2-mount-your-external-volume" title="Permanent link">&para;</a></h2>
-<p>The specifics here will vary based on your setup. We'll cover some general steps, but if you're part of an organization, you should probably reach out to a system admin.</p>
-<p>If you don't have enough storage on the VM itself and are attaching an extra storage volume, then attach the volume to the <code>minio</code> folder you just made (e.g. via your cloud computing platform, such as OpenStack, or by plugging in an external hard drive and making sure it's recognized on the VM). Run <code>lsblk</code> or <code>df -h</code> to list all devices and check that it is attached (it will probably look something like <code>/dev/sdb1</code>). </p>
-<p>If the volume is new and has no data on it, then you will need to format it before using it. Follow the steps <a href="https://www.digitalocean.com/community/tutorials/how-to-partition-and-format-storage-devices-in-linux">in this tutorial</a> to format your new volume. To automatically mount the new volume when booting your VM, also follow the steps regarding adding an entry to your <code>/etc/fstab</code> file. </p>
-<p>You may have to edit permissions in order to work with data and directories on your new volume:</p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo chown -R ubuntu: minio
-sudo chmod -R 775 minio
-</pre>
-
-<h2 id="3-launch-the-minio-server">3. Launch the MinIO server<a class="headerlink" href="#3-launch-the-minio-server" title="Permanent link">&para;</a></h2>
-<p>The MinIO server is the core component that provides object storage capabilities. In other words, in this step we'll set up the storage backend that will hold your data.</p>
-<p>We'll make a new terminal session using tmux, a terminal multiplexer (which is a fancy way of saying that it opens terminal sessions which you can attach to or detatch from). We'll launch our MinIO service from this terminal. This ensures that MinIO will keep running even if you disconnect from the server or your network connection is interrupted. </p>
-<p>Let's create a new terminal session and name it <code>minio</code>:</p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-tmux new -s minio
-</pre>
-
-<p>Now you're in your new tmux terminal. </p>
-<p>(You can detach from the tmux session and return to your normal terminal by pressing <code>Ctrl+B D</code>. You can later reattach to the session using the command <code>tmux attach -t minio</code>.)</p>
-<p>Now we'll launch our MinIO server container using Docker. The command below maps ports 9000 and 9001 from the host to the container for server and console access, mounts the host <code>minio</code> directory as a volume for data storage, and sets up root access credentials for the server. <strong>Enter a password of your choosing.</strong></p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo docker run -p 9000:9000 -p 9001:9001 --name minio -v ~/minio:/data -e "MINIO_ROOT_USER=root" -e "MINIO_ROOT_PASSWORD=&lt;password&gt;" quay.io/minio/minio:RELEASE.2021-10-23T03-28-24Z server /data -console-address ":9001"
-</pre>
-
-<p>You should now be able to access your MinIO console via a web browser at <code>http://&lt;your.ip&gt;:9001</code> (you can find your IP from a terminal on the server via <code>hostname -I</code>). From here you can create new users and grant them the necessary privileges to access and store data on MinIO. </p>
-<h2 id="4-launch-the-minio-client">4. Launch the MinIO client<a class="headerlink" href="#4-launch-the-minio-client" title="Permanent link">&para;</a></h2>
-<p>The MinIO Client (<code>mc</code>) is a command-line tool designed to interact with the MinIO server. Although we recommend doing user management from the GUI at the link mentioned above (<code>http://&lt;your.ip&gt;:9001</code>), installing <code>mc</code> may prove useful for performing certain operations, especially if you prefer working via the command line (and either way, it certainly won't hurt to have it installed).</p>
-<p>Let's first split the current terminal pane vertically: <code>Ctrl+B Shift+%</code></p>
-<p>Now, from our new pane, we'll launch the MinIO client:</p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo docker run --name minio1_client --net=host -it -v ~/minio:/data --entrypoint=/bin/sh minio/mc
-</pre>
-
-<p>The above command binds the local directory <code>~/minio</code> to the <code>/data</code> directory inside the container. </p>
-<p>Now we'll tell the MinIO client to remember our new MinIO server and make it accesible via browser. <strong>Enter your password of choice.</strong>  </p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-mc config host add minio http://127.0.0.1:9001 root "&lt;password&gt;"
-</pre>
-
-<p>Now you're ready to store data on MinIO!</p>
-<p>In tutorial 5 we'll cover how to populate MinIO with your bulky data.</p>
+<h1 id="enable-access-for-other-users">Enable access for other users<a class="headerlink" href="#enable-access-for-other-users" title="Permanent link">&para;</a></h1>
+<p>The codebase is the interface for your database. The major benefit of separating these components is that it enables additional uses to flexibly interact with and use the data stored in the database, while minimizing the chances that unwanted destructive or constructive errors are made. It additionally ensures that all users have a single source of truth, and are interacting with the data in a consistent manner. </p>
+<p>In case you want to enable additional users, we recommend creating and maintaining a template codebase which can be downloaded and used to connect to your bespoke database. In essence, this is what Epiphyte is, but with additional modules to generate mock data and additional documentation. </p>
+<p>A compiled codebase only really needs 4 modules:
+1. <code>access_info.py</code>: a script containing the server, storage, and user information.
+2. <code>db_setup.py</code>: a script containing all the table definitions and package imports. 
+3. <code>config.py</code>: a script containing any hard-coded variables or pieces of information. 
+4. <code>query_functions</code>: a script defining common interactions with the database as convenience functions.</p>
+<p>Once a database is in a stable state, and these modules exist in a stable form, we recommend creating a private GitHub repository containing these scripts. New users can then clone and modify the relevant lines in <code>access_info.py</code> and then access and interact with the data. </p>
 
 
 

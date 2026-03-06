@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/6.%20Compile%20the%20codebase/">
+        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/1a.%20Launch%20a%20MySQL%20database%20locally/">
       
       
-        <link rel="prev" href="../5.%20Design%20and%20implement%20the%20database/">
+        <link rel="prev" href="../../install/">
       
       
-        <link rel="next" href="../7.%20%28Optional%29%20Run%20regular%20backups/">
+        <link rel="next" href="../1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Compile the codebase - Epiphyte</title>
+        <title>Launch a MySQL database locally - Epiphyte</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-compile-the-codebase" class="md-skip">
+        <a href="#launch-a-mysql-database-locally" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Compile the codebase
+              Launch a MySQL database locally
             
           </span>
         </div>
@@ -328,15 +328,125 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../Launch%20the%20MySQL%20database%20locally/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Launch a MySQL database locally
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database locally
+    Launch a MySQL database locally
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-install-and-set-up-the-datajoint-docker-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Install and set-up the DataJoint docker container
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-download-and-launch-the-datajoint-mysql-server-via-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Download and launch the DataJoint MySQL server via docker-compose
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Launch a MySQL database on a virtual machine
     
   </span>
   
@@ -354,12 +464,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+      <a href="../2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database on a virtual machine
+    Attach a storage back-end to an existing database (optional)
     
   </span>
   
@@ -377,30 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../2.%20%28Optional%29%20Add%20MinIO%20to%20an%20existing%20virtual%20machine/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../3.%20Install%20Epiphyte/" class="md-nav__link">
+      <a href="../3.%20Install%20Epiphyte%20locally%20or%20remotely/" class="md-nav__link">
         
   
   
@@ -423,12 +510,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../4.%20Configure%20and%20connect%20to%20the%20database/" class="md-nav__link">
+      <a href="../4.%20Configure%20and%20connect%20to%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Configure and connect to the database
+    Configure and connect to a database
     
   </span>
   
@@ -446,50 +533,17 @@
   
   
     <li class="md-nav__item">
-      <a href="../5.%20Design%20and%20implement%20the%20database/" class="md-nav__link">
+      <a href="../5.%20Design%20and%20implement%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Design and implement the database
+    Design and implement a database
     
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Compile the codebase
-    
-  </span>
-  
-
-      </a>
-      
     </li>
   
 
@@ -502,35 +556,58 @@
   
   
     <li class="md-nav__item">
-      <a href="../7.%20%28Optional%29%20Run%20regular%20backups/" class="md-nav__link">
+      <a href="../6.%20Develop%20an%20analysis%20workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Develop an analysis workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../7.%20Enable%20access%20for%20other%20users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enable access for other users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../8.%20Run%20regular%20backups%20%28optional%29/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     Run regular backups (optional)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../8_Add_new_table/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Add a table to an existing database
     
   </span>
   
@@ -826,6 +903,59 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-install-and-set-up-the-datajoint-docker-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Install and set-up the DataJoint docker container
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-download-and-launch-the-datajoint-mysql-server-via-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Download and launch the DataJoint MySQL server via docker-compose
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -840,15 +970,81 @@
 
 
 
-<h1 id="tutorial-compile-the-codebase">Tutorial: Compile the codebase<a class="headerlink" href="#tutorial-compile-the-codebase" title="Permanent link">&para;</a></h1>
-<p>The codebase is the interface for your database. The major benefit of separating these components is that it enables additional uses to flexibly interact with and use the data stored in the database, while minimizing the chances that unwanted destructive or constructive errors are made. It additionally ensures that all users have a single source of truth, and are interacting with the data in a consistent manner. </p>
-<p>In case you want to enable additional users, we recommend creating and maintaining a template codebase which can be downloaded and used to connect to your bespoke database. In essence, this is what Epiphyte is, but with additional modules to generate mock data and additional documentation. </p>
-<p>A compiled codebase only really needs 4 modules:
-1. <code>access_info.py</code>: a script containing the server, storage, and user information.
-2. <code>db_setup.py</code>: a script containing all the table definitions and package imports. 
-3. <code>config.py</code>: a script containing any hard-coded variables or pieces of information. 
-4. <code>query_functions</code>: a script defining common interactions with the database as convenience functions.</p>
-<p>Once a database is in a stable state, and these modules exist in a stable form, we recommend creating a private GitHub repository containing these scripts. New users can then clone and modify the relevant lines in <code>access_info.py</code> and then access and interact with the data. </p>
+<h1 id="launch-a-mysql-database-locally">Launch a MySQL database locally<a class="headerlink" href="#launch-a-mysql-database-locally" title="Permanent link">&para;</a></h1>
+<h3 id="goal"><strong>Goal:</strong><a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>Set up the MySQL environment directly on a personal computer or workstation.</p>
+<h3 id="requirements"><strong>Requirements:</strong><a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>OS: Linux or Mac/OSx</li>
+<li>Python 3.5 or higher (either system-level, or in an IDE)</li>
+<li>400 MB free disk space</li>
+<li>Permission to perform sudo-level commands</li>
+</ul>
+<h3 id="steps"><strong>Steps</strong>:<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Install and set-up the DataJoint docker container</li>
+<li>Download and launch the DataJoint MySQL server via docker-compose</li>
+</ol>
+<p>Refer to the FAQ if issues arise. </p>
+<hr />
+<h3 id="1-install-and-set-up-the-datajoint-docker-container">1. Install and set-up the DataJoint docker container<a class="headerlink" href="#1-install-and-set-up-the-datajoint-docker-container" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Install the correct <a href="https://docs.docker.com/get-docker/">Docker</a> for your OS.</li>
+<li>Verify the Docker installation: </li>
+</ul>
+<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
+docker --version
+docker run hello-world
+</pre>
+<ul>
+<li>Install <a href="https://docs.docker.com/compose/install/">Docker Compose</a>.</li>
+<li>Verify the Docker Compose installation:</li>
+</ul>
+<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
+docker-compose --version
+</pre>
+
+<h3 id="2-download-and-launch-the-datajoint-mysql-server-via-docker-compose">2. Download and launch the DataJoint MySQL server via docker-compose<a class="headerlink" href="#2-download-and-launch-the-datajoint-mysql-server-via-docker-compose" title="Permanent link">&para;</a></h3>
+<p><em>Following is taken from <a href="https://github.com/datajoint/mysql-docker">DataJoint documentation</a>.</em></p>
+<ul>
+<li>Create a directory to store the docker-compose YAML file:</li>
+</ul>
+<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
+mkdir mysql-docker
+cd mysql-docker
+wget https://raw.githubusercontent.com/datajoint/mysql-docker/master/docker-compose.yaml
+docker compose up -d
+</pre>
+<ul>
+<li>Download a package that enables access to your locally running MySQL server:</li>
+</ul>
+<blockquote>
+<p>Linux: </p>
+</blockquote>
+<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
+sudo apt-get install mysql-client
+</pre>
+
+<blockquote>
+<p>Mac (via <a href="https://brew.sh/">Homebrew</a>): </p>
+</blockquote>
+<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
+brew install mysql@5.7
+brew tap homebrew/services
+brew services start mysql@5.7
+brew services list
+brew link --force mysql@5.7
+mysql -V # verify the installation
+</pre>
+<ul>
+<li>Test the server access. If there are issues, refer <a href="https://github.com/mackelab/Epiphyte/wiki/Troubleshooting">here</a>.</li>
+</ul>
+<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
+mysql -h 127.0.0.1 -u root -p
+Enter password: [type in your password here: default is "simple"]
+</pre>
+
+<p><a href="../3.%20Install%20Epiphyte%20locally%20or%20remotely/">Continue to <em>Install Epiphyte</em>.</a></p>
 
 
 

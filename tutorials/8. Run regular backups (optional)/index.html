@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/Launch%20the%20MySQL%20database%20locally/">
+        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/8.%20Run%20regular%20backups%20%28optional%29/">
       
       
-        <link rel="prev" href="../../install/">
+        <link rel="prev" href="../7.%20Enable%20access%20for%20other%20users/">
       
       
-        <link rel="next" href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/">
+        <link rel="next" href="../../reference/database/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Launch the MySQL database locally - Epiphyte</title>
+        <title>Run regular backups (optional) - Epiphyte</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-launch-the-mysql-database-locally" class="md-skip">
+        <a href="#optional-run-regular-backups" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Launch the MySQL database locally
+              Run regular backups (optional)
             
           </span>
         </div>
@@ -328,149 +328,15 @@
                 
   
   
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Launch the MySQL database locally
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Launch the MySQL database locally
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Requirements:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installation:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-install-and-set-up-the-datajoint-docker-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Install and set-up the DataJoint docker container.
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-download-and-launch-the-datajoint-mysql-server-via-docker-compose" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Download and launch the DataJoint MySQL server via docker-compose.
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-install-epiphyte" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Install Epiphyte:
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="3. Install Epiphyte:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#install-via-git" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install via git
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#or-install-via-pip-in-a-conda-environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Or, install via pip in a conda environment
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
   
   
     <li class="md-nav__item">
-      <a href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+      <a href="../1a.%20Launch%20a%20MySQL%20database%20locally/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database on a virtual machine
+    Launch a MySQL database locally
     
   </span>
   
@@ -488,12 +354,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../2.%20%28Optional%29%20Add%20MinIO%20to%20an%20existing%20virtual%20machine/" class="md-nav__link">
+      <a href="../1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
+    Launch a MySQL database on a virtual machine
     
   </span>
   
@@ -511,7 +377,30 @@
   
   
     <li class="md-nav__item">
-      <a href="../3.%20Install%20Epiphyte/" class="md-nav__link">
+      <a href="../2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Attach a storage back-end to an existing database (optional)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3.%20Install%20Epiphyte%20locally%20or%20remotely/" class="md-nav__link">
         
   
   
@@ -534,12 +423,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../4.%20Configure%20and%20connect%20to%20the%20database/" class="md-nav__link">
+      <a href="../4.%20Configure%20and%20connect%20to%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Configure and connect to the database
+    Configure and connect to a database
     
   </span>
   
@@ -557,12 +446,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../5.%20Design%20and%20implement%20the%20database/" class="md-nav__link">
+      <a href="../5.%20Design%20and%20implement%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Design and implement the database
+    Design and implement a database
     
   </span>
   
@@ -580,12 +469,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../6.%20Compile%20the%20codebase/" class="md-nav__link">
+      <a href="../6.%20Develop%20an%20analysis%20workflow/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Compile the codebase
+    Develop an analysis workflow
     
   </span>
   
@@ -603,7 +492,52 @@
   
   
     <li class="md-nav__item">
-      <a href="../7.%20%28Optional%29%20Run%20regular%20backups/" class="md-nav__link">
+      <a href="../7.%20Enable%20access%20for%20other%20users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enable access for other users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Run regular backups (optional)
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -614,29 +548,80 @@
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../8_Add_new_table/" class="md-nav__link">
+      
         
-  
-  
-  <span class="md-ellipsis">
-    Add a table to an existing database
-    
-  </span>
-  
 
-      </a>
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-create-a-config-file-with-your-mysql-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Create a config file with your MySQL credentials
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-write-your-backup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Write your backup script
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-schedule-your-backups-with-a-cron-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Schedule your backups with a cron job
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -934,6 +919,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       Requirements:
@@ -943,62 +937,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#steps" class="md-nav__link">
     <span class="md-ellipsis">
-      Installation:
+      Steps:
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-install-and-set-up-the-datajoint-docker-container" class="md-nav__link">
+  <a href="#1-create-a-config-file-with-your-mysql-credentials" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Install and set-up the DataJoint docker container.
+      1. Create a config file with your MySQL credentials
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-download-and-launch-the-datajoint-mysql-server-via-docker-compose" class="md-nav__link">
+  <a href="#2-write-your-backup-script" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Download and launch the DataJoint MySQL server via docker-compose.
+      2. Write your backup script
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-install-epiphyte" class="md-nav__link">
+  <a href="#3-schedule-your-backups-with-a-cron-job" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Install Epiphyte:
+      3. Schedule your backups with a cron job
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="3. Install Epiphyte:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#install-via-git" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install via git
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#or-install-via-pip-in-a-conda-environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Or, install via pip in a conda environment
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1018,134 +988,101 @@
 
 
 
-<h1 id="tutorial-launch-the-mysql-database-locally">Tutorial: Launch the MySQL database locally<a class="headerlink" href="#tutorial-launch-the-mysql-database-locally" title="Permanent link">&para;</a></h1>
+<h1 id="optional-run-regular-backups">(Optional) Run regular backups<a class="headerlink" href="#optional-run-regular-backups" title="Permanent link">&para;</a></h1>
+<h3 id="goal"><strong>Goal:</strong><a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>set up regular backups of an entire database after population</p>
 <h3 id="requirements"><strong>Requirements:</strong><a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>OS: Linux or Mac/OSx</li>
-<li>Python 3.5 or higher (either system-level, or in an IDE)</li>
-<li>400 MB free disk space</li>
-<li>Permission to perform sudo-level commands</li>
+<li>data stored in your database (and/or MinIO) </li>
 </ul>
-<h3 id="installation">Installation:<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
-<p>The installation of <code>epiphyte</code> has three steps: </p>
+<h3 id="steps"><strong>Steps:</strong><a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Install and set-up the DataJoint docker container. </li>
-<li>Download and launch the DataJoint MySQL server via docker-compose.</li>
-<li>Install <code>Epiphyte</code>.</li>
+<li>Create a config file with your MySQL credentials</li>
+<li>Write your backup script</li>
+<li>Schedule your backups with a cron job</li>
 </ol>
-<h3 id="1-install-and-set-up-the-datajoint-docker-container">1. Install and set-up the DataJoint docker container.<a class="headerlink" href="#1-install-and-set-up-the-datajoint-docker-container" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Install the correct <a href="https://docs.docker.com/get-docker/">Docker</a> for your OS.</li>
-<li>Verify the Docker installation: </li>
-</ul>
+<hr />
+<h2 id="1-create-a-config-file-with-your-mysql-credentials">1. Create a config file with your MySQL credentials<a class="headerlink" href="#1-create-a-config-file-with-your-mysql-credentials" title="Permanent link">&para;</a></h2>
+<p>You shouldn't save your MySQL credentials directly in your backup script, as this can pose a security risk. Instead, we'll make a separate config file to save your credentials, and then restrict access to the root user only. </p>
+<p>Create a config file called <code>.my.cnf</code>:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-docker --version
-docker run hello-world
-</pre>
-<ul>
-<li>Install <a href="https://docs.docker.com/compose/install/">Docker Compose</a>.</li>
-<li>Verify the Docker Compose installation:</li>
-</ul>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-docker-compose --version
+touch .my.cnf
+sudo nano .my.cnf
 </pre>
 
-<h3 id="2-download-and-launch-the-datajoint-mysql-server-via-docker-compose">2. Download and launch the DataJoint MySQL server via docker-compose.<a class="headerlink" href="#2-download-and-launch-the-datajoint-mysql-server-via-docker-compose" title="Permanent link">&para;</a></h3>
-<p>(Following is taken from <a href="https://github.com/datajoint/mysql-docker">DataJoint documentation</a>.)</p>
-<ul>
-<li>Create a directory to store the docker-compose YAML file:</li>
-</ul>
+<p>Now add your data to that file: </p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-mkdir mysql-docker
-cd mysql-docker
-wget https://raw.githubusercontent.com/datajoint/mysql-docker/master/docker-compose.yaml
-docker-compose up -d
-</pre>
-<ul>
-<li>Download a package that enables access to your locally running MySQL server:</li>
-</ul>
-<blockquote>
-<p>Linux: </p>
-</blockquote>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-sudo apt-get install mysql-client
+bash
+# needed for dump
+[mysqldump]
+user = root
+password = &lt;password&gt;
+
+# needed for restore
+[mysql]
+user = root
+password = &lt;password&gt;
 </pre>
 
-<blockquote>
-<p>Mac (via <a href="https://brew.sh/">Homebrew</a>): </p>
-</blockquote>
+<p>Be sure to change the file's permissions to restrict access to the root user only:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-brew install mysql@5.7
-brew tap homebrew/services
-brew services start mysql@5.7
-brew services list
-brew link --force mysql@5.7
-mysql -V # verify the installation
-</pre>
-<ul>
-<li>Test the server access. If there are issues, refer <a href="https://github.com/mackelab/Epiphyte/wiki/Troubleshooting">here</a>.</li>
-</ul>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-mysql -h 127.0.0.1 -u root -p
-Enter password: [type in your password here: default is "simple"]
+chmod 600 .my.cnf
 </pre>
 
-<h3 id="3-install-epiphyte">3. Install <code>Epiphyte</code>:<a class="headerlink" href="#3-install-epiphyte" title="Permanent link">&para;</a></h3>
-<p>There are two ways to install <code>epiphyte</code> -- via <code>pip</code> or cloning this repo. </p>
-<p>Note: certain features of the DataJoint python package have not been updated for more recent releases of Python. Therefore, DataJoint and epiphyte require an older version of Python (&lt;=3.9). For this reason, we recommend using a conda environment to install all needed packages and to develop from. </p>
-<h4 id="install-via-git">Install via <code>git</code><a class="headerlink" href="#install-via-git" title="Permanent link">&para;</a></h4>
-<ul>
-<li>Clone the repository:</li>
-</ul>
+<h2 id="2-write-your-backup-script">2. Write your backup script<a class="headerlink" href="#2-write-your-backup-script" title="Permanent link">&para;</a></h2>
+<p>Create a shell script <code>backup.sh</code>:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-git clone git@github.com:mackelab/epiphyte.git
-cd epiphyte
+touch backup.sh
+sudo nano backup.sh
 </pre>
 
-<ul>
-<li>Create a new conda environment suitable for the <code>epiphyte</code> requirements: </li>
-</ul>
+<p>Add the following lines to your script. <strong>Be sure to update the paths accordingly</strong> (for finding your config file, and where you want to send the backup to). Ideally you should send your backups to a separate piece of hardware than where your database is running, or store them in the cloud.</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda create --name epiphyte python=3.9.18 ipython
+#!/bin/bash
+
+# Update paths accordingly in the following lines:
+# --defaults-extra-file=~/path/to/config_file
+# > ~/destination/file/for/backups
+echo "$(date -u +\%H:\%M) Dumping database..."
+mysqldump --defaults-extra-file=~/path/to/config_file/.my.cnf -h 127.0.0.1 -u root --column-statistics=0 --all-databases --skip-triggers > ~/destiantion/file/for/backups/mysql_backup_$(date -u +\%FT\%H\%MZ).sql
+
+# Removes backups older than 30 days
+echo "$(date -u +\%H:\%M) Deleting old dumps..."
+find ~/backups/mysql/* -mtime +30 -exec rm {} \;
+
+echo "MySQL backup is finished!"
 </pre>
 
-<ul>
-<li>Activate the conda environment: </li>
-</ul>
+<p>If you're storing data on MinIO as well, you can add the following lines to backup your MinIO data using <code>rsync</code> (sample file paths are given, be sure to again <strong>update file paths accordingly</strong>):</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda activate epiphyte
+# Syncs everything from bulk-minio to backup
+# -q: does syncronizing quietly (only error outputs will be shown)
+echo "$(date -u +\%H:\%M) Archiving MinIO..."
+rsync -a ~/minio ~/backups/minio/minio_backup_$(date -u +\%FT\%H\%MZ) -q
+
+# Removes backups older than 30 days
+echo "$(date -u +\%H:\%M) Deleting old archieves..."
+find ~/backups/minio/* -maxdepth 1  -mtime +30 -exec rm -r "{}" \;
+
+echo "MinIO backup is finished!"
 </pre>
 
-<ul>
-<li>Install the needed dependencies using <code>setup.py</code>:</li>
-</ul>
+<h2 id="3-schedule-your-backups-with-a-cron-job">3. Schedule your backups with a cron job<a class="headerlink" href="#3-schedule-your-backups-with-a-cron-job" title="Permanent link">&para;</a></h2>
+<p>A "cron job" is a scheduled task used in Unix and Unix-like operating systems to automate the execution of scripts at specified times or intervals. We'll set up a cron job to run backups at 1 a.m. server time.</p>
+<p>Edit a new crontab:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-pip install .
+crontab -e
 </pre>
 
-<ul>
-<li>Verify the installation:</li>
-</ul>
+<p>Add the following lines to the crontab and <strong>update the path to your backup script accordingly</strong>: </p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda list
+bash
+0 1 * * * /bin/bash ~/path/to/backup/script/backup.sh >/dev/null 2>&1
 </pre>
 
-<h4 id="or-install-via-pip-in-a-conda-environment">Or, install via <code>pip</code> in a <code>conda</code> environment<a class="headerlink" href="#or-install-via-pip-in-a-conda-environment" title="Permanent link">&para;</a></h4>
-<ul>
-<li>Create a new conda environment suitable for the <code>epiphyte</code> requirements: </li>
-</ul>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda create --name epiphyte python=3.9.18 ipython
-</pre>
-<ul>
-<li>Activate the conda environment and install <code>epiphyte</code>:</li>
-</ul>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-conda activate epiphyte
-pip install epiphyte
-</pre>
-
-<p><a href="../4.%20Configure%20and%20connect%20to%20the%20database/">Continue to <em>Configure and connect to the database</em>.</a></p>
+<p>Whenever a crontab has been edited successfully <code>crontab: installing new crontab</code> will pop up.</p>
+<p>You can check the status of your crontab via <code>crontab -l</code>.</p>
+<p>Your backups should now be good to go!</p>
 
 
 

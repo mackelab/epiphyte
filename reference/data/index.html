@@ -331,12 +331,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/Launch%20the%20MySQL%20database%20locally/" class="md-nav__link">
+      <a href="../../tutorials/1a.%20Launch%20a%20MySQL%20database%20locally/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database locally
+    Launch a MySQL database locally
     
   </span>
   
@@ -354,12 +354,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+      <a href="../../tutorials/1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database on a virtual machine
+    Launch a MySQL database on a virtual machine
     
   </span>
   
@@ -377,12 +377,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/2.%20%28Optional%29%20Add%20MinIO%20to%20an%20existing%20virtual%20machine/" class="md-nav__link">
+      <a href="../../tutorials/2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
+    Attach a storage back-end to an existing database (optional)
     
   </span>
   
@@ -400,7 +400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/3.%20Install%20Epiphyte/" class="md-nav__link">
+      <a href="../../tutorials/3.%20Install%20Epiphyte%20locally%20or%20remotely/" class="md-nav__link">
         
   
   
@@ -423,12 +423,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/4.%20Configure%20and%20connect%20to%20the%20database/" class="md-nav__link">
+      <a href="../../tutorials/4.%20Configure%20and%20connect%20to%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Configure and connect to the database
+    Configure and connect to a database
     
   </span>
   
@@ -446,12 +446,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/5.%20Design%20and%20implement%20the%20database/" class="md-nav__link">
+      <a href="../../tutorials/5.%20Design%20and%20implement%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Design and implement the database
+    Design and implement a database
     
   </span>
   
@@ -469,12 +469,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/6.%20Compile%20the%20codebase/" class="md-nav__link">
+      <a href="../../tutorials/6.%20Develop%20an%20analysis%20workflow/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Compile the codebase
+    Develop an analysis workflow
     
   </span>
   
@@ -492,35 +492,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/7.%20%28Optional%29%20Run%20regular%20backups/" class="md-nav__link">
+      <a href="../../tutorials/7.%20Enable%20access%20for%20other%20users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enable access for other users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/8.%20Run%20regular%20backups%20%28optional%29/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     Run regular backups (optional)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../tutorials/8_Add_new_table/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Add a table to an existing database
     
   </span>
   
@@ -2296,7 +2296,10 @@ as simple *.npy arrays with on/off segments.
 <span class="normal">573</span>
 <span class="normal">574</span>
 <span class="normal">575</span>
-<span class="normal">576</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GenerateData</span><span class="p">:</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GenerateData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate mock neural data and related metadata.</span>
 
 <span class="sd">    Attributes:</span>
@@ -2334,7 +2337,7 @@ as simple *.npy arrays with on/off segments.
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_channels_per_region</span> <span class="o">=</span> <span class="mi">8</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unit_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MU&quot;</span><span class="p">,</span> <span class="s2">&quot;SU&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">brain_regions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;LA&quot;</span><span class="p">,</span> <span class="s2">&quot;LAH&quot;</span><span class="p">,</span> <span class="s2">&quot;LEC&quot;</span><span class="p">,</span> <span class="s2">&quot;LMH&quot;</span><span class="p">,</span> <span class="s2">&quot;LPHC&quot;</span><span class="p">,</span> 
-                              <span class="s2">&quot;RA&quot;</span><span class="p">,</span> <span class="s2">&quot;RAH&quot;</span><span class="p">,</span> <span class="s2">&quot;REC&quot;</span><span class="p">,</span> <span class="s2">&quot;RMH&quot;</span><span class="p">,</span> <span class="s2">&quot;RPCH&quot;</span><span class="p">]</span>
+                              <span class="s2">&quot;RA&quot;</span><span class="p">,</span> <span class="s2">&quot;RAH&quot;</span><span class="p">,</span> <span class="s2">&quot;REC&quot;</span><span class="p">,</span> <span class="s2">&quot;RMH&quot;</span><span class="p">,</span> <span class="s2">&quot;RPHC&quot;</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rec_length</span> <span class="o">=</span> <span class="mi">5400000</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rectime_on</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1347982266000</span><span class="p">,</span> <span class="mi">1695051066000</span><span class="p">)</span>
@@ -2705,7 +2708,7 @@ as simple *.npy arrays with on/off segments.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nr_movie_frames</span><span class="p">,</span> <span class="n">perfect_pts</span><span class="p">,</span> <span class="n">cpu_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_perfect_watchlog</span><span class="p">()</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed_and_interval</span><span class="p">()</span>
-        <span class="n">pause_pool</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># 5 minutes in unix/epoch time -- use for max pause time        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool</span>
+        <span class="n">pause_pool</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># 5 minutes in unix/epoch time -- use for max pause time  </span>
 
         <span class="n">movie_len_unix</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimulus_len</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-</span> <span class="n">pause_pool</span>
         <span class="n">end_time</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">+</span> <span class="n">movie_len_unix</span> 
@@ -2725,9 +2728,12 @@ as simple *.npy arrays with on/off segments.
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices_pause</span><span class="p">):</span> 
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices_pause</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
-                <span class="n">pause_len</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">min_pause</span><span class="p">),</span> <span class="n">pause_pool</span><span class="p">)</span>
-                <span class="n">cpu_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cpu_time</span><span class="p">[:</span><span class="n">index</span><span class="p">],</span><span class="n">cpu_time</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">pause_len</span><span class="p">))</span> 
-                <span class="n">pause_pool</span> <span class="o">-=</span> <span class="n">pause_len</span>
+                <span class="k">if</span> <span class="n">pause_pool</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_pause</span><span class="p">):</span>
+                    <span class="n">pause_len</span> <span class="o">=</span> <span class="n">pause_pool</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pause_len</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">min_pause</span><span class="p">),</span> <span class="n">pause_pool</span><span class="p">)</span>
+                    <span class="n">cpu_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cpu_time</span><span class="p">[:</span><span class="n">index</span><span class="p">],</span><span class="n">cpu_time</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">pause_len</span><span class="p">))</span> 
+                    <span class="n">pause_pool</span> <span class="o">-=</span> <span class="n">pause_len</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pause_len</span> <span class="o">=</span> <span class="n">pause_pool</span>
                 <span class="n">cpu_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cpu_time</span><span class="p">[:</span><span class="n">index</span><span class="p">],</span><span class="n">cpu_time</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">pause_len</span><span class="p">))</span>
@@ -4414,7 +4420,10 @@ clamped to the movie duration and non-negative.</p>
 <span class="normal">555</span>
 <span class="normal">556</span>
 <span class="normal">557</span>
-<span class="normal">558</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_pauses_and_skips</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_pauses_and_skips</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a watchlog with pauses and skips.</span>
 
 <span class="sd">    Returns:</span>
@@ -4430,7 +4439,7 @@ clamped to the movie duration and non-negative.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">nr_movie_frames</span><span class="p">,</span> <span class="n">perfect_pts</span><span class="p">,</span> <span class="n">cpu_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_perfect_watchlog</span><span class="p">()</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed_and_interval</span><span class="p">()</span>
-    <span class="n">pause_pool</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># 5 minutes in unix/epoch time -- use for max pause time        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool</span>
+    <span class="n">pause_pool</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">60</span> <span class="c1"># 5 minutes in unix/epoch time -- use for max pause time  </span>
 
     <span class="n">movie_len_unix</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimulus_len</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-</span> <span class="n">pause_pool</span>
     <span class="n">end_time</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">+</span> <span class="n">movie_len_unix</span> 
@@ -4450,9 +4459,12 @@ clamped to the movie duration and non-negative.</p>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices_pause</span><span class="p">):</span> 
         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices_pause</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
-            <span class="n">pause_len</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">min_pause</span><span class="p">),</span> <span class="n">pause_pool</span><span class="p">)</span>
-            <span class="n">cpu_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cpu_time</span><span class="p">[:</span><span class="n">index</span><span class="p">],</span><span class="n">cpu_time</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">pause_len</span><span class="p">))</span> 
-            <span class="n">pause_pool</span> <span class="o">-=</span> <span class="n">pause_len</span>
+            <span class="k">if</span> <span class="n">pause_pool</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_pause</span><span class="p">):</span>
+                <span class="n">pause_len</span> <span class="o">=</span> <span class="n">pause_pool</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pause_len</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">min_pause</span><span class="p">),</span> <span class="n">pause_pool</span><span class="p">)</span>
+                <span class="n">cpu_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cpu_time</span><span class="p">[:</span><span class="n">index</span><span class="p">],</span><span class="n">cpu_time</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">pause_len</span><span class="p">))</span> 
+                <span class="n">pause_pool</span> <span class="o">-=</span> <span class="n">pause_len</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pause_len</span> <span class="o">=</span> <span class="n">pause_pool</span>
             <span class="n">cpu_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">cpu_time</span><span class="p">[:</span><span class="n">index</span><span class="p">],</span><span class="n">cpu_time</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">pause_len</span><span class="p">))</span>
@@ -4517,10 +4529,7 @@ clamped to the movie duration and non-negative.</p>
 
             <details class="quote">
               <summary>Source code in <code>epiphyte/data/mock_data_utils.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">563</span>
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
@@ -4533,7 +4542,10 @@ clamped to the movie duration and non-negative.</p>
 <span class="normal">573</span>
 <span class="normal">574</span>
 <span class="normal">575</span>
-<span class="normal">576</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_watchlog_with_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_watchlog_with_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save a watchlog including pauses and skips to ``watchlogs`` dir.&quot;&quot;&quot;</span>
     <span class="n">nr_movie_frames</span><span class="p">,</span> <span class="n">skip_pts_revised</span><span class="p">,</span> <span class="n">cpu_time</span><span class="p">,</span> <span class="n">indices_pause</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_pauses_and_skips</span><span class="p">()</span>
 
@@ -4667,10 +4679,7 @@ with filenames including a random <code>annotator_id</code> and the current date
 
             <details class="quote">
               <summary>Source code in <code>epiphyte/data/mock_data_utils.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">581</span>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
@@ -4765,7 +4774,10 @@ with filenames including a random <code>annotator_id</code> and the current date
 <span class="normal">673</span>
 <span class="normal">674</span>
 <span class="normal">675</span>
-<span class="normal">676</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_data_generation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_data_generation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate a small mock dataset and minimal annotation arrays.</span>
 
 <span class="sd">    Iterates through hard-coded ``patients`` and ``sessions`` and, for each</span>

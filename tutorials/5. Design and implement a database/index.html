@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/5.%20Design%20and%20implement%20the%20database/">
+        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/5.%20Design%20and%20implement%20a%20database/">
       
       
-        <link rel="prev" href="../4.%20Configure%20and%20connect%20to%20the%20database/">
+        <link rel="prev" href="../4.%20Configure%20and%20connect%20to%20a%20database/">
       
       
-        <link rel="next" href="../6.%20Compile%20the%20codebase/">
+        <link rel="next" href="../6.%20Develop%20an%20analysis%20workflow/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Design and implement the database - Epiphyte</title>
+        <title>Design and implement a database - Epiphyte</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-define-the-database-tables" class="md-skip">
+        <a href="#design-and-implement-a-database" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Design and implement the database
+              Design and implement a database
             
           </span>
         </div>
@@ -331,12 +331,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../Launch%20the%20MySQL%20database%20locally/" class="md-nav__link">
+      <a href="../1a.%20Launch%20a%20MySQL%20database%20locally/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database locally
+    Launch a MySQL database locally
     
   </span>
   
@@ -354,12 +354,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+      <a href="../1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database on a virtual machine
+    Launch a MySQL database on a virtual machine
     
   </span>
   
@@ -377,12 +377,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../2.%20%28Optional%29%20Add%20MinIO%20to%20an%20existing%20virtual%20machine/" class="md-nav__link">
+      <a href="../2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
+    Attach a storage back-end to an existing database (optional)
     
   </span>
   
@@ -400,7 +400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../3.%20Install%20Epiphyte/" class="md-nav__link">
+      <a href="../3.%20Install%20Epiphyte%20locally%20or%20remotely/" class="md-nav__link">
         
   
   
@@ -423,12 +423,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../4.%20Configure%20and%20connect%20to%20the%20database/" class="md-nav__link">
+      <a href="../4.%20Configure%20and%20connect%20to%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Configure and connect to the database
+    Configure and connect to a database
     
   </span>
   
@@ -460,7 +460,7 @@
   
   
   <span class="md-ellipsis">
-    Design and implement the database
+    Design and implement a database
     
   </span>
   
@@ -473,7 +473,7 @@
   
   
   <span class="md-ellipsis">
-    Design and implement the database
+    Design and implement a database
     
   </span>
   
@@ -496,9 +496,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       Requirements:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps:
     </span>
   </a>
   
@@ -542,18 +569,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#lfpdata" class="md-nav__link">
+  <a href="#electrodedata" class="md-nav__link">
     <span class="md-ellipsis">
-      LFPData
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#electrodeunit" class="md-nav__link">
-    <span class="md-ellipsis">
-      ElectrodeUnit
+      ElectrodeData
     </span>
   </a>
   
@@ -587,6 +605,15 @@
   <a href="#spikedata" class="md-nav__link">
     <span class="md-ellipsis">
       SpikeData
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lfpdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      LFPData
     </span>
   </a>
   
@@ -640,12 +667,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../6.%20Compile%20the%20codebase/" class="md-nav__link">
+      <a href="../6.%20Develop%20an%20analysis%20workflow/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Compile the codebase
+    Develop an analysis workflow
     
   </span>
   
@@ -663,35 +690,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../7.%20%28Optional%29%20Run%20regular%20backups/" class="md-nav__link">
+      <a href="../7.%20Enable%20access%20for%20other%20users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enable access for other users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../8.%20Run%20regular%20backups%20%28optional%29/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     Run regular backups (optional)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../8_Add_new_table/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Add a table to an existing database
     
   </span>
   
@@ -994,9 +1021,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       Requirements:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps:
     </span>
   </a>
   
@@ -1040,18 +1094,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#lfpdata" class="md-nav__link">
+  <a href="#electrodedata" class="md-nav__link">
     <span class="md-ellipsis">
-      LFPData
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#electrodeunit" class="md-nav__link">
-    <span class="md-ellipsis">
-      ElectrodeUnit
+      ElectrodeData
     </span>
   </a>
   
@@ -1085,6 +1130,15 @@
   <a href="#spikedata" class="md-nav__link">
     <span class="md-ellipsis">
       SpikeData
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lfpdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      LFPData
     </span>
   </a>
   
@@ -1138,19 +1192,30 @@
 
 
 
-<h1 id="tutorial-define-the-database-tables">Tutorial: Define the database tables<a class="headerlink" href="#tutorial-define-the-database-tables" title="Permanent link">&para;</a></h1>
+<h1 id="design-and-implement-a-database">Design and implement a database<a class="headerlink" href="#design-and-implement-a-database" title="Permanent link">&para;</a></h1>
+<h3 id="goal"><strong>Goal:</strong><a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>generate mock data, define database tables, and instantiate a database</p>
 <h3 id="requirements"><strong>Requirements:</strong><a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>completed tutorials 1-5.</li>
+<li>completion of the previous tutorials</li>
 </ul>
-<p>This notebook covers the basics of defining tables. In particular, we'll go through:
-* Defining a table,
-* Defining inheritances and relationships between tables,
-* Defining how data is imported into a table, and
-* Creating mock-ups of tables before creating them within a database.</p>
+<h3 id="content"><strong>Content:</strong><a class="headerlink" href="#content" title="Permanent link">&para;</a></h3>
+<p>This notebook covers the basics of defining tables, namely:
+* defining a table,
+* defining inheritances and relationships between tables,
+* defining how data is imported into a table, and
+* creating mock-ups of tables before creating them within a database.</p>
 <p>All of the tables implemented here are taken from <code>/src/epiphyte/database/db_setup.py</code>. Importing this module will directely add these tables to the <code>epiphyte_mock</code> database schema. Only the tables that are set up as <code>Lookup</code> tables (i.e., draw their entries from a hard-coded source) will be populated upon first import; all others will need to be populated separately. Running the cells with the tables here will have the same effect as importing the module. </p>
+<h3 id="steps"><strong>Steps:</strong><a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Generate the mock data for the example database</li>
+<li>Identify the order of table population</li>
+<li>Define remaining tables, including dependencies/relationships</li>
+</ol>
 <hr />
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<div class="highlight"><pre><span></span><code><span class="c1">### imports</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
@@ -1161,12 +1226,27 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">epiphyte.data.mock_data_utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 </code></pre></div>
 <h2 id="1-generate-the-mock-data-for-the-example-database">1. Generate the mock data for the example database.<a class="headerlink" href="#1-generate-the-mock-data-for-the-example-database" title="Permanent link">&para;</a></h2>
+<p>The diagram below illustrates the general format of the mock dataset. </p>
+<ul>
+<li>a. Movie stimulus, with ~30 seconds shown. </li>
+<li>b. Movie feature annotations for each frame. Two time scales are involved in the movie playback: presentation timestamps (pts, time of the frame within the movie playback) and display timestamps (dts, real-world time at which the frame was shown).</li>
+<li>c. Spike times, concurrent with the movie playback. Times are clocked by the recording system and originally given in Unix time. </li>
+<li>d. Local field potentials (LFP), concurrent with the movie playback. Same time scale as the spike times. </li>
+</ul>
+<p><img alt="stimulus_features.png" src="../5.%20Design%20and%20implement%20a%20database_files/stimulus_features.png" /></p>
 <p>The following function generates a mock dataset of patient "recordings" during a movie. This mock dataset consists of fake spiking data, local field potential, watchlogs, and annotations to demonstrate the design and population of database tables. </p>
-<p>The generated data is stored in <code>/epiphyte/data/mock_data/</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">run_data_generation</span><span class="p">()</span>
 </code></pre></div>
+<p>The generated data is stored in <code>/epiphyte/data/mock_data/</code> and has the following structure: </p>
 <h2 id="2-identify-the-order-of-table-population">2. Identify the order of table population<a class="headerlink" href="#2-identify-the-order-of-table-population" title="Permanent link">&para;</a></h2>
-<p>Since some tables pull information from other tables, we first need to decide on the order of table population. Details of this decision process are given in <strong>§ 4.2.2 Identify a hierarchy</strong>, but ultimately it will depend heavily on the specifics of the dataset. </p>
+<p>The following diagram illustrates the overall organization of the database for the mock dataset: </p>
+<ul>
+<li><strong>a.</strong> Overview of the database ecosystem. Pink: Data formatting and refractoring are done prior to data entering the database. Green: Database interactions form the basis of analysis.</li>
+<li><strong>b.</strong> Structure of the tables composing the database. </li>
+<li><strong>c.</strong> Dependencies for a sub-selection of tables from <strong>b</strong> (shown in the yellow box).</li>
+</ul>
+<p><img alt="database_schematic.png" src="../5.%20Design%20and%20implement%20a%20database_files/database_schematic.png" /></p>
+<p>Since some tables pull information from other tables, we first need to decide on the order of table population.</p>
 <p>In the example dataset, the most top-level information is that which describes a given patient. Each patient comes with the following information: 
 * Patient ID number,
 * Age of the patient,
@@ -1260,8 +1340,8 @@ These tables contain the information regarding identity of label creators and th
 <div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
 <span class="n">erd</span>
 </code></pre></div>
-<p>The remaining tables, shown below in a modified Panel B from Figure 3, should be defined and instantiated according to the hierarchy, or "downstream" along the ERD.</p>
-<p><img alt="erd.png" src="../5.%20Design%20and%20implement%20the%20database_files/erd.png" /></p>
+<p>The remaining tables, shown below, should be defined and instantiated according to the hierarchy, or "downstream" along the ERD.</p>
+<p><img alt="erd.png" src="../5.%20Design%20and%20implement%20a%20database_files/erd.png" /></p>
 <p>Level I: <code>Patients</code>, <code>Sessions</code>, <code>Annotator</code>, <code>LabelName</code></p>
 <p>Level II: <code>MovieSession</code>, <code>ElectrodeUnit</code>, <code>LFPData</code>, <code>MovieAnnotation</code></p>
 <p>Level III: <code>SpikeData</code>, <code>PatientAlignedMovieAnnotations</code>, <code>MovieSkips</code>, <code>MoviePauses</code></p>
@@ -1367,93 +1447,17 @@ These tables contain the information regarding identity of label creators and th
                             <span class="s1">&#39;channel_names&#39;</span><span class="p">:</span> <span class="n">channel_names</span>
                             <span class="p">},</span> <span class="n">skip_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-<p>TODO </p>
-<p>explain populate method a little bit, with the lfp manual population in mind</p>
 <div class="highlight"><pre><span></span><code><span class="n">MovieSession</span><span class="o">.</span><span class="n">populate</span><span class="p">()</span>
 <span class="n">MovieSession</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
 <span class="n">erd</span>
 </code></pre></div>
-<h3 id="lfpdata"><code>LFPData</code><a class="headerlink" href="#lfpdata" title="Permanent link">&para;</a></h3>
-<p>The <code>LFPData</code> </p>
+<h3 id="electrodedata"><code>ElectrodeData</code><a class="headerlink" href="#electrodedata" title="Permanent link">&para;</a></h3>
+<p>The <code>ElectrodeData</code> table organizes the meta-data of the implanted electrodes. </p>
+<p>Since this information is patient-specific and consistent for all sessions from a given patient, it's a relatively high-level table (e.g. has a longer downstream than upstream). </p>
 <div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">LFPData</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Manual</span><span class="p">):</span>
-    <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    # local field potential data, by channel. </span>
-<span class="s2">    -&gt; Patients</span>
-<span class="s2">    -&gt; Sessions</span>
-<span class="s2">    csc_nr: int</span>
-<span class="s2">    ---</span>
-<span class="s2">    samples: longblob                # samples, in microvolts</span>
-<span class="s2">    timestamps: longblob             # timestamps corresponding to each sample, in ms</span>
-<span class="s2">    sample_rate: int                 # sample rate from the recording device</span>
-<span class="s2">    brain_region: varchar(8)         # brain region where unit was recorded</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-</code></pre></div>
-<p>defining a function for manually adding data to the table</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">populate_lfp_data_table</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Iterates over the channel files stored in config.PATH_TO_DATA/lfp_data/</span>
-<span class="sd">    and adds each channel to the table. </span>
-
-<span class="sd">    Ignores channels already uploaded.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">patient_ids</span><span class="p">,</span> <span class="n">session_nrs</span> <span class="o">=</span> <span class="n">MovieSession</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;session_nr&quot;</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">i_pat</span><span class="p">,</span> <span class="n">pat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patient_ids</span><span class="p">):</span>
-        <span class="n">pat_sessions</span> <span class="o">=</span> <span class="n">session_nrs</span><span class="p">[</span><span class="n">i_pat</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">i_sesh</span><span class="p">,</span> <span class="n">sesh</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pat_sessions</span><span class="p">):</span>
-
-            <span class="n">path_ds_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PATH_TO_PATIENT_DATA</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;session_</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;lfp_data&quot;</span><span class="p">)</span>
-            <span class="n">lfp_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">path_ds_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;CSC*&quot;</span><span class="p">))</span>
-
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">check</span> <span class="o">=</span> <span class="p">(</span><span class="n">LFPData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;csc_nr&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">check</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">lfp_files</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Patient </span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2"> session </span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2"> already added.&quot;</span><span class="p">)</span>
-                    <span class="k">continue</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Adding patient </span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2"> session </span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2"> to database...&quot;</span><span class="p">)</span>
-                    <span class="k">pass</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Adding patient </span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2"> session </span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2"> to database...&quot;</span><span class="p">)</span>
-                <span class="k">pass</span>
-
-            <span class="n">path_channels</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PATH_TO_PATIENT_DATA</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;session_</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;ChannelNames.txt&quot;</span><span class="p">)</span>
-            <span class="n">channel_names</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_channel_names</span><span class="p">(</span><span class="n">path_channels</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">ds_file</span> <span class="ow">in</span> <span class="n">path_ds_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-
-                <span class="n">csc_nr</span> <span class="o">=</span> <span class="n">ds_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">:]</span>
-                <span class="n">region</span> <span class="o">=</span> <span class="n">channel_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">csc_nr</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  .. adding csc </span><span class="si">{</span><span class="n">csc_nr</span><span class="si">}</span><span class="s2">..&quot;</span><span class="p">)</span>
-                <span class="n">ds_dict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ds_file</span><span class="p">,</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">LFPData</span><span class="o">.</span><span class="n">insert1</span><span class="p">({</span>
-                    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">pat</span><span class="p">,</span>
-                    <span class="s1">&#39;session_nr&#39;</span><span class="p">:</span> <span class="n">sesh</span><span class="p">,</span>
-                    <span class="s1">&#39;csc_nr&#39;</span><span class="p">:</span> <span class="n">csc_nr</span><span class="p">,</span>
-                    <span class="s1">&#39;samples&#39;</span><span class="p">:</span> <span class="n">ds_dict</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;samples&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;timestamps&#39;</span><span class="p">:</span> <span class="n">ds_dict</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timestamps&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;sample_rate&#39;</span><span class="p">:</span> <span class="n">ds_dict</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sample_rate&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="s1">&#39;brain_region&#39;</span><span class="p">:</span> <span class="n">region</span>
-                <span class="p">})</span>
-
-
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  .. csc </span><span class="si">{</span><span class="n">csc_nr</span><span class="si">}</span><span class="s2"> added.&quot;</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="c1"># populate_lfp_data_table()</span>
-<span class="c1"># LFPData()</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
-<span class="n">erd</span>
-</code></pre></div>
-<h3 id="electrodeunit"><code>ElectrodeUnit</code><a class="headerlink" href="#electrodeunit" title="Permanent link">&para;</a></h3>
-<p>The <code>ElectrodeUnit</code> </p>
-<div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ElectrodeUnit</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Imported</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ElectrodeData</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Imported</span><span class="p">):</span>
     <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    # Contains information about the implanted electrodes of each patient</span>
 <span class="s2">    -&gt; Patients                      # patient ID</span>
@@ -1463,6 +1467,7 @@ These tables contain the information regarding identity of label creators and th
 <span class="s2">    csc: int                         # number of CSC file</span>
 <span class="s2">    unit_type: enum(&#39;M&#39;, &#39;S&#39;, &#39;X&#39;)   # unit type: &#39;M&#39; for Multi Unit, &#39;S&#39; for Single Unit, &#39;X&#39;: undefined</span>
 <span class="s2">    unit_nr: int                     # number of unit, as there can be several multi units and single units in one CSC file</span>
+<span class="s2">    hemisphere: enum(&#39;L&#39;, &#39;R&#39;)       # hemisphere where unit was recorded</span>
 <span class="s2">    brain_region: varchar(8)         # brain region where unit was recorded</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 
@@ -1480,7 +1485,7 @@ These tables contain the information regarding identity of label creators and th
                 <span class="n">channel_names</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_channel_names</span><span class="p">(</span><span class="n">path_channels</span> <span class="o">/</span> <span class="s2">&quot;ChannelNames.txt&quot;</span><span class="p">)</span>
 
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">check</span> <span class="o">=</span> <span class="p">(</span><span class="n">ElectrodeUnit</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;csc_nr&quot;</span><span class="p">)</span>
+                    <span class="n">check</span> <span class="o">=</span> <span class="p">(</span><span class="n">ElectrodeData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;csc_nr&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">check</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_names</span><span class="p">):</span>
                         <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -1502,6 +1507,9 @@ These tables contain the information regarding identity of label creators and th
                     <span class="n">channel</span> <span class="o">=</span> <span class="n">channel_names</span><span class="p">[</span><span class="n">csc_index</span><span class="p">]</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    ... Channel name: </span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
+                    <span class="n">hemisphere</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">brain_region</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
                     <span class="n">unit_type</span><span class="p">,</span> <span class="n">unit_nr</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_unit_type_and_number</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    ... Unit type: </span><span class="si">{</span><span class="n">unit_type</span><span class="si">}</span><span class="s2">,  Within-channel unit number: </span><span class="si">{</span><span class="n">unit_nr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -1511,19 +1519,37 @@ These tables contain the information regarding identity of label creators and th
                                 <span class="s1">&#39;csc&#39;</span><span class="p">:</span> <span class="n">csc_nr</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> 
                                 <span class="s1">&#39;unit_type&#39;</span><span class="p">:</span> <span class="n">unit_type</span><span class="p">,</span> 
                                 <span class="s1">&#39;unit_nr&#39;</span><span class="p">:</span> <span class="n">unit_nr</span><span class="p">,</span>
-                                <span class="s1">&#39;brain_region&#39;</span><span class="p">:</span> <span class="n">channel</span><span class="p">},</span>
+                                <span class="s1">&#39;hemisphere&#39;</span><span class="p">:</span> <span class="n">hemisphere</span><span class="p">,</span>
+                                <span class="s1">&#39;brain_region&#39;</span><span class="p">:</span> <span class="n">brain_region</span><span class="p">},</span>
                                     <span class="n">skip_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">ElectrodeUnit</span><span class="o">.</span><span class="n">populate</span><span class="p">()</span>
-<span class="n">ElectrodeUnit</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">ElectrodeData</span><span class="o">.</span><span class="n">populate</span><span class="p">()</span>
+<span class="n">ElectrodeData</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
 <span class="n">erd</span>
 </code></pre></div>
 <h3 id="movieannotation"><code>MovieAnnotation</code><a class="headerlink" href="#movieannotation" title="Permanent link">&para;</a></h3>
-<p>The <code>MovieAnnotation</code> </p>
+<p>The <code>MovieAnnotation</code> table organizes and stores the stimulus feature annotation. </p>
+<p>All stimulus features are structured as <strong>start times, stop times, and content indicators (values)</strong>. The "character 1" label in section 1 of this tutorial would be broken down into the following vectors:</p>
+<div class="highlight"><pre><span></span><code>start_times = [0., 0.12, 0.16, 0.20]
+stop_times = [0.119, 0.159, 0.119, 0.32]
+values = [1, 0, 1, 0]
+</code></pre></div>
+<p>Character 1 has two continuous appearances in the "film" -- the entirety of the first scene and the beginning of the second scene. The appearance spans the pts 0.0 to 0.12. These times determine the first <code>start_times</code> and <code>stop_times</code> entries, and determines the entry given to the value indicator, <code>1</code>. </p>
+<p>The "outdoors" label has a single occurrence and would have the following break-down: 
+<div class="highlight"><pre><span></span><code>start_times = [0., 0.16, 0.28]
+stop_times = [0.159, 0.279, 0.32]
+values = [0, 1, 0]
+</code></pre></div></p>
+<p>Non-binary values, such as "scene id", would be represented as: 
+<div class="highlight"><pre><span></span><code>start_times = [0., 0.12, 0.28]
+stop_times = [0.119, 0.279, 0.32]
+values = [1, 2, 3]
+</code></pre></div></p>
+<p>Prior to table population, annoations are converted from indicator functions, $a = [a_1, a_2, \ldots, a_s]$, where $a_i \in {0, 1}$ indicates the status of frame $i$ in the movie for $s$ frames to the format detailed above using the module <code>epiphyte.processing_labels</code>. </p>
 <div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MovieAnnotation</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Imported</span><span class="p">):</span>
     <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -1586,14 +1612,14 @@ These tables contain the information regarding identity of label creators and th
 </code></pre></div>
 <h2 id="remaining-tables">Remaining tables<a class="headerlink" href="#remaining-tables" title="Permanent link">&para;</a></h2>
 <h3 id="spikedata"><code>SpikeData</code><a class="headerlink" href="#spikedata" title="Permanent link">&para;</a></h3>
-<p>The <code>SpikeData</code> </p>
+<p>The <code>SpikeData</code> table contains the spike train data for all units. </p>
 <div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpikeData</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Imported</span><span class="p">):</span>
     <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    # This table contains all spike times of all units of all patients in Neural Recording Time</span>
 <span class="s2">    # Each entry contains a vector of all spike times of one unit of one patient</span>
 <span class="s2">    -&gt; Sessions</span>
-<span class="s2">    -&gt; ElectrodeUnit                   # unit from which data was recorded</span>
+<span class="s2">    -&gt; ElectrodeData                   # unit from which data was recorded</span>
 <span class="s2">    ---</span>
 <span class="s2">    spike_times: longblob              # in case bin_size is not 0: number of spikes; otherwise: times of spikes (original data)</span>
 <span class="s2">    spike_amps: longblob               # amplitudes for each spike in spike_times</span>
@@ -1608,9 +1634,9 @@ These tables contain the information regarding identity of label creators and th
             <span class="k">for</span> <span class="n">i_sesh</span><span class="p">,</span> <span class="n">sesh</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pat_sessions</span><span class="p">):</span>
                 <span class="n">spike_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PATH_TO_DATA</span><span class="p">,</span> <span class="s2">&quot;patient_data&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;session_</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;spiking_data&quot;</span><span class="p">)</span>
                 <span class="n">spike_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spike_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
-                <span class="n">unit_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">ElectrodeUnit</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;unit_id&quot;</span><span class="p">)</span>
+                <span class="n">unit_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">ElectrodeData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;unit_id&quot;</span><span class="p">)</span>
 
-                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">spike_files</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">unit_ids</span><span class="p">),</span> <span class="s2">&quot;Number of units in ElectrodeUnits doesn&#39;t match number of spiking files.&quot;</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">spike_files</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">unit_ids</span><span class="p">),</span> <span class="s2">&quot;Number of units in ElectrodeData doesn&#39;t match number of spiking files.&quot;</span>
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">check</span> <span class="o">=</span> <span class="p">(</span><span class="n">SpikeData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;unit_id&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -1629,7 +1655,7 @@ These tables contain the information regarding identity of label creators and th
                     <span class="n">csc_nr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">csc_nr</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
                     <span class="n">unit_type</span><span class="p">,</span> <span class="n">unit_nr</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_unit_type_and_number</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
 
-                    <span class="n">unit_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">ElectrodeUnit</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span> 
+                    <span class="n">unit_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">ElectrodeData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span> 
                             <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;csc=</span><span class="si">{</span><span class="n">csc_nr</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;unit_nr=</span><span class="si">{</span><span class="n">unit_nr</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;unit_type=&#39;</span><span class="si">{</span><span class="n">unit_type</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;unit_id&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
                     <span class="n">spikes_file</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1653,8 +1679,84 @@ These tables contain the information regarding identity of label creators and th
 <div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
 <span class="n">erd</span>
 </code></pre></div>
+<h3 id="lfpdata"><code>LFPData</code><a class="headerlink" href="#lfpdata" title="Permanent link">&para;</a></h3>
+<p>The <code>LFPData</code> table contains the local field potential data, samples and timestamps. </p>
+<p>Since LFP data is usually quite large, the table population routine is more likely to experience disruptions. To mitigate data loss during the upload procedure, the population function is manually defined since DataJoint doesn't always handle partial upload calls. </p>
+<div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LFPData</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Manual</span><span class="p">):</span>
+    <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    # local field potential data, by channel. </span>
+<span class="s2">    -&gt; Patients</span>
+<span class="s2">    -&gt; Sessions</span>
+<span class="s2">    csc_nr: int</span>
+<span class="s2">    ---</span>
+<span class="s2">    samples: longblob                # samples, in microvolts</span>
+<span class="s2">    timestamps: longblob             # timestamps corresponding to each sample, in ms</span>
+<span class="s2">    sample_rate: int                 # sample rate from the recording device</span>
+<span class="s2">    brain_region: varchar(8)         # brain region where unit was recorded</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">populate_lfp_data_table</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterates over the channel files stored in config.PATH_TO_DATA/lfp_data/</span>
+<span class="sd">    and adds each channel to the table. </span>
+
+<span class="sd">    Ignores channels already uploaded.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">patient_ids</span><span class="p">,</span> <span class="n">session_nrs</span> <span class="o">=</span> <span class="n">MovieSession</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;session_nr&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i_pat</span><span class="p">,</span> <span class="n">pat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patient_ids</span><span class="p">):</span>
+        <span class="n">pat_sessions</span> <span class="o">=</span> <span class="n">session_nrs</span><span class="p">[</span><span class="n">i_pat</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i_sesh</span><span class="p">,</span> <span class="n">sesh</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="n">pat_sessions</span><span class="p">]):</span>
+
+            <span class="n">path_ds_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PATH_TO_PATIENT_DATA</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;session_</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;lfp_data&quot;</span><span class="p">)</span>
+            <span class="n">lfp_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">path_ds_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;CSC*&quot;</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">check</span> <span class="o">=</span> <span class="p">(</span><span class="n">LFPData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;csc_nr&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">check</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">lfp_files</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Patient </span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2"> session </span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2"> already added.&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Adding patient </span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2"> session </span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2"> to database...&quot;</span><span class="p">)</span>
+                    <span class="k">pass</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Adding patient </span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2"> session </span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2"> to database...&quot;</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+            <span class="n">path_channels</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PATH_TO_PATIENT_DATA</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pat</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;session_</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;ChannelNames.txt&quot;</span><span class="p">)</span>
+            <span class="n">channel_names</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">get_channel_names</span><span class="p">(</span><span class="n">path_channels</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ds_file</span> <span class="ow">in</span> <span class="n">path_ds_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+
+                <span class="n">csc_nr</span> <span class="o">=</span> <span class="n">ds_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">:]</span>
+                <span class="n">region</span> <span class="o">=</span> <span class="n">channel_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">csc_nr</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  .. adding csc </span><span class="si">{</span><span class="n">csc_nr</span><span class="si">}</span><span class="s2">..&quot;</span><span class="p">)</span>
+                <span class="n">ds_dict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ds_file</span><span class="p">,</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">LFPData</span><span class="o">.</span><span class="n">insert1</span><span class="p">({</span>
+                    <span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">pat</span><span class="p">,</span>
+                    <span class="s1">&#39;session_nr&#39;</span><span class="p">:</span> <span class="n">sesh</span><span class="p">,</span>
+                    <span class="s1">&#39;csc_nr&#39;</span><span class="p">:</span> <span class="n">csc_nr</span><span class="p">,</span>
+                    <span class="s1">&#39;samples&#39;</span><span class="p">:</span> <span class="n">ds_dict</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;samples&quot;</span><span class="p">),</span>
+                    <span class="s1">&#39;timestamps&#39;</span><span class="p">:</span> <span class="n">ds_dict</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ts&quot;</span><span class="p">),</span>
+                    <span class="s1">&#39;sample_rate&#39;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">,</span>
+                    <span class="s1">&#39;brain_region&#39;</span><span class="p">:</span> <span class="n">region</span>
+                <span class="p">})</span>
+
+
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  .. csc </span><span class="si">{</span><span class="n">csc_nr</span><span class="si">}</span><span class="s2"> added.&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">populate_lfp_data_table</span><span class="p">()</span>
+<span class="n">LFPData</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
+<span class="n">erd</span>
+</code></pre></div>
 <h3 id="patientalignedmovieannotations"><code>PatientAlignedMovieAnnotations</code><a class="headerlink" href="#patientalignedmovieannotations" title="Permanent link">&para;</a></h3>
-<p>The <code>PatientAlignedMovieAnnotations</code> </p>
+<p>Depending on the experiment conditions and the duration of the stimulus, there may be interruptions to the stimulus presentation. In the case of a movie stimulus shown to intracranial patients, there could be clinical interruptions such as the administration of medication or even a seizure, causing a non-linear relationship between the presentation timestamps and the display timestamps/neural recording system time. Despite these possible imperfections, the recorded data may still be useful. In this case, it's necessary to align the annotations to the particular movie playback experienced by the experiment participant. </p>
+<p>The <code>PatientAlignedMovieAnnotations</code> pulls from the <code>MovieAnnotations</code> table and the <code>Sessions</code> table and automatically aligns all annotations to each patient's own watchlog. </p>
 <div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PatientAlignedMovieAnnotation</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Computed</span><span class="p">):</span>
     <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -1701,7 +1803,7 @@ These tables contain the information regarding identity of label creators and th
                     <span class="n">neural_rectime</span> <span class="o">=</span> <span class="p">(</span><span class="n">MovieSession</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;neural_recording_time&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
                     <span class="n">default_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">MovieAnnotation</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;annotator_id=&#39;</span><span class="si">{</span><span class="n">annotator_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;label_name=&#39;</span><span class="si">{</span><span class="n">label_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;indicator_function&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">patient_aligned_label</span> <span class="o">=</span> <span class="n">match_label_to_patient_pts_time</span><span class="p">(</span><span class="n">default_label</span><span class="p">,</span> <span class="n">patient_pts</span><span class="p">)</span>
+                    <span class="n">patient_aligned_label</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">match_label_to_patient_pts_time</span><span class="p">(</span><span class="n">default_label</span><span class="p">,</span> <span class="n">patient_pts</span><span class="p">)</span>
                     <span class="n">values</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">stops</span> <span class="o">=</span> <span class="n">create_vectors_from_time_points</span><span class="o">.</span><span class="n">get_start_stop_times_from_label</span><span class="p">(</span><span class="n">neural_rectime</span><span class="p">,</span> 
                                                                                             <span class="n">patient_aligned_label</span><span class="p">)</span>
 
@@ -1723,7 +1825,7 @@ These tables contain the information regarding identity of label creators and th
 <span class="n">erd</span>
 </code></pre></div>
 <h3 id="movieskips"><code>MovieSkips</code><a class="headerlink" href="#movieskips" title="Permanent link">&para;</a></h3>
-<p>The <code>MovieSkips</code> </p>
+<p>The <code>MovieSkips</code> contains annotation-formatted vectors tracking any and all moments in which movie playback was discontinuous, i.e. a participant skipped through a section. </p>
 <div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MovieSkips</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Computed</span><span class="p">):</span>
     <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -1800,7 +1902,7 @@ These tables contain the information regarding identity of label creators and th
 <span class="n">erd</span>
 </code></pre></div>
 <h3 id="moviepauses"><code>MoviePauses</code><a class="headerlink" href="#moviepauses" title="Permanent link">&para;</a></h3>
-<p>The <code>MoviePauses</code> </p>
+<p>The <code>MoviePauses</code> contains annotation-formatted vectors tracking any and all moments in which movie playback was paused.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@epi_schema</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MoviePauses</span><span class="p">(</span><span class="n">dj</span><span class="o">.</span><span class="n">Computed</span><span class="p">):</span>
     <span class="n">definition</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -1866,8 +1968,8 @@ These tables contain the information regarding identity of label creators and th
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">insert1</span><span class="p">({</span><span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">pat</span><span class="p">,</span> 
                             <span class="s1">&#39;session_nr&#39;</span><span class="p">:</span> <span class="n">sesh</span><span class="p">,</span>
-                            <span class="s1">&#39;start_times&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">starts</span><span class="p">),</span> 
-                            <span class="s1">&#39;stop_times&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">stops</span><span class="p">)},</span> <span class="n">skip_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="s1">&#39;start_times&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> 
+                            <span class="s1">&#39;stop_times&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">stop</span><span class="p">)},</span> <span class="n">skip_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">MoviePauses</span><span class="o">.</span><span class="n">populate</span><span class="p">()</span>
 <span class="n">MoviePauses</span><span class="p">()</span>
@@ -1875,6 +1977,7 @@ These tables contain the information regarding identity of label creators and th
 <div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
 <span class="n">erd</span>
 </code></pre></div>
+<p>Continue to <em><a href="../6.%20Develop%20an%20analysis%20workflow/">Develop an analysis workflow</a></em>.</p>
 
 
 

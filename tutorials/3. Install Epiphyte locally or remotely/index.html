@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/7.%20%28Optional%29%20Run%20regular%20backups/">
+        <link rel="canonical" href="https://mackelab.github.io/Epiphyte/tutorials/3.%20Install%20Epiphyte%20locally%20or%20remotely/">
       
       
-        <link rel="prev" href="../6.%20Compile%20the%20codebase/">
+        <link rel="prev" href="../2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/">
       
       
-        <link rel="next" href="../8_Add_new_table/">
+        <link rel="next" href="../4.%20Configure%20and%20connect%20to%20a%20database/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Run regular backups (optional) - Epiphyte</title>
+        <title>Install Epiphyte - Epiphyte</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-run-regular-backups" class="md-skip">
+        <a href="#install-epiphyte-locally-or-remotely" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Run regular backups (optional)
+              Install Epiphyte
             
           </span>
         </div>
@@ -331,12 +331,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../Launch%20the%20MySQL%20database%20locally/" class="md-nav__link">
+      <a href="../1a.%20Launch%20a%20MySQL%20database%20locally/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database locally
+    Launch a MySQL database locally
     
   </span>
   
@@ -354,12 +354,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../1.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
+      <a href="../1b.%20Launch%20the%20MySQL%20database%20on%20a%20virtual%20machine/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Launch the MySQL database on a virtual machine
+    Launch a MySQL database on a virtual machine
     
   </span>
   
@@ -377,104 +377,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../2.%20%28Optional%29%20Add%20MinIO%20to%20an%20existing%20virtual%20machine/" class="md-nav__link">
+      <a href="../2.%20%28Optional%29%20Attach%20a%20storage%20back-end%20to%20an%20existing%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Add MinIO to an existing VM (optional)
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../3.%20Install%20Epiphyte/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Install Epiphyte
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../4.%20Configure%20and%20connect%20to%20the%20database/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Configure and connect to the database
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../5.%20Design%20and%20implement%20the%20database/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Design and implement the database
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../6.%20Compile%20the%20codebase/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Compile the codebase
+    Attach a storage back-end to an existing database (optional)
     
   </span>
   
@@ -506,7 +414,7 @@
   
   
   <span class="md-ellipsis">
-    Run regular backups (optional)
+    Install Epiphyte
     
   </span>
   
@@ -519,7 +427,7 @@
   
   
   <span class="md-ellipsis">
-    Run regular backups (optional)
+    Install Epiphyte
     
   </span>
   
@@ -542,6 +450,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       Requirements:
@@ -551,27 +468,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-create-a-config-file-with-your-mysql-credentials" class="md-nav__link">
+  <a href="#contents" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Create a config file with your MySQL credentials
+      Contents:
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-write-your-backup-script" class="md-nav__link">
+  <a href="#install-epiphyte-by-cloning-the-github-repository" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Write your backup script
+      Install epiphyte by cloning the GitHub repository
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-schedule-your-backups-with-a-cron-job" class="md-nav__link">
+  <a href="#install-epiphyte-via-pip" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Schedule your backups with a cron job
+      Install epiphyte via pip
     </span>
   </a>
   
@@ -593,12 +510,104 @@
   
   
     <li class="md-nav__item">
-      <a href="../8_Add_new_table/" class="md-nav__link">
+      <a href="../4.%20Configure%20and%20connect%20to%20a%20database/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Add a table to an existing database
+    Configure and connect to a database
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5.%20Design%20and%20implement%20a%20database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Design and implement a database
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6.%20Develop%20an%20analysis%20workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Develop an analysis workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../7.%20Enable%20access%20for%20other%20users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enable access for other users
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../8.%20Run%20regular%20backups%20%28optional%29/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run regular backups (optional)
     
   </span>
   
@@ -901,6 +910,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goal:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       Requirements:
@@ -910,27 +928,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-create-a-config-file-with-your-mysql-credentials" class="md-nav__link">
+  <a href="#contents" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Create a config file with your MySQL credentials
+      Contents:
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-write-your-backup-script" class="md-nav__link">
+  <a href="#install-epiphyte-by-cloning-the-github-repository" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Write your backup script
+      Install epiphyte by cloning the GitHub repository
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-schedule-your-backups-with-a-cron-job" class="md-nav__link">
+  <a href="#install-epiphyte-via-pip" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Schedule your backups with a cron job
+      Install epiphyte via pip
     </span>
   </a>
   
@@ -952,95 +970,64 @@
 
 
 
-<h1 id="tutorial-run-regular-backups">Tutorial: Run regular backups<a class="headerlink" href="#tutorial-run-regular-backups" title="Permanent link">&para;</a></h1>
+<h1 id="install-epiphyte-locally-or-remotely">Install Epiphyte locally or remotely<a class="headerlink" href="#install-epiphyte-locally-or-remotely" title="Permanent link">&para;</a></h1>
+<h3 id="goal"><strong>Goal</strong>:<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h3>
+<p>Install and configure the <code>epiphyte</code> package</p>
 <h3 id="requirements"><strong>Requirements:</strong><a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>data stored in your database (and/or MinIO). </li>
+<li>either a configured VM (tutorial 1) or local machine running Linux</li>
+<li>400 MB free disk space</li>
+<li>Python 3 and Anaconda (or Miniconda)</li>
+<li>Note: if using Windows, VS Code is recommended</li>
 </ul>
-<p>We call this tutorial "optional" because the methods described here are optional—there are many different ways you can configure regular backups, and at this point your database should be fully functional, which was the main goal of this tutorial series. </p>
-<p>That being said, <strong>you should consider regular backups an essential part of having a database!</strong></p>
+<h3 id="contents"><strong>Contents:</strong><a class="headerlink" href="#contents" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Install <code>epiphyte</code> by cloning the GitHub repository</li>
+<li>Install <code>epiphyte</code> via <code>pip</code></li>
+</ul>
+<p>Once your MySQL database (and optional additional storage) is configured, you're ready to install and set up Epiphyte!</p>
+<p>The database can be defined and structured remotely from a client computer, separate from where the database is hosted (e.g. on a remote server or virtual machine). This means you can install and configure Epiphyte on a separate computer (e.g. a workstation or personal laptop), while gaining the power and storage capacity of an external server. A schematic of this arrangement is given below:</p>
+<p><img alt="Infrastructure diagram" class="img-center w-600" src="../../reference/infrastructure_diagram.png" /></p>
+<p>Here, the VM (configured by you, the <code>dev</code> user) hosts the database, while the codebase controls and populates it with data. Once you install and configure Epiphyte, it's possible to directly interact with the remotely-hosted database from your PC or workstation. </p>
+<p>This tutorial explains how to install and set up Epiphyte on your PC, workstation, or whichever machine is used for interacting with the data. </p>
+<p>There are two ways to install Epiphyte: either via <code>pip</code> or by cloning the GitHub repository. We'll cover both methods, but if you already cloned the repo and are going through the tutorials locally, skip to that section. </p>
 <hr />
-<h2 id="1-create-a-config-file-with-your-mysql-credentials">1. Create a config file with your MySQL credentials<a class="headerlink" href="#1-create-a-config-file-with-your-mysql-credentials" title="Permanent link">&para;</a></h2>
-<p>You shouldn't save your MySQL credentials directly in your backup script, as this can pose a security risk. Instead, we'll make a separate config file to save your credentials, and then restrict access to the root user only. </p>
-<p>Create a config file called <code>.my.cnf</code>:</p>
+<h2 id="install-epiphyte-by-cloning-the-github-repository">Install <code>epiphyte</code> by cloning the GitHub repository<a class="headerlink" href="#install-epiphyte-by-cloning-the-github-repository" title="Permanent link">&para;</a></h2>
+<p>Clone <a href="https://github.com/mackelab/epiphyte">the repository</a>, and change your directory to the repository: </p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-touch .my.cnf
-sudo nano .my.cnf
+git clone https://github.com/mackelab/epiphyte.git
+cd epiphyte
 </pre>
 
-<p>Now add your data to that file: </p>
+<p>Create a new <code>conda</code> environment suitable for the Epiphyte requirements:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-bash
-# needed for dump
-[mysqldump]
-user = root
-password = &lt;password&gt;
-
-# needed for restore
-[mysql]
-user = root
-password = &lt;password&gt;
+conda create --name epiphyte python=3.9.18 ipython
 </pre>
 
-<p>Be sure to change the file's permissions to restrict access to the root user only:</p>
+<p>Activate the <code>conda</code> environment and install the dependencies:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-chmod 600 .my.cnf
+conda activate epiphyte
+pip install -e .
 </pre>
 
-<h2 id="2-write-your-backup-script">2. Write your backup script<a class="headerlink" href="#2-write-your-backup-script" title="Permanent link">&para;</a></h2>
-<p>Create a shell script <code>backup.sh</code>:</p>
+<p>Verify the installation:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-touch backup.sh
-sudo nano backup.sh
+conda list
 </pre>
 
-<p>Add the following lines to your script. <strong>Be sure to update the paths accordingly</strong> (for finding your config file, and where you want to send the backup to). Ideally you should send your backups to a separate piece of hardware than where your database is running, or store them in the cloud.</p>
+<h2 id="install-epiphyte-via-pip">Install <code>epiphyte</code> via <code>pip</code><a class="headerlink" href="#install-epiphyte-via-pip" title="Permanent link">&para;</a></h2>
+<p>Create a new <code>conda</code> environment suitable for the Epiphyte requirements:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-#!/bin/bash
-
-# Update paths accordingly in the following lines:
-# --defaults-extra-file=~/path/to/config_file
-# > ~/destination/file/for/backups
-echo "$(date -u +\%H:\%M) Dumping database..."
-mysqldump --defaults-extra-file=~/path/to/config_file/.my.cnf -h 127.0.0.1 -u root --column-statistics=0 --all-databases --skip-triggers > ~/destiantion/file/for/backups/mysql_backup_$(date -u +\%FT\%H\%MZ).sql
-
-# Removes backups older than 30 days
-echo "$(date -u +\%H:\%M) Deleting old dumps..."
-find ~/backups/mysql/* -mtime +30 -exec rm {} \;
-
-echo "MySQL backup is finished!"
+conda create --name epiphyte python=3.9.18 ipython
 </pre>
 
-<p>If you're storing data on MinIO as well, you can add the following lines to backup your MinIO data using <code>rsync</code> (sample file paths are given, be sure to again <strong>update file paths accordingly</strong>):</p>
+<p>Activate the conda environment and install Epiphyte:</p>
 <pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-# Syncs everything from bulk-minio to backup
-# -q: does syncronizing quietly (only error outputs will be shown)
-echo "$(date -u +\%H:\%M) Archiving MinIO..."
-rsync -a ~/minio ~/backups/minio/minio_backup_$(date -u +\%FT\%H\%MZ) -q
-
-# Removes backups older than 30 days
-echo "$(date -u +\%H:\%M) Deleting old archieves..."
-find ~/backups/minio/* -maxdepth 1  -mtime +30 -exec rm -r "{}" \;
-
-echo "MinIO backup is finished!"
+conda activate epiphyte
+pip install epiphyte
 </pre>
 
-<h2 id="3-schedule-your-backups-with-a-cron-job">3. Schedule your backups with a cron job<a class="headerlink" href="#3-schedule-your-backups-with-a-cron-job" title="Permanent link">&para;</a></h2>
-<p>A "cron job" is a scheduled task used in Unix and Unix-like operating systems to automate the execution of scripts at specified times or intervals. We'll set up a cron job to run backups at 1 a.m. server time.</p>
-<p>Edit a new crontab:</p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-crontab -e
-</pre>
-
-<p>Add the following lines to the crontab and <strong>update the path to your backup script accordingly</strong>: </p>
-<pre style="background-color: #1E1E1E; color: white; padding: 10px; border-radius: 5px; border-left: 5px solid #007bff;">
-bash
-0 1 * * * /bin/bash ~/path/to/backup/script/backup.sh >/dev/null 2>&1
-</pre>
-
-<p>Whenever a crontab has been edited successfully <code>crontab: installing new crontab</code> will pop up.</p>
-<p>You can check the status of your crontab via <code>crontab -l</code>.</p>
-<p>Your backups should now be good to go!</p>
+<p>Continue to <em><a href="../4.%20Configure%20and%20connect%20to%20a%20database/">Configure and connect to a database</a></em>.</p>
 
 
 

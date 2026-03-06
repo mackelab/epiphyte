@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="560pt" height="184pt" viewBox="0.00 0.00 559.59 183.68">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 179.68)">
+<polygon fill="white" stroke="none" points="-4,4 -4,-179.68 555.59,-179.68 555.59,4 -4,4"/>
+<!-- Annotator -->
+<g id="node1" class="node">
+<title>Annotator</title>
+<g id="a_node1"><a xlink:title="annotator_id         ------------------------------first_name           last_name            ">
+<polygon fill="#000000" fill-opacity="0.125490" stroke="none" points="81.38,-175.68 23.38,-175.68 23.38,-141.12 81.38,-141.12 81.38,-175.68"/>
+<text text-anchor="start" x="31.38" y="-155.9" font-family="arial" text-decoration="underline" font-size="10.00">Annotator</text>
+</a>
+</g>
+</g>
+<!-- MovieAnnotation -->
+<g id="node9" class="node">
+<title>MovieAnnotation</title>
+<g id="a_node9"><a xlink:title="→ Annotator→ LabelNameannotation_date      ------------------------------values               start_times          stop_times           category             indicator_function   ">
+<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="92.38" cy="-87.84" rx="69.26" ry="17.28"/>
+<text text-anchor="start" x="47.38" y="-84.56" font-family="arial" text-decoration="underline" font-size="12.00" fill="#00007f" fill-opacity="0.627451">MovieAnnotation</text>
+</a>
+</g>
+</g>
+<!-- Annotator&#45;&gt;MovieAnnotation -->
+<g id="edge1" class="edge">
+<title>Annotator-&gt;MovieAnnotation</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M61.85,-141.15C68.14,-130.38 76.36,-116.29 82.69,-105.45"/>
+</g>
+<!-- LabelName -->
+<g id="node2" class="node">
+<title>LabelName</title>
+<g id="a_node2"><a xlink:title="label_name           ">
+<polygon fill="#000000" fill-opacity="0.125490" stroke="none" points="165.12,-175.68 99.62,-175.68 99.62,-141.12 165.12,-141.12 165.12,-175.68"/>
+<text text-anchor="start" x="107.62" y="-155.9" font-family="arial" text-decoration="underline" font-size="10.00">LabelName</text>
+</a>
+</g>
+</g>
+<!-- LabelName&#45;&gt;MovieAnnotation -->
+<g id="edge2" class="edge">
+<title>LabelName-&gt;MovieAnnotation</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M122.9,-141.15C116.61,-130.38 108.39,-116.29 102.06,-105.45"/>
+</g>
+<!-- Patients -->
+<g id="node3" class="node">
+<title>Patients</title>
+<g id="a_node3"><a xlink:title="patient_id           ------------------------------age                  gender               year                 ">
+<polygon fill="#000000" fill-opacity="0.125490" stroke="none" points="411.38,-175.68 359.38,-175.68 359.38,-141.12 411.38,-141.12 411.38,-175.68"/>
+<text text-anchor="start" x="367.38" y="-155.9" font-family="arial" text-decoration="underline" font-size="10.00">Patients</text>
+</a>
+</g>
+</g>
+<!-- ElectrodeData -->
+<g id="node8" class="node">
+<title>ElectrodeData</title>
+<g id="a_node8"><a xlink:title="→ Patients→ Sessionsunit_id              ------------------------------csc                  unit_type            unit_nr              hemisphere           brain_region         ">
+<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="385.38" cy="-87.84" rx="60.44" ry="17.28"/>
+<text text-anchor="start" x="347.12" y="-84.56" font-family="arial" text-decoration="underline" font-size="12.00" fill="#00007f" fill-opacity="0.627451">ElectrodeData</text>
+</a>
+</g>
+</g>
+<!-- Patients&#45;&gt;ElectrodeData -->
+<g id="edge3" class="edge">
+<title>Patients-&gt;ElectrodeData</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M385.38,-141.15C385.38,-130.38 385.38,-116.29 385.38,-105.45"/>
+</g>
+<!-- MovieSession -->
+<g id="node10" class="node">
+<title>MovieSession</title>
+<g id="a_node10"><a xlink:title="→ Patients→ Sessions------------------------------date                 time                 pts                  dts                  neural_recording_time channel_names        ">
+<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="247.38" cy="-87.84" rx="59.95" ry="17.28"/>
+<text text-anchor="middle" x="247.38" y="-83.56" font-family="arial" font-size="12.00" fill="#00007f" fill-opacity="0.627451">MovieSession</text>
+</a>
+</g>
+</g>
+<!-- Patients&#45;&gt;MovieSession -->
+<g id="edge4" class="edge">
+<title>Patients-&gt;MovieSession</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M359.42,-144.5C335.84,-132.79 301.09,-115.53 276.56,-103.34"/>
+</g>
+<!-- LFPData -->
+<g id="node12" class="node">
+<title>LFPData</title>
+<g id="a_node12"><a xlink:title="→ Patients→ Sessionscsc_nr               ------------------------------samples              timestamps           sample_rate          brain_region         ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="527.38,-105.12 463.38,-105.12 463.38,-70.56 527.38,-70.56 527.38,-105.12"/>
+<text text-anchor="start" x="471.38" y="-84.56" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">LFPData</text>
+</a>
+</g>
+</g>
+<!-- Patients&#45;&gt;LFPData -->
+<g id="edge5" class="edge">
+<title>Patients-&gt;LFPData</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M411.17,-141.33C428.44,-130.56 451.12,-116.42 468.6,-105.53"/>
+</g>
+<!-- Sessions -->
+<g id="node4" class="node">
+<title>Sessions</title>
+<g id="a_node4"><a xlink:title="patient_id           session_nr           ------------------------------session_type         ">
+<polygon fill="#000000" fill-opacity="0.125490" stroke="none" points="504.62,-175.68 448.12,-175.68 448.12,-141.12 504.62,-141.12 504.62,-175.68"/>
+<text text-anchor="start" x="456.12" y="-155.9" font-family="arial" text-decoration="underline" font-size="10.00">Sessions</text>
+</a>
+</g>
+</g>
+<!-- Sessions&#45;&gt;ElectrodeData -->
+<g id="edge6" class="edge">
+<title>Sessions-&gt;ElectrodeData</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M454.81,-141.15C440.09,-130.06 420.71,-115.46 406.16,-104.5"/>
+</g>
+<!-- Sessions&#45;&gt;MovieSession -->
+<g id="edge7" class="edge">
+<title>Sessions-&gt;MovieSession</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M448.3,-148.99C408.05,-136.94 333.74,-114.7 287.64,-100.9"/>
+</g>
+<!-- SpikeData -->
+<g id="node11" class="node">
+<title>SpikeData</title>
+<g id="a_node11"><a xlink:title="→ Sessions→ ElectrodeData------------------------------spike_times          spike_amps           ">
+<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="504.38" cy="-17.28" rx="47.21" ry="17.28"/>
+<text text-anchor="middle" x="504.38" y="-13.01" font-family="arial" font-size="12.00" fill="#00007f" fill-opacity="0.627451">SpikeData</text>
+</a>
+</g>
+</g>
+<!-- Sessions&#45;&gt;SpikeData -->
+<g id="edge8" class="edge">
+<title>Sessions-&gt;SpikeData</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M504,-141.14C516.35,-132.23 529.62,-119.96 536.38,-105.12 547.35,-80.99 530.89,-51.89 517.79,-34.25"/>
+</g>
+<!-- Sessions&#45;&gt;LFPData -->
+<g id="edge9" class="edge">
+<title>Sessions-&gt;LFPData</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M480.88,-141.15C483.86,-130.38 487.77,-116.29 490.77,-105.45"/>
+</g>
+<!-- MoviePauses -->
+<g id="node5" class="node">
+<title>MoviePauses</title>
+<g id="a_node5"><a xlink:title="→ MovieSession------------------------------start_times          stop_times           ">
+<ellipse fill="#ff0000" fill-opacity="0.125490" stroke="#ff0000" stroke-opacity="0.125490" cx="247.38" cy="-17.28" rx="12.96" ry="12.96"/>
+<text text-anchor="middle" x="247.38" y="-13.01" font-family="arial" font-size="12.00" fill="#7f0000" fill-opacity="0.627451">MoviePauses</text>
+</a>
+</g>
+</g>
+<!-- MovieSkips -->
+<g id="node6" class="node">
+<title>MovieSkips</title>
+<g id="a_node6"><a xlink:title="→ MovieSession------------------------------values               start_times          stop_times           ">
+<ellipse fill="#ff0000" fill-opacity="0.125490" stroke="#ff0000" stroke-opacity="0.125490" cx="349.38" cy="-17.28" rx="12.96" ry="12.96"/>
+<text text-anchor="middle" x="349.38" y="-13.01" font-family="arial" font-size="12.00" fill="#7f0000" fill-opacity="0.627451">MovieSkips</text>
+</a>
+</g>
+</g>
+<!-- PatientAlignedMovieAnnotation -->
+<g id="node7" class="node">
+<title>PatientAlignedMovieAnnotation</title>
+<g id="a_node7"><a xlink:title="→ MovieSession→ MovieAnnotation------------------------------label_in_patient_time values               start_times          stop_times           ">
+<ellipse fill="#ff0000" fill-opacity="0.125490" stroke="#ff0000" stroke-opacity="0.125490" cx="92.38" cy="-17.28" rx="12.96" ry="12.96"/>
+<text text-anchor="middle" x="92.38" y="-13.01" font-family="arial" font-size="12.00" fill="#7f0000" fill-opacity="0.627451">PatientAlignedMovieAnnotation</text>
+</a>
+</g>
+</g>
+<!-- ElectrodeData&#45;&gt;SpikeData -->
+<g id="edge10" class="edge">
+<title>ElectrodeData-&gt;SpikeData</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M411.49,-71.79C431.88,-60.05 460,-43.85 479.94,-32.36"/>
+</g>
+<!-- MovieAnnotation&#45;&gt;PatientAlignedMovieAnnotation -->
+<g id="edge11" class="edge">
+<title>MovieAnnotation-&gt;PatientAlignedMovieAnnotation</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M92.38,-70.24C92.38,-57.88 92.38,-41.29 92.38,-30.21"/>
+</g>
+<!-- MovieSession&#45;&gt;MoviePauses -->
+<g id="edge12" class="edge">
+<title>MovieSession-&gt;MoviePauses</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M247.38,-70.24C247.38,-57.88 247.38,-41.29 247.38,-30.21"/>
+</g>
+<!-- MovieSession&#45;&gt;MovieSkips -->
+<g id="edge13" class="edge">
+<title>MovieSession-&gt;MovieSkips</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M270.27,-71.45C291.88,-56.93 323.29,-35.81 339.25,-25.08"/>
+</g>
+<!-- MovieSession&#45;&gt;PatientAlignedMovieAnnotation -->
+<g id="edge14" class="edge">
+<title>MovieSession-&gt;PatientAlignedMovieAnnotation</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M215.63,-72.8C180.92,-57.44 127.11,-33.64 103.79,-23.33"/>
+</g>
+</g>
+</svg>
