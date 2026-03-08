@@ -110,21 +110,14 @@ venv.bak/
 
 .idea
 
-keylogger/Untitled.ipynb
-Untitled.ipynb
-*/Untitled*
-
 *.swp
 
 
 *.svg
 */*.png
-movie_annotation/plots/
 *.html
 
 ign/
 
 
 data_base/mysql-docker/data
-
-*.pdf
