@@ -103,7 +103,7 @@ With the development of DataJoint [@DataJoint], relational databases have become
 
 # State of the field 
 
-Naturalistic neuroscience is expanding as a field. However, codebases and tools for analyzing experiments utilizing naturalistic and continuous stimuli generally take the form of code releases alongside a publication [@wang2023brainbert; @keles2024multimodal]. `epiphyte` was built as a standalone framework for structuring complex stimuli, namely movies, to support the analysis of large neural datasets by providing experimenters with an end-to-end worked solution and tools for relating the content of a complex, continuous stimulus with concurrently recorded spiking and field potential activity.
+Naturalistic neuroscience is expanding as a field. However, codebases and tools for analyzing experiments utilizing naturalistic and continuous stimuli generally take the form of code released alongside a publication [@wang2023brainbert; @keles2024multimodal]. `epiphyte` was built as a standalone framework for structuring complex stimuli, namely movies, to support the analysis of large neural datasets by providing experimenters with an end-to-end worked solution and tools for relating the content of a complex, continuous stimulus with concurrently recorded spiking and field potential activity.
 
 # Software design
 
@@ -113,7 +113,7 @@ Naturalistic neuroscience is expanding as a field. However, codebases and tools 
 - `preprocessing`: utilities for processing neural and stimulus data,
 - `data`: generators for creating mock neural and stimulus data.
 
-Beyond the dependencies common to analysis in Python, `epiphyte` is built using DataJoint, a package that enables implementing and querying a MySQL database, and optionally, MinIO, which stores large data objects (such as field potential recordings) in a queryable format.
+Beyond the common Python data science dependencies, `epiphyte` is built using DataJoint, a package that enables implementing and querying a MySQL database, and optionally, MinIO, which stores large data objects (such as field potential recordings) in a queryable format.
 
 The main design contribution is the structuring and organization of stimulus, neural, and experiment-related meta-data. Movies and other naturalistic and continuous stimulus can be difficult to align with concurrently recorded neural data. To allow for flexible use of stimulus annotations, all stimulus-related items are structured as onset and offset times and the associated content values, and all subsequent analysis interactions are built around this structure, such as binning by movie frame (`epiphyte.data_preprocessing.binning`). Since experiment set-ups and their constituent data formats can vary between labs, we provide methods for generating a full mock dataset so users can quickly implement and use the framework without adjusting to their specific data formats. 
 
