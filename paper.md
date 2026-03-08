@@ -39,8 +39,7 @@ authors:
 - name: Stefanie Liebe
   orcid: 
   equal-contrib: false
-  affiliation:
-affiliations:
+  affiliation: "2, 7"
 - name: Laura Leal-Taixé
   orcid: 
   equal-contrib: false
@@ -66,6 +65,8 @@ affiliations:
     index: 5
   - name: Max Planck Institute for Intelligent Systems, Tübingen, Germany
     index: 6
+  - name: Department of Epileptology and Neurology, University Hospital Tübingen, Tübingen, Germany
+    index: 7
 date: 8 March 2026
 bibliography: paper.bib
 ---
