@@ -8,6 +8,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
         with:
