@@ -99,11 +99,11 @@ Dependencies include:
 
 With the development of DataJoint [@DataJoint], relational databases have become more accessible to neuroscientists. However, designing, deploying, and maintaining a database ecosystem for experimental data remains technically challenging and time-consuming. While many research projects already rely on relational backends (see [here](https://docs.datajoint.com/projects/publications/)), few provide domain-specific, worked examples that can be readily adapted to new datasets. 
 
-`epiphyte` addresses this gap by offering a standalone, fully functional database tailored for analysis of neural activity recorded during a concurrent naturalistic stimulus. It can be used as an experimental analysis framework, adapted to specific experimental designs, or studied as a reference implementation.
+`epiphyte` addresses this gap by offering a standalone, fully functional framework tailored for analysis of neural activity recorded during a concurrent naturalistic stimulus. It can be used as an experimental analysis framework, adapted to specific experimental designs, or studied as a reference implementation. 
 
 # State of the field 
 
-Naturalistic neuroscience is expanding as a field. However, codebases and tools for analyzing experiments utilizing naturalistic and continuous stimuli generally take the form of code releases alongside a publication [@wang2023brainbertl; @keles2024multimodal]. `epiphyte` was built as a standalone framework for structuring complex stimuli, namely movies, to support the analysis of large neural datasets. 
+Naturalistic neuroscience is expanding as a field. However, codebases and tools for analyzing experiments utilizing naturalistic and continuous stimuli generally take the form of code releases alongside a publication [@wang2023brainbert; @keles2024multimodal]. `epiphyte` was built as a standalone framework for structuring complex stimuli, namely movies, to support the analysis of large neural datasets by providing experimenters with an end-to-end worked solution and tools for relating the content of a complex, continuous stimulus with concurrently recorded spiking and field potential activity.
 
 # Software design
 
@@ -115,7 +115,7 @@ Naturalistic neuroscience is expanding as a field. However, codebases and tools 
 
 Beyond the dependencies common to analysis in Python, `epiphyte` is built using DataJoint, a package that enables implementing and querying a MySQL database, and optionally, MinIO, which stores large data objects (such as field potential recordings) in a queryable format.
 
-The main design contribution is the structuring and organization of stimulus, neural, and experiment-related meta-data. Movies and other naturalistic and continuous stimulus can be difficult to align with concurrently recorded neural data. To allow for flexible use of stimulus annotations, all stimulus-related items are structured as onset and offset times and the associated content values, and all subsequent analysis interactions are built around this structure.
+The main design contribution is the structuring and organization of stimulus, neural, and experiment-related meta-data. Movies and other naturalistic and continuous stimulus can be difficult to align with concurrently recorded neural data. To allow for flexible use of stimulus annotations, all stimulus-related items are structured as onset and offset times and the associated content values, and all subsequent analysis interactions are built around this structure, such as binning by movie frame (`epiphyte.data_preprocessing.binning`). Since experiment set-ups and their constituent data formats can vary between labs, we provide methods for generating a full mock dataset so users can quickly implement and use the framework without adjusting to their specific data formats. 
 
 To increase the utility of `epiphyte`, we provide a set of tutorials for implementing a database and centering subsequent data analysis around database interactions. We include walkthroughs detailing how to: 
 
@@ -134,7 +134,7 @@ To increase the utility of `epiphyte`, we provide a set of tutorials for impleme
 
 # AI usage disclosure
 
-AI tools were used to generate type hints and to expland and unify function documentation. These were verified via manual review. 
+AI tools were used to generate type hints and to expland and unify documentation. All generated type hints and documentation elements were verified via manual review. 
 
 # Acknowledgements
 
