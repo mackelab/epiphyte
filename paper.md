@@ -134,7 +134,7 @@ To increase the utility of `epiphyte`, we provide a set of tutorials for impleme
 
 # AI usage disclosure
 
-AI tools were used to generate type hints and to expland and unify function documentation. These were verified manually. 
+AI tools were used to generate type hints and to expland and unify function documentation. These were verified via manual review. 
 
 # Acknowledgements
 
