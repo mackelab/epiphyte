@@ -33,7 +33,7 @@ PATH_PATIENT_ALIGNED_LABELS = os.path.join(PATH_TO_DATA, "patient_aligned_annota
 PATH_TO_PATIENT_DATA = os.path.join(PATH_TO_DATA, "patient_data")
 PATH_TO_SESSION_DATA = os.path.join(PATH_TO_DATA, "session_data")
 
-PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125726)]  # movie length: 5029 seconds (AVI file); 5029/0.04 = 125725
+PTS_MOVIE_new = [round((x * 0.04), 2) for x in range(1, 125726)]  # movie length: 5029 seconds 
 
 patients = [
     {'patient_id': 1, 'age': 55, 'gender': 'x', 'year': 1970},
@@ -55,4 +55,4 @@ annotators = [
 
 label_names = zip(['character1', 'character2', 'location1'])
 
-sample_rate = 32000
+sample_rate = 1000

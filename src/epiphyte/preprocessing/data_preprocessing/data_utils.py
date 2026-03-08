@@ -249,12 +249,12 @@ def get_coeff(event_mat: np.ndarray, daqlogfile: Union[str, Path]) -> np.ndarray
     # check that daq is quick enough
     diffs = daqPosttimes - daqPretimes
     print("Min Daq Diff: {:.1f} ms, Max Daq Diff: {:.1f} ms".
-          format(diffs.min()/1e3, diffs.max()/1e3))
+          format(diffs.min(), diffs.max()))
 
     # convert daqPosttimes to eventTimes by polyfit, check error
     m, b = np.polyfit(daqPosttimes, eventTimes, 1)
     fitdaq = m*daqPosttimes + b
-    maxFitError = np.abs(fitdaq-eventTimes).max()/1e3
+    maxFitError = np.abs(fitdaq-eventTimes).max()
 
     print("Maximum Error after Event fit: {:.1f} ms".format(maxFitError))
 

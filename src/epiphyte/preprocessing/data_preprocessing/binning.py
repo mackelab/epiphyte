@@ -10,10 +10,10 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from database.db_setup import *
-from database.query_functions import get_neural_rectime_of_patient, get_start_stop_times_pauses
-import annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
-import preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
+from epiphyte.database.db_setup import *
+from epiphyte.database.query_functions import get_patient_neural_rectime, get_start_stop_times_pauses
+import epiphyte.preprocessing.annotation.stimulus_driven_annotation.movies.pause_handling as pause_handling
+import epiphyte.preprocessing.data_preprocessing.create_vectors_from_time_points as create_vectors_from_time_points
 
 
 def bin_label(
@@ -39,10 +39,10 @@ def bin_label(
     Returns:
         np.ndarray: Indicator vector (one value per bin).
     """
-    neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
-
+    neural_rec_time = get_patient_neural_rectime(patient_id, session_nr)
     rec_on = neural_rec_time[0]
     rec_off = neural_rec_time[-1]
+
     total_msec = rec_off - rec_on
     total_bins = int(total_msec / bin_size)
     bins = np.linspace(rec_on, rec_off, total_bins)
@@ -84,7 +84,7 @@ def bin_spikes(
     Returns:
         Union[np.ndarray, List[np.ndarray]]: Binned spikes or ``[binned_spikes, bin_edges]`` if requested.
     """
-    rectime = get_neural_rectime_of_patient(patient_id, session_nr) / 1000
+    rectime = get_patient_neural_rectime(patient_id, session_nr)
     rec_on = rectime[0]
     rec_off = rectime[-1]
     
@@ -94,10 +94,6 @@ def bin_spikes(
 
     if exclude_pauses:
         start_times_pauses, stop_times_pauses = get_start_stop_times_pauses(patient_id, session_nr)
-
-        # rescale pauses from microseconds to milliseconds
-        start_times_pauses = start_times_pauses / 1000
-        stop_times_pauses = stop_times_pauses / 1000
 
         # remove the pauses from the binning edges
         bins_no_pauses = pause_handling.rm_pauses_bins(bins, start_times_pauses, stop_times_pauses)

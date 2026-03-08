@@ -52,7 +52,7 @@ Outputs & directory layout:
 Conventions:
     - Time bases:
         * Spike times / LFP timestamps: milliseconds since Unix epoch
-        * stim_on_time / stim_off_time: microseconds since Unix epoch
+        * stim_on_time / stim_off_time: milliseconds since Unix epoch
         * Watchlog PTS increments: ~0.04 s per frame
     - Sampling: LFP synthesized at 1 kHz
     - Randomness: Data are randomized per run (no fixed seed by default)
@@ -106,8 +106,8 @@ class GenerateData:
         len_context_files (int): Number of entries for events/DAQ logs.
         datetime (str): ISO-like timestamp used in filenames.
         signal_tile (np.ndarray): Bit-pattern tile used to synthesize event codes.
-        stim_on_time (int): Estimated stimulus onset (microseconds).
-        stim_off_time (int): Estimated stimulus offset (microseconds).
+        stim_on_time (int): Estimated stimulus onset (ms).
+        stim_off_time (int): Estimated stimulus offset (ms).
     """
     
     def __init__(self, patient_id: int, session_nr: int,
@@ -138,8 +138,7 @@ class GenerateData:
         self.datetime = datetime.utcfromtimestamp(int(self.rectime_on)/1000).strftime('%Y-%m-%d_%H-%M-%S')
         
         self.signal_tile = self.generate_pings()
-        self.stim_on_time = self.generate_stimulus_onsets()[0]
-        self.stim_off_time = self.generate_stimulus_onsets()[1]
+        self.stim_on_time, self.stim_off_time = self.generate_stimulus_onsets()
     
     def summarize(self) -> None:
         """Print key randomized parameters for quick inspection."""
@@ -384,13 +383,13 @@ class GenerateData:
         """Generate approximate onset and offset timestamps for the stimulus.
 
         Returns:
-            Tuple[int, int]: ``(stim_on_time, stim_off_time)`` in Unix epoch **µs**.
+            Tuple[int, int]: ``(stim_on_time, stim_off_time)`` in Unix epoch **ms**.
         """
         
-        # generate projected end time for the DAQ log, in unix time microseconds
-        # movie_len_unix = (stimulus_len * 60 * 1000 * 1000)       
-        stim_on_time = (self.rectime_on + random.randint(120000, 180000)) * 1000
-        stim_off_time = (stim_on_time + (self.stimulus_len * 60 * 1000)) * 1000
+        # generate projected end time for the DAQ log, in unix time ms
+        # movie_len_unix = (stimulus_len * 60 * 1000)       
+        stim_on_time = (self.rectime_on + random.randint(12000, 18000))
+        stim_off_time = (stim_on_time + (self.stimulus_len * 60 * 1000)) 
         
         return stim_on_time, stim_off_time
     
@@ -398,11 +397,10 @@ class GenerateData:
         """Compute DAQ interval and initial seed time for log synthesis.
 
         Returns:
-            Tuple[int, int]: ``(interval_us, seed_time_us)`` in **microseconds**.
+            Tuple[int, int]: ``(interval_us, seed_time_us)`` in **ms**.
         """
-
-        add_interval = int((self.stim_off_time) / self.len_context_files)
-        seed = int(self.stim_on_time + add_interval * 1.25)
+        add_interval = int((self.stim_off_time - self.stim_on_time) / self.len_context_files)
+        seed = int(self.stim_on_time + add_interval)
         return add_interval, seed
         
     def generate_daq_log(self) -> List[Tuple[int, int, int, int]]:
@@ -419,7 +417,7 @@ class GenerateData:
         post = []
 
         for i in range(self.len_context_files):
-            interval_diff = (np.random.normal(1000, 200) / 2)
+            interval_diff = (np.random.normal(100, 200) / 2)
 
             pre.append(int(seed - interval_diff))
             post.append(int(seed + interval_diff))
@@ -493,9 +491,9 @@ class GenerateData:
         """
         nr_movie_frames, perfect_pts, cpu_time = self.generate_perfect_watchlog()
         _, seed = self.seed_and_interval()
-        pause_pool = 1 * 1000 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time  
+        pause_pool = 1 * 1000 * 60 # 5 minutes in unix/epoch time -- use for max pause time  
         
-        movie_len_unix = (self.stimulus_len * 60 * 1000 * 1000) - pause_pool
+        movie_len_unix = (self.stimulus_len * 60 * 1000) - pause_pool
         end_time = seed + movie_len_unix 
         add_interval = int((end_time - seed) / nr_movie_frames)
         
@@ -505,7 +503,7 @@ class GenerateData:
             cpu_time.append(int(seed))   
 
         nr_pauses = int(uniform(1,3))
-        min_pause = 0.1 * 1000 * 1000 * 60
+        min_pause = 0.1 * 1000 * 60
         
         indices_pause = random.sample(range(len(cpu_time) - 5000), nr_pauses)
         
@@ -660,21 +658,31 @@ def run_data_generation() -> None:
     path = Path(PATH_TO_LABELS)
     path.mkdir(parents=True, exist_ok=True)
 
-    start_times_1 = [0, 5000.04, 7000.04, 12000.04]
-    stop_times_1 = [5000,7000,12000,12575]
-    values_1 = [1,0,1,0]
+    start_times_1 = [0, 120.04, 1700.04, 1880.04, 2110.04,
+       2150.04, 2670.04, 2740.04, 2860.04, 3190.04, 
+       3270.04, 3640.04, 4490.04, 4490.04, 4530.04]
+    stop_times_1 = [  53.48,  319.88, 1798.4 , 2039.04, 2191.6 , 2302.72, 2868.68,
+       2840.4 , 2941.08, 3419.08, 3452.16, 3711.28, 4601.  , 4641.6 ,
+       5029.  ]
+    values_1 = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
     character1 = np.array([values_1, start_times_1, stop_times_1]) 
     np.save(path / f"1_character1_{random.choice(annotator_ids)}_{datetime.now().strftime('%Y%m%d')}_character.npy", character1)
 
-    start_times_2 = [0, 400.04, 4000.04, 10000.04, 10500.04]
-    stop_times_2 = [400,4000,10000,10500,12575]
-    values_2 = [0,1,0,1,0]
+    start_times_2 = [ 160.04, 800.04,  920.04, 1300.04,
+       1660.04, 2720.04, 2840.04, 3440.04, 3500.04,
+      3600.04, 4000.04, 4260.04, 4820.04]
+    stop_times_2 = [ 530.2 , 1192.16, 1033.32, 1608.48, 2010.72, 3002.68, 3201.84,
+       3562.24, 3845.88, 3980.84, 4234.88, 4507.68, 5029.  ]
+    values_2 = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
     character2 = np.array([values_2, start_times_2, stop_times_2]) 
     np.save(path / f"2_character2_{random.choice(annotator_ids)}_{datetime.now().strftime('%Y%m%d')}_character.npy", character2)
 
-    start_times_3 = [0, 100.04, 500.04]
-    stop_times_3 = [100, 500, 12575]
-    values_3 = [0,1,0]
+    start_times_3 = [  56.04, 484.04,  648.04,  968.04,
+       1284.04, 2264.04, 2316.04, 2476.04, 2504.04,
+       2600.04, 3372.04, 4664.04, 4916.04]
+    stop_times_3 = [ 539.04,  883.72, 1342.44, 1280.88, 2079.24, 2820.4 , 3187.88,
+       3145.72, 2812.32, 3207.36, 4182.72, 5029.  , 5029.  ]
+    values_3 = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
     location1 = np.array([values_3, start_times_3, stop_times_3]) 
     np.save(path / f"3_location1_{random.choice(annotator_ids)}_{datetime.now().strftime('%Y%m%d')}_character.npy", location1)
 

@@ -116,7 +116,7 @@ def create_vector_from_start_stop_times(
         np.ndarray: Indicator function aligned to reference vector.
 
     """
-    neural_rec_time = get_neural_rectime_of_patient(patient_id, session_nr)
+    neural_rec_time = get_patient_neural_rectime(patient_id, session_nr)
 
     # check if input has the correct format
     if not (len(values) == len(starts) == len(stops)):
@@ -344,18 +344,42 @@ def get_value_in_time_frame(
     if index_1 == index_2:
         return values[index_1]
     else:
-        df = pd.DataFrame(columns=["value", "weighing"])
+        
         # first interval: add weighing of end_point of this segment - timepoint1
-        df = df.append({"value": values[index_1], "weighing": end_times[index_1] - time_point1}, ignore_index=True)
+        df = pd.DataFrame([{
+            "value": values[index_1],
+            "weighing": end_times[index_1] - time_point1
+        }])
         # all in between intervals: add weighing of length of segment
         for i in range(1, index_2 - index_1):
             if values[index_1 + i] in df.values:
                 df.loc[df["value"] == values[index_1 + i], "weighing"] += end_times[index_1 + i] - start_times[
                     index_1 + i]
-            df = df.append(
-                {"value": values[index_1 + i], "weighing": end_times[index_1 + i] - start_times[index_1 + i]},
-                ignore_index=True)
+            
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [{
+                            "value": values[index_1 + i],
+                            "weighing": end_times[index_1 + i] - start_times[index_1 + i]
+                        }]
+                    )
+                ],
+                ignore_index=True
+            )
         # last interval: add weighing of timepoint2 - start_point of this segment
-        df = df.append({"value": values[index_2], "weighing": time_point2 - start_times[index_2]}, ignore_index=True)
+        df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [{
+                            "value": values[index_2],
+                            "weighing": time_point2 - start_times[index_2]
+                        }]
+                    )
+                ],
+                ignore_index=True
+            )
 
     return list(df[df['weighing'] == df['weighing'].max()]["value"])[0]
