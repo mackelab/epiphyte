@@ -843,11 +843,13 @@
 <h1 id="enable-access-for-other-users">Enable access for other users<a class="headerlink" href="#enable-access-for-other-users" title="Permanent link">&para;</a></h1>
 <p>The codebase is the interface for your database. The major benefit of separating these components is that it enables additional uses to flexibly interact with and use the data stored in the database, while minimizing the chances that unwanted destructive or constructive errors are made. It additionally ensures that all users have a single source of truth, and are interacting with the data in a consistent manner. </p>
 <p>In case you want to enable additional users, we recommend creating and maintaining a template codebase which can be downloaded and used to connect to your bespoke database. In essence, this is what Epiphyte is, but with additional modules to generate mock data and additional documentation. </p>
-<p>A compiled codebase only really needs 4 modules:
-1. <code>access_info.py</code>: a script containing the server, storage, and user information.
-2. <code>db_setup.py</code>: a script containing all the table definitions and package imports. 
-3. <code>config.py</code>: a script containing any hard-coded variables or pieces of information. 
-4. <code>query_functions</code>: a script defining common interactions with the database as convenience functions.</p>
+<p>A compiled codebase only needs 4 modules:</p>
+<ol>
+<li><code>access_info.py</code>: a script containing the server, storage, and user information.</li>
+<li><code>db_setup.py</code>: a script containing all the table definitions and package imports. </li>
+<li><code>config.py</code>: a script containing any hard-coded variables or pieces of information. </li>
+<li><code>query_functions</code>: a script defining common interactions with the database as convenience functions.</li>
+</ol>
 <p>Once a database is in a stable state, and these modules exist in a stable form, we recommend creating a private GitHub repository containing these scripts. New users can then clone and modify the relevant lines in <code>access_info.py</code> and then access and interact with the data. </p>
 
 

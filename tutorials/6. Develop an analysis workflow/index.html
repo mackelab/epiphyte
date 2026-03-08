@@ -554,6 +554,24 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#visualize-stimulus-events-and-neuronal-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualize stimulus events and neuronal activity
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calculate-the-correlation-between-character-appearance-and-spiking-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculate the correlation between character appearance and spiking activity
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -936,6 +954,24 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#visualize-stimulus-events-and-neuronal-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualize stimulus events and neuronal activity
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calculate-the-correlation-between-character-appearance-and-spiking-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculate the correlation between character appearance and spiking activity
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -962,6 +998,8 @@
 <h3 id="contents"><strong>Contents:</strong><a class="headerlink" href="#contents" title="Permanent link">&para;</a></h3>
 <ul>
 <li>create a summary visualization of the dataset</li>
+<li>create a summary visualization of a session's spiking activity and movie contents</li>
+<li>correlate binned character appearances and spiking activity</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 
@@ -971,12 +1009,20 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">epiphyte.database.db_setup</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">epiphyte.database.query_functions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">epiphyte.preprocessing.data_preprocessing.binning</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">erd</span> <span class="o">=</span> <span class="n">dj</span><span class="o">.</span><span class="n">ERD</span><span class="p">(</span><span class="n">epi_schema</span><span class="p">)</span>
 <span class="n">erd</span>
 </code></pre></div>
 <p><img alt="svg" src="../6.%20Develop%20an%20analysis%20workflow_files/6.%20Develop%20an%20analysis%20workflow_3_0.svg" /></p>
 <h3 id="create-a-summary-visualization-of-all-units-in-the-database">Create a summary visualization of all units in the database<a class="headerlink" href="#create-a-summary-visualization-of-all-units-in-the-database" title="Permanent link">&para;</a></h3>
+<ul>
+<li>collect single- and multi-unit data from all sessions</li>
+<li>collect region-wise information for all units within each session</li>
+<li>visualize the watchlogs of each patient</li>
+<li>visualize the annotations on the base version of the movie (no specific pauses or skips factored in)</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="n">su_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ElectrodeData</span> <span class="o">&amp;</span> <span class="s2">&quot;unit_type=&#39;S&#39;&quot;</span><span class="p">)</span>
 <span class="n">mu_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ElectrodeData</span> <span class="o">&amp;</span> <span class="s2">&quot;unit_type=&#39;M&#39;&quot;</span><span class="p">)</span>
 
@@ -1048,6 +1094,28 @@
 <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 
 <span class="c1">######</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
+<span class="n">pats</span><span class="p">,</span> <span class="n">seshs</span> <span class="o">=</span> <span class="n">MovieSession</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;session_nr&quot;</span><span class="p">)</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;viridis_r&quot;</span><span class="p">,</span> <span class="n">n_colors</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">pats</span><span class="p">))</span> 
+<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">pat</span><span class="p">,</span> <span class="n">sesh</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">seshs</span><span class="p">):</span>
+
+    <span class="n">pts</span><span class="p">,</span> <span class="n">dts</span> <span class="o">=</span> <span class="p">(</span><span class="n">MovieSession</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;pts&quot;</span><span class="p">,</span> <span class="s2">&quot;dts&quot;</span><span class="p">)</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dts</span> <span class="o">=</span> <span class="n">dts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dts</span> <span class="o">=</span> <span class="n">dts</span> <span class="o">/</span> <span class="mi">1000</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dts</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">-s</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Patient Watchlogs&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time [s]&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Frame index&quot;</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1">######</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">]</span>
 <span class="n">yticks</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">ylabels</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1085,32 +1153,102 @@
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Annotations&quot;</span><span class="p">)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 
-<span class="c1">######</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
-<span class="n">pats</span><span class="p">,</span> <span class="n">seshs</span> <span class="o">=</span> <span class="n">MovieSession</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;session_nr&quot;</span><span class="p">)</span>
-<span class="n">colors</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;viridis_r&quot;</span><span class="p">,</span> <span class="n">n_colors</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">pats</span><span class="p">))</span> 
-<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="k">for</span> <span class="n">pat</span><span class="p">,</span> <span class="n">sesh</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">seshs</span><span class="p">):</span>
-
-    <span class="n">pts</span><span class="p">,</span> <span class="n">dts</span> <span class="o">=</span> <span class="p">(</span><span class="n">MovieSession</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;pts&quot;</span><span class="p">,</span> <span class="s2">&quot;dts&quot;</span><span class="p">)</span>
-    <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">dts</span> <span class="o">=</span> <span class="n">dts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">dts</span> <span class="o">=</span> <span class="n">dts</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">1000</span>
-
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dts</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pat</span><span class="si">}</span><span class="s2">-s</span><span class="si">{</span><span class="n">sesh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Patient Watchlogs&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time [s]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Frame index&quot;</span><span class="p">)</span>
-
-<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p><img alt="png" src="../6.%20Develop%20an%20analysis%20workflow_files/6.%20Develop%20an%20analysis%20workflow_6_0.png" /></p>
+<h3 id="visualize-stimulus-events-and-neuronal-activity">Visualize stimulus events and neuronal activity<a class="headerlink" href="#visualize-stimulus-events-and-neuronal-activity" title="Permanent link">&para;</a></h3>
+<ul>
+<li>collect the patient-aligned labels (i.e. those with pauses and any skips in playback factored into the PTS vector)</li>
+<li>collect all spike times recorded from patient 1, session 1</li>
+<li>overlay the annotations on top of the spikes</li>
+<li>use preset query functions to simplify database calls</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">patient_id</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">session_nr</span> <span class="o">=</span> <span class="mi">1</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">patient_spikes</span> <span class="o">=</span> <span class="p">(</span><span class="n">SpikeData</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;patient_id=</span><span class="si">{</span><span class="n">patient_id</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">&amp;</span> <span class="sa">f</span><span class="s2">&quot;session_nr=</span><span class="si">{</span><span class="n">session_nr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;spike_times&quot;</span><span class="p">)</span>
+
+<span class="n">rectime</span> <span class="o">=</span> <span class="n">get_patient_neural_rectime</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">session_nr</span><span class="p">)</span> 
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">eventplot</span><span class="p">(</span><span class="n">patient_spikes</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">colors</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span>  <span class="n">n_colors</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">MovieAnnotation</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;label_name&quot;</span><span class="p">)):</span>
+    <span class="n">values</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">stops</span> <span class="o">=</span> <span class="n">get_patient_aligned_label_info</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">session_nr</span><span class="p">,</span> <span class="n">label_name</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">stops</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">label_name</span> <span class="o">=</span> <span class="n">label_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">label_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span>
+                <span class="n">xmin</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">xmax</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span>
+                <span class="n">ymin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">ymax</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">patient_spikes</span><span class="p">)</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+                <span class="n">facecolor</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label_name</span>
+            <span class="p">)</span>
+            <span class="n">c</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">rectime</span><span class="p">[::</span><span class="mi">10_000</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(((</span><span class="n">rectime</span><span class="p">[::</span><span class="mi">10_000</span><span class="p">]</span> <span class="o">-</span> <span class="n">rectime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time [s]</span><span class="se">\n</span><span class="s2">Aligned to recording onset&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Neurons&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Patient 1 spikes + aligned movie labels&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bbox_transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">bbox_to_anchor</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../6.%20Develop%20an%20analysis%20workflow_files/6.%20Develop%20an%20analysis%20workflow_9_0.png" /></p>
+<h3 id="calculate-the-correlation-between-character-appearance-and-spiking-activity">Calculate the correlation between character appearance and spiking activity<a class="headerlink" href="#calculate-the-correlation-between-character-appearance-and-spiking-activity" title="Permanent link">&para;</a></h3>
+<ul>
+<li>collect label and spiking information</li>
+<li>bin label to 80 ms bins, excluding any pauses</li>
+<li>bin spikes to 80 ms bins, also excluding any pause</li>
+<li>correlate the resulting binned character presence and spiking activity</li>
+</ul>
+<p>Note: spiking activity is totally random.</p>
+<div class="highlight"><pre><span></span><code><span class="n">label_name</span> <span class="o">=</span> <span class="s2">&quot;character1&quot;</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">stops</span> <span class="o">=</span> <span class="n">get_patient_aligned_label_info</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">session_nr</span><span class="p">,</span> <span class="n">label_name</span><span class="p">)</span>
+
+<span class="n">spike_times</span> <span class="o">=</span> <span class="n">get_spike_times</span><span class="p">(</span><span class="n">patient_id</span><span class="p">,</span> <span class="n">session_nr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">bin_size</span> <span class="o">=</span> <span class="mi">80</span>
+
+<span class="n">label_binned</span> <span class="o">=</span> <span class="n">bin_label</span><span class="p">(</span>
+    <span class="n">patient_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">session_nr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
+    <span class="n">start_times</span><span class="o">=</span><span class="n">starts</span><span class="p">,</span>
+    <span class="n">stop_times</span><span class="o">=</span><span class="n">stops</span><span class="p">,</span>
+    <span class="n">bin_size</span><span class="o">=</span><span class="n">bin_size</span><span class="p">,</span>
+    <span class="n">exclude_pauses</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">spikes_binned</span> <span class="o">=</span> <span class="n">bin_spikes</span><span class="p">(</span>
+    <span class="n">patient_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">session_nr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">spike_times</span><span class="o">=</span><span class="n">spike_times</span><span class="p">,</span>
+    <span class="n">bin_size</span><span class="o">=</span><span class="n">bin_size</span><span class="p">,</span>
+    <span class="n">exclude_pauses</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">label_binned</span><span class="p">,</span> <span class="n">spikes_binned</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>np.float64(-0.0015086612955703923)
+</code></pre></div>
 
 
 
