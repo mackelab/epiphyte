@@ -1,6 +1,6 @@
 # Epiphyte
 
-[![Docs](https://img.shields.io/badge/docs-online-success)](https://www.mackelab.org/epiphyte/) [![Docs](https://img.shields.io/website?url=https%3A%2F%2Fmackelab.github.io%2Fepiphyte%2F)](https://www.mackelab.org/epiphyte/)
+[![Docs](https://img.shields.io/badge/docs-online-success)](https://www.mackelab.org/epiphyte/) [![Docs](https://img.shields.io/website?url=https%3A%2F%2Fmackelab.github.io%2Fepiphyte%2F)](https://www.mackelab.org/epiphyte/) [![status](https://joss.theoj.org/papers/123b6c1ae598e53bffac539906d54ebb/status.svg)](https://joss.theoj.org/papers/123b6c1ae598e53bffac539906d54ebb)
 
 
 ## What is Epiphyte?
