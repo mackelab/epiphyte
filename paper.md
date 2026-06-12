@@ -97,7 +97,7 @@ Dependencies include:
 
 # Statement of need
 
-With the development of DataJoint [@DataJoint], relational databases have become more accessible to neuroscientists. However, designing, deploying, and maintaining a database ecosystem for experimental data remains technically challenging and time-consuming. While many research projects already rely on relational backends (see [here](https://docs.datajoint.com/projects/publications/)), few provide domain-specific, worked examples that can be readily adapted to new datasets. 
+With the development of DataJoint [@DataJoint], relational databases have become more accessible to neuroscientists. However, designing, deploying, and maintaining a database ecosystem for experimental data remains technically challenging and time-consuming. While many research projects already rely on relational backends (see [here](https://docs.datajoint.com/about/publications/)), few provide domain-specific, worked examples that can be readily adapted to new datasets.
 
 `epiphyte` addresses this gap by offering a standalone, fully functional framework tailored for analysis of neural activity recorded during a concurrent naturalistic stimulus. It can be used as an experimental analysis framework, adapted to specific experimental designs, or studied as a reference implementation. 
 
